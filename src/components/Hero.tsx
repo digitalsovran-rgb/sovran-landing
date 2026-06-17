@@ -33,8 +33,11 @@ export default function Hero() {
       }}
     >
       {/* Background */}
-      <div
+      <motion.div
         className="hero-bg"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.5, ease: 'easeOut' }}
         style={{
           position: 'absolute',
           inset: 0,

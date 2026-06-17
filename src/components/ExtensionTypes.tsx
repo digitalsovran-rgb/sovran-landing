@@ -11,7 +11,7 @@ const extensions = [
   {
     title: 'Loft Conversion',
     desc: 'Turn unused space into the room you need.',
-    image: '/media/loftconver.png',
+    image: '/media/loftconver.png?v=2',
     imageLeft: false,
   },
   {
@@ -23,7 +23,7 @@ const extensions = [
   {
     title: 'Double Storey',
     desc: 'Two floors of new space. One build.',
-    image: '/media/doublstor.png',
+    image: '/media/doublstor.png?v=2',
     imageLeft: false,
   },
   {

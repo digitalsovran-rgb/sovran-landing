@@ -43,7 +43,7 @@ function ValueCard({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        backgroundColor: hovered ? 'rgba(245,240,235,0.98)' : 'rgba(245,240,235,0.92)',
+        backgroundColor: hovered ? 'rgba(245,240,235,0.86)' : 'rgba(245,240,235,0.78)',
         border: 'none',
         padding: '32px 28px',
         transition: 'background-color 0.3s',
@@ -99,7 +99,7 @@ export default function ValueProps() {
           style={{
             fontSize: 'clamp(36px, 4.5vw, 56px)',
             fontWeight: 900,
-            color: '#0a0a0a',
+            color: '#f5f0eb',
             letterSpacing: '-0.02em',
             textAlign: 'center',
             textTransform: 'uppercase',

@@ -81,9 +81,10 @@ export default function BeforeAfter() {
                     objectFit: 'cover',
                     objectPosition: 'center',
                     display: 'block',
+                    filter: 'grayscale(55%) brightness(0.9)',
                   }}
                 />
-                <div style={{ ...labelStyle, top: 0, left: 0 }}>Before</div>
+                <div style={{ ...labelStyle, bottom: '16px', left: '50%', transform: 'translateX(-50%)' }}>Before</div>
               </div>
 
               {/* After half */}
@@ -105,7 +106,7 @@ export default function BeforeAfter() {
                     display: 'block',
                   }}
                 />
-                <div style={{ ...labelStyle, bottom: 0, left: 0 }}>After</div>
+                <div style={{ ...labelStyle, bottom: '16px', left: '50%', transform: 'translateX(-50%)' }}>After</div>
               </div>
             </div>
           ))}
