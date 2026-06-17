@@ -92,9 +92,48 @@ export default function ValueProps() {
   return (
     <section
       ref={ref}
-      style={{ backgroundColor: '#f5f0eb', padding: '80px 0 0 0' }}
+      style={{
+        position: 'relative',
+        width: '100%',
+        backgroundColor: '#0a0a0a',
+      }}
     >
-      <div className="inner" style={{ marginBottom: '60px' }}>
+      {/* Background image */}
+      <img
+        src="/media/humantouch.png"
+        alt="Extensions done properly"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          objectPosition: 'center',
+          display: 'block',
+          zIndex: 0,
+        }}
+      />
+
+      {/* Dark overlay */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundColor: 'rgba(0,0,0,0.45)',
+          zIndex: 1,
+        }}
+      />
+
+      {/* All content */}
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          padding: '80px 40px',
+          maxWidth: '1200px',
+          margin: '0 auto',
+        }}
+      >
         <h2
           style={{
             fontSize: 'clamp(36px, 4.5vw, 56px)',
@@ -104,109 +143,57 @@ export default function ValueProps() {
             textAlign: 'center',
             textTransform: 'uppercase',
             fontFamily: 'Inter, sans-serif',
+            marginBottom: '60px',
           }}
         >
           Extensions. Done Properly.
         </h2>
-      </div>
 
-      {/* Full-width image with cards overlay */}
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '600px',
-        }}
-      >
-        {/* Background image */}
-        <img
-          src="/media/humantouch.png"
-          alt="Extensions done properly"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: 'center',
-            display: 'block',
-          }}
-        />
-
-        {/* Dark overlay */}
+        {/* Top row — 3 cards */}
         <div
+          className="value-grid"
           style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundColor: 'rgba(0,0,0,0.45)',
-          }}
-        />
-
-        {/* Cards on top */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '16px',
+            marginBottom: '16px',
           }}
         >
-          <div
-            style={{
-              maxWidth: '1200px',
-              width: '100%',
-              margin: '0 auto',
-              padding: '60px 40px',
-            }}
-          >
-            {/* Top row — 3 cards */}
-            <div
-              className="value-grid"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: '16px',
-                marginBottom: '16px',
-              }}
-            >
-              {cards.slice(0, 3).map((card, i) => (
-                <ValueCard
-                  key={card.title}
-                  card={card}
-                  delay={i * 0.1}
-                  isInView={isInView}
-                />
-              ))}
-            </div>
+          {cards.slice(0, 3).map((card, i) => (
+            <ValueCard
+              key={card.title}
+              card={card}
+              delay={i * 0.1}
+              isInView={isInView}
+            />
+          ))}
+        </div>
 
-            {/* Bottom row — 2 cards centered */}
+        {/* Bottom row — 2 cards centered */}
+        <div
+          className="value-bottom-row"
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '16px',
+          }}
+        >
+          {cards.slice(3).map((card, i) => (
             <div
-              className="value-bottom-row"
+              key={card.title}
+              className="value-bottom-card"
               style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '16px',
+                flex: '0 0 calc(33.333% - 8px)',
+                maxWidth: 'calc(33.333% - 8px)',
               }}
             >
-              {cards.slice(3).map((card, i) => (
-                <div
-                  key={card.title}
-                  className="value-bottom-card"
-                  style={{
-                    flex: '0 0 calc(33.333% - 8px)',
-                    maxWidth: 'calc(33.333% - 8px)',
-                  }}
-                >
-                  <ValueCard
-                    card={card}
-                    delay={(i + 3) * 0.1}
-                    isInView={isInView}
-                  />
-                </div>
-              ))}
+              <ValueCard
+                card={card}
+                delay={(i + 3) * 0.1}
+                isInView={isInView}
+              />
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>
