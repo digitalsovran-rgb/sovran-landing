@@ -27,14 +27,14 @@ export default function BeforeAfter() {
   return (
     <section
       ref={sectionRef}
-      style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}
+      style={{ backgroundColor: '#f5f0eb', padding: '100px 0' }}
     >
       <div className="inner" style={{ textAlign: 'center', marginBottom: '60px' }}>
         <h2
           style={{
             fontSize: 'clamp(32px, 4vw, 52px)',
             fontWeight: 900,
-            color: '#ffffff',
+            color: '#0a0a0a',
             letterSpacing: '-0.02em',
             fontFamily: 'Inter, sans-serif',
           }}
