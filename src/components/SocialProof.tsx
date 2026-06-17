@@ -7,18 +7,21 @@ const testimonials = [
       "We've worked with Sovran for over five years on multiple developments. Their consistency, attention to detail, and reliability keep us coming back — they deliver exactly what high-value projects demand.",
     name: "Marcus O'Neill",
     title: 'Residential Property Developer, London',
+    image: '/media/marcus.png',
   },
   {
     quote:
       'Military-level precision on every project. Sovran understood our vision from day one and delivered without a single compromise on quality or timeline.',
     name: 'Shiv Patel',
     title: 'Property Investor, London',
+    image: '/media/shiv.png',
   },
   {
     quote:
       'They went beyond our expectations. The attention to detail, the communication throughout, and the final result — everything exceeded what we thought was possible.',
     name: 'Nyla Idrissi',
     title: 'Homeowner, West London',
+    image: '/media/nyla.png',
   },
 ];
 
@@ -43,19 +46,35 @@ function TestimonialCard({
         padding: '48px 40px',
         display: 'flex',
         flexDirection: 'column',
+        alignItems: 'flex-start',
       }}
     >
-      {/* Gold open-quote */}
+      {/* Profile picture */}
+      <img
+        src={t.image}
+        alt={t.name}
+        style={{
+          width: '64px',
+          height: '64px',
+          borderRadius: '50%',
+          objectFit: 'cover',
+          objectPosition: 'center top',
+          marginBottom: '16px',
+          border: '2px solid rgba(201,169,110,0.3)',
+          display: 'block',
+        }}
+      />
+
+      {/* Stars */}
       <div
         style={{
-          fontSize: '64px',
-          fontWeight: 900,
+          fontSize: '16px',
           color: '#c9a96e',
-          lineHeight: 1,
-          userSelect: 'none',
+          marginBottom: '16px',
+          letterSpacing: '2px',
         }}
       >
-        &ldquo;
+        ★★★★★
       </div>
 
       {/* Quote */}
@@ -66,7 +85,6 @@ function TestimonialCard({
           color: 'rgba(255,255,255,0.75)',
           lineHeight: 1.8,
           fontStyle: 'italic',
-          marginTop: '24px',
           flex: 1,
           letterSpacing: 'normal',
         }}
@@ -125,8 +143,7 @@ export default function SocialProof() {
             lineHeight: 1.1,
           }}
         >
-          Trusted by London&apos;s Most Discerning Homeowners and Developers for
-          Over 15 Years.
+          Stories of Success
         </h2>
 
         <div

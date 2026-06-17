@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type FormData = {
-  firstName: string;
-  lastName: string;
+  name: string;
+  postcode: string;
   email: string;
   phone: string;
 };
@@ -17,16 +17,8 @@ const extensionOptions = [
   'Not Sure Yet',
 ];
 
-const propertyOptions = [
-  'Terraced',
-  'Semi-Detached',
-  'Detached',
-  'Flat / Apartment',
-  'Other',
-];
-
 const budgetOptions = [
-  '£100K – £250K',
+  'Under £250K',
   '£250K – £500K',
   '£500K – £1M',
   '£1M+',
@@ -131,29 +123,28 @@ export default function ConsultationForm() {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
   const [selectedExtension, setSelectedExtension] = useState('');
-  const [selectedProperty, setSelectedProperty] = useState('');
   const [selectedBudget, setSelectedBudget] = useState('');
   const [formData, setFormData] = useState<FormData>({
-    firstName: '',
-    lastName: '',
+    name: '',
+    postcode: '',
     email: '',
     phone: '',
   });
   const [submitted, setSubmitted] = useState(false);
 
-  const progress = `${step * 25}%`;
+  const progressMap: Record<number, string> = { 1: '33%', 2: '66%', 3: '100%' };
+  const progress = progressMap[step] ?? '33%';
 
   const canNext = () => {
     if (step === 1) return selectedExtension !== '';
-    if (step === 2) return selectedProperty !== '';
-    if (step === 3) return selectedBudget !== '';
-    if (step === 4)
-      return formData.firstName.trim() !== '' && formData.email.trim() !== '';
+    if (step === 2) return selectedBudget !== '';
+    if (step === 3)
+      return formData.name.trim() !== '' && formData.email.trim() !== '';
     return false;
   };
 
   const goNext = () => {
-    if (step === 4) { setSubmitted(true); return; }
+    if (step === 3) { setSubmitted(true); return; }
     setDirection(1);
     setStep((s) => s + 1);
   };
@@ -165,9 +156,8 @@ export default function ConsultationForm() {
 
   const stepHeadings: Record<number, string> = {
     1: 'What type of extension are you planning?',
-    2: 'What type of property?',
-    3: 'What is your approximate investment?',
-    4: 'How should we reach you?',
+    2: 'What is your approximate investment?',
+    3: 'How should we reach you?',
   };
 
   return (
@@ -297,7 +287,7 @@ export default function ConsultationForm() {
                   marginBottom: '8px',
                 }}
               >
-                Step {step} of 4
+                Step {step} of 3
               </p>
               <h3
                 style={{
@@ -348,27 +338,6 @@ export default function ConsultationForm() {
                       className="form-options-grid"
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(3, 1fr)',
-                        gap: '12px',
-                        marginBottom: '40px',
-                      }}
-                    >
-                      {propertyOptions.map((opt) => (
-                        <SelectCard
-                          key={opt}
-                          label={opt}
-                          selected={selectedProperty === opt}
-                          onClick={() => setSelectedProperty(opt)}
-                        />
-                      ))}
-                    </div>
-                  )}
-
-                  {step === 3 && (
-                    <div
-                      className="form-options-grid"
-                      style={{
-                        display: 'grid',
                         gridTemplateColumns: 'repeat(2, 1fr)',
                         gap: '12px',
                         marginBottom: '40px',
@@ -385,7 +354,7 @@ export default function ConsultationForm() {
                     </div>
                   )}
 
-                  {step === 4 && (
+                  {step === 3 && (
                     <div
                       style={{
                         display: 'flex',
@@ -394,29 +363,20 @@ export default function ConsultationForm() {
                         marginBottom: '40px',
                       }}
                     >
-                      <div
-                        className="form-name-grid"
-                        style={{
-                          display: 'grid',
-                          gridTemplateColumns: '1fr 1fr',
-                          gap: '40px',
-                        }}
-                      >
-                        <TextInput
-                          label="First Name"
-                          value={formData.firstName}
-                          onChange={(v) =>
-                            setFormData((f) => ({ ...f, firstName: v }))
-                          }
-                        />
-                        <TextInput
-                          label="Last Name"
-                          value={formData.lastName}
-                          onChange={(v) =>
-                            setFormData((f) => ({ ...f, lastName: v }))
-                          }
-                        />
-                      </div>
+                      <TextInput
+                        label="Name"
+                        value={formData.name}
+                        onChange={(v) =>
+                          setFormData((f) => ({ ...f, name: v }))
+                        }
+                      />
+                      <TextInput
+                        label="Postcode (optional)"
+                        value={formData.postcode}
+                        onChange={(v) =>
+                          setFormData((f) => ({ ...f, postcode: v }))
+                        }
+                      />
                       <TextInput
                         label="Email Address"
                         type="email"
@@ -501,7 +461,7 @@ export default function ConsultationForm() {
                     e.currentTarget.style.borderColor = '#0a0a0a';
                   }}
                 >
-                  {step === 4 ? 'Book My Consultation →' : 'Next →'}
+                  {step === 3 ? 'Book My Consultation →' : 'Next →'}
                 </button>
               </div>
             </>

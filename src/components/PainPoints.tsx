@@ -2,11 +2,11 @@ import { useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 
 const points = [
-  { num: '01', text: 'Over budget' },
-  { num: '02', text: 'Planning refused' },
+  { num: '01', text: 'Budget overruns' },
+  { num: '02', text: 'Planning refusals' },
   { num: '03', text: 'No accountability' },
-  { num: '04', text: 'Hidden fees' },
-  { num: '05', text: 'Endless delays' },
+  { num: '04', text: 'Endless delays' },
+  { num: '05', text: 'Compromised quality' },
 ];
 
 function PainTile({
@@ -94,7 +94,7 @@ export default function PainPoints() {
                 lineHeight: 1.05,
               }}
             >
-              8 in 10 London Homeowners Face This.
+              Extending your home shouldn&apos;t feel like a risk.
             </h2>
             <p
               style={{
@@ -106,7 +106,7 @@ export default function PainPoints() {
                 letterSpacing: 'normal',
               }}
             >
-              Most find out when it&apos;s too late to walk away.
+              Yet for many homeowners and developers, it does.
             </p>
           </div>
 

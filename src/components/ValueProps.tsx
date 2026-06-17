@@ -3,24 +3,24 @@ import { motion, useInView } from 'framer-motion';
 
 const cards = [
   {
-    title: 'Design & Build',
-    body: 'One team handling architecture and construction from day one. No handovers, no blame shifting.',
+    title: 'One team, one responsibility',
+    body: 'A single team accountable for every detail, from concept to completion.',
   },
   {
-    title: 'Deadline Guaranteed',
-    body: 'Every stage agreed in writing before work begins. Payments tied to progress, not promises.',
+    title: 'Payment protection',
+    body: 'Structured contracts and milestone aligned payments designed to protect your investment.',
   },
   {
-    title: '95% Planning Approval',
-    body: 'Our former planning officers know exactly what local authorities look for. Your project moves forward, not sideways.',
+    title: 'Planning with purpose',
+    body: 'Led by former planning officers who understand what drives approvals.',
   },
   {
-    title: 'Full Accountability',
-    body: 'A dedicated project manager assigned to you from start to finish. Weekly updates, full visibility, no chasing.',
+    title: 'Dedicated project manager',
+    body: 'Regular updates, clear communication, and complete project visibility.',
   },
   {
-    title: 'No Hidden Fees',
-    body: 'What you agree on day one is what you pay. Every cost outlined upfront, nothing added along the way.',
+    title: 'Uncompromised quality',
+    body: 'Meticulous craftsmanship and rigorous quality checks at every stage.',
   },
 ];
 
@@ -43,37 +43,36 @@ function ValueCard({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        backgroundColor: '#ede8e1',
-        border: `1px solid ${hovered ? 'rgba(201,169,110,0.4)' : 'rgba(0,0,0,0.08)'}`,
-        padding: '40px',
-        transition: 'border-color 0.3s',
-        height: '100%',
+        backgroundColor: hovered ? 'rgba(245,240,235,0.98)' : 'rgba(245,240,235,0.92)',
+        border: 'none',
+        padding: '32px 28px',
+        transition: 'background-color 0.3s',
       }}
     >
-      {/* Gold accent line */}
       <div
         style={{
           width: '32px',
           height: '2px',
           backgroundColor: '#c9a96e',
-          marginBottom: '24px',
+          marginBottom: '16px',
         }}
       />
       <h3
         style={{
-          fontSize: '28px',
-          fontWeight: 900,
+          fontSize: '18px',
+          fontWeight: 700,
           color: '#0a0a0a',
-          letterSpacing: '-0.02em',
-          lineHeight: 1.1,
-          marginBottom: '12px',
+          letterSpacing: '-0.01em',
+          lineHeight: 1.3,
+          marginBottom: '10px',
+          fontFamily: 'Inter, sans-serif',
         }}
       >
         {card.title}
       </h3>
       <p
         style={{
-          fontSize: '14px',
+          fontSize: '13px',
           fontWeight: 400,
           color: 'rgba(0,0,0,0.55)',
           lineHeight: 1.7,
@@ -93,9 +92,9 @@ export default function ValueProps() {
   return (
     <section
       ref={ref}
-      style={{ backgroundColor: '#f5f0eb', padding: '100px 0' }}
+      style={{ backgroundColor: '#f5f0eb', padding: '80px 0 0 0' }}
     >
-      <div className="inner">
+      <div className="inner" style={{ marginBottom: '60px' }}>
         <h2
           style={{
             fontSize: 'clamp(36px, 4.5vw, 56px)',
@@ -103,57 +102,111 @@ export default function ValueProps() {
             color: '#0a0a0a',
             letterSpacing: '-0.02em',
             textAlign: 'center',
-            marginBottom: '80px',
+            textTransform: 'uppercase',
+            fontFamily: 'Inter, sans-serif',
           }}
         >
-          The Experience You Should Expect.
+          Extensions. Done Properly.
         </h2>
+      </div>
 
-        {/* Top row — 3 cards */}
-        <div
-          className="value-grid"
+      {/* Full-width image with cards overlay */}
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: '600px',
+        }}
+      >
+        {/* Background image */}
+        <img
+          src="/media/humantouch.png"
+          alt="Extensions done properly"
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '16px',
-            marginBottom: '16px',
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center',
+            display: 'block',
           }}
-        >
-          {cards.slice(0, 3).map((card, i) => (
-            <ValueCard
-              key={card.title}
-              card={card}
-              delay={i * 0.1}
-              isInView={isInView}
-            />
-          ))}
-        </div>
+        />
 
-        {/* Bottom row — 2 cards centered */}
+        {/* Dark overlay */}
         <div
-          className="value-bottom-row"
           style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.45)',
+          }}
+        />
+
+        {/* Cards on top */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
             display: 'flex',
+            alignItems: 'center',
             justifyContent: 'center',
-            gap: '16px',
           }}
         >
-          {cards.slice(3).map((card, i) => (
+          <div
+            style={{
+              maxWidth: '1200px',
+              width: '100%',
+              margin: '0 auto',
+              padding: '60px 40px',
+            }}
+          >
+            {/* Top row — 3 cards */}
             <div
-              key={card.title}
-              className="value-bottom-card"
+              className="value-grid"
               style={{
-                flex: '0 0 calc(33.333% - 8px)',
-                maxWidth: 'calc(33.333% - 8px)',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '16px',
+                marginBottom: '16px',
               }}
             >
-              <ValueCard
-                card={card}
-                delay={(i + 3) * 0.1}
-                isInView={isInView}
-              />
+              {cards.slice(0, 3).map((card, i) => (
+                <ValueCard
+                  key={card.title}
+                  card={card}
+                  delay={i * 0.1}
+                  isInView={isInView}
+                />
+              ))}
             </div>
-          ))}
+
+            {/* Bottom row — 2 cards centered */}
+            <div
+              className="value-bottom-row"
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '16px',
+              }}
+            >
+              {cards.slice(3).map((card, i) => (
+                <div
+                  key={card.title}
+                  className="value-bottom-card"
+                  style={{
+                    flex: '0 0 calc(33.333% - 8px)',
+                    maxWidth: 'calc(33.333% - 8px)',
+                  }}
+                >
+                  <ValueCard
+                    card={card}
+                    delay={(i + 3) * 0.1}
+                    isInView={isInView}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -49,7 +49,7 @@ export default function Hero() {
         style={{
           position: 'absolute',
           inset: 0,
-          backgroundColor: 'rgba(0,0,0,0.55)',
+          backgroundColor: 'rgba(0,0,0,0.35)',
         }}
       />
 
@@ -59,7 +59,7 @@ export default function Hero() {
           position: 'relative',
           zIndex: 1,
           textAlign: 'center',
-          padding: '0 24px',
+          padding: '120px 24px 0',
           width: '100%',
           maxWidth: '900px',
         }}
@@ -74,7 +74,7 @@ export default function Hero() {
             letterSpacing: '0.2em',
             color: '#c9a96e',
             textTransform: 'uppercase',
-            marginBottom: '28px',
+            marginBottom: '40px',
           }}
         >
           London&apos;s Luxury Extension Specialists
@@ -88,10 +88,11 @@ export default function Hero() {
             fontSize: 'clamp(36px, 5.5vw, 68px)',
             fontWeight: 900,
             color: '#ffffff',
-            maxWidth: '800px',
+            maxWidth: '900px',
             margin: '0 auto',
             lineHeight: 1.05,
             letterSpacing: '-0.02em',
+            textTransform: 'uppercase',
           }}
         >
           Extending Your London Home? Do It Once. Do It Right.
@@ -106,15 +107,12 @@ export default function Hero() {
             fontWeight: 400,
             color: 'rgba(255,255,255,0.7)',
             maxWidth: '560px',
-            margin: '24px auto 0',
+            margin: '40px auto 0',
             lineHeight: 1.75,
             letterSpacing: 'normal',
           }}
         >
-          Most extensions run late, cost more than quoted, and leave homeowners
-          managing three different companies. Sovran is one team — design,
-          planning, and build — with contract-backed deadlines and a 95%
-          planning approval rate.
+          A seamless design and build experience, combining architecture, planning and construction under one roof. Thoughtfully designed, expertly managed, and built to the highest standards.
         </motion.p>
 
         <motion.div
@@ -125,7 +123,7 @@ export default function Hero() {
             display: 'flex',
             gap: '16px',
             justifyContent: 'center',
-            marginTop: '40px',
+            marginTop: '56px',
             flexWrap: 'wrap',
           }}
         >
