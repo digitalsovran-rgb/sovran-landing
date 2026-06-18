@@ -45,7 +45,7 @@ function ValueCard({
       style={{
         backgroundColor: hovered ? 'rgba(245,240,235,0.86)' : 'rgba(245,240,235,0.78)',
         border: 'none',
-        padding: '32px 28px',
+        padding: '48px 36px',
         transition: 'background-color 0.3s',
       }}
     >
@@ -129,7 +129,7 @@ export default function ValueProps() {
         style={{
           position: 'relative',
           zIndex: 2,
-          padding: '80px 40px',
+          padding: '120px 40px',
           maxWidth: '1200px',
           margin: '0 auto',
         }}
@@ -143,7 +143,7 @@ export default function ValueProps() {
             textAlign: 'center',
             textTransform: 'uppercase',
             fontFamily: 'Inter, sans-serif',
-            marginBottom: '60px',
+            marginBottom: '80px',
           }}
         >
           Extensions. Done Properly.
@@ -156,7 +156,7 @@ export default function ValueProps() {
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
             gap: '16px',
-            marginBottom: '16px',
+            marginBottom: '32px',
           }}
         >
           {cards.slice(0, 3).map((card, i) => (

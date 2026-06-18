@@ -10,7 +10,7 @@ const steps = [
   {
     num: '02',
     label: 'Design',
-    tooltip: 'Full architectural drawings, 3D renders, and material selections tailored to your home.',
+    tooltip: 'Full architectural drawings, 3D renders, and material selections tailored to your home. Includes interior design and structural engineering.',
   },
   {
     num: '03',
@@ -26,16 +26,6 @@ const steps = [
     num: '05',
     label: 'Handover',
     tooltip: 'A full walkthrough of your completed space. Snagging handled before we leave.',
-  },
-  {
-    num: '06',
-    label: 'Interiors',
-    tooltip: 'From material selections to furniture placement, our interior design team brings your space to life.',
-  },
-  {
-    num: '07',
-    label: 'Structural Design',
-    tooltip: 'Full structural engineering and calculations handled in-house, coordinated with the architectural team.',
   },
 ];
 

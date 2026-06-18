@@ -11,7 +11,7 @@ const extensions = [
   {
     title: 'Loft Conversion',
     desc: 'Turn unused space into the room you need.',
-    image: '/media/loftconver.png?v=2',
+    image: '/media/loftconver.png?v=3',
     imageLeft: false,
   },
   {

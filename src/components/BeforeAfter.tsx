@@ -4,7 +4,7 @@ import { motion, useInView } from 'framer-motion';
 const cards = [
   { before: '/media/before1.png', after: '/media/after1.png' },
   { before: '/media/before2.png', after: '/media/after2.png' },
-  { before: '/media/before3.png', after: '/media/after3.png' },
+  { before: '/media/before3.png?v=2', after: '/media/after3.png?v=2' },
 ];
 
 const labelStyle: React.CSSProperties = {
