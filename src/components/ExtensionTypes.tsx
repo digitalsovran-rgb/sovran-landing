@@ -7,30 +7,35 @@ const extensions = [
     desc: 'Open the back of your home to the garden.',
     image: '/media/rearext.png',
     imageLeft: true,
+    location: 'Richmond, London',
   },
   {
     title: 'Loft Conversion',
     desc: 'Turn unused space into the room you need.',
     image: '/media/loftconver.png?v=3',
     imageLeft: false,
+    location: 'Wimbledon, London',
   },
   {
     title: 'Side Return',
     desc: 'Reclaim the narrow gap beside your property.',
     image: '/media/sideret.png',
     imageLeft: true,
+    location: 'Chiswick, London',
   },
   {
     title: 'Double Storey',
     desc: 'Two floors of new space. One build.',
     image: '/media/doublstor.png?v=2',
     imageLeft: false,
+    location: 'Hampstead, London',
   },
   {
     title: 'Wrap Around',
     desc: 'Change the entire feel of your home.',
     image: '/media/wraparound.png',
     imageLeft: true,
+    location: 'Notting Hill, London',
   },
 ];
 
@@ -41,9 +46,9 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0 }}
-      animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-      transition={{ duration: 0.7, delay: 0.1 }}
+      initial={{ opacity: 0, y: 24 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+      transition={{ duration: 0.7, ease: 'easeOut' }}
       className="ext-row"
       style={{
         display: 'flex',
@@ -71,6 +76,23 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
             display: 'block',
           }}
         />
+        {/* Location label */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '16px',
+            left: '16px',
+            backgroundColor: 'rgba(10,10,10,0.6)',
+            color: '#ffffff',
+            fontSize: '11px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            padding: '6px 14px',
+            pointerEvents: 'none',
+          }}
+        >
+          {ext.location}
+        </div>
       </div>
 
       {/* Text block */}
@@ -115,15 +137,22 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
 }
 
 export default function ExtensionTypes() {
+  const headingRef = useRef<HTMLDivElement>(null);
+  const isHeadingInView = useInView(headingRef, { once: true, margin: '-60px' });
+
   return (
     <section id="projects" style={{ backgroundColor: '#f5f0eb' }}>
       <div
+        ref={headingRef}
         style={{
           textAlign: 'center',
           padding: '100px 24px 60px',
         }}
       >
-        <h2
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          animate={isHeadingInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
           style={{
             fontSize: 'clamp(32px, 4vw, 48px)',
             fontWeight: 900,
@@ -132,8 +161,8 @@ export default function ExtensionTypes() {
             fontFamily: 'Inter, sans-serif',
           }}
         >
-          Our Recent Extension Projects
-        </h2>
+          Recent Extension Projects Across London
+        </motion.h2>
       </div>
       {extensions.map((ext) => (
         <ExtRow key={ext.title} ext={ext} />

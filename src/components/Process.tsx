@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 
 const steps = [
   {
@@ -28,11 +29,22 @@ const steps = [
   },
 ];
 
-function StepItem({ step, i }: { step: (typeof steps)[0]; i: number }) {
+function StepItem({
+  step,
+  i,
+  isInView,
+}: {
+  step: (typeof steps)[0];
+  i: number;
+  isInView: boolean;
+}) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.6, delay: i * 0.1, ease: 'easeOut' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -109,16 +121,22 @@ function StepItem({ step, i }: { step: (typeof steps)[0]; i: number }) {
           }}
         />
       )}
-    </div>
+    </motion.div>
   );
 }
 
 export default function Process() {
+  const ref = useRef<HTMLElement>(null);
+  const isInView = useInView(ref, { once: true, margin: '-80px' });
+
   return (
-    <section style={{ backgroundColor: '#0a0a0a', padding: '48px 0' }}>
+    <section ref={ref} style={{ backgroundColor: '#0a0a0a', padding: '48px 0' }}>
       <div className="process-inner">
         {/* Section title */}
-        <p
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
           style={{
             textAlign: 'center',
             fontSize: 'clamp(36px, 4.5vw, 52px)',
@@ -130,8 +148,8 @@ export default function Process() {
             fontFamily: 'Inter, sans-serif',
           }}
         >
-          Our Process
-        </p>
+          A Seamless Process
+        </motion.p>
 
         <div
           className="process-row"
@@ -155,7 +173,7 @@ export default function Process() {
           />
 
           {steps.map((step, i) => (
-            <StepItem key={step.num} step={step} i={i} />
+            <StepItem key={step.num} step={step} i={i} isInView={isInView} />
           ))}
         </div>
       </div>

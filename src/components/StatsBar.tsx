@@ -1,13 +1,20 @@
+import { useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
+
 const stats = [
   { value: '15+', label: 'Years of Experience' },
-  { value: '98%', label: 'Planning Success Rate' },
+  { value: '97%', label: 'Planning Success Rate' },
   { value: '£25M+', label: 'Value Delivered' },
-  { value: '1,000+', label: 'Projects Delivered' },
+  { value: '1,000+', label: 'Projects Completed' },
 ];
 
 export default function StatsBar() {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: '-40px' });
+
   return (
     <div
+      ref={ref}
       style={{
         width: '100%',
         backgroundColor: '#0f0f0f',
@@ -22,8 +29,11 @@ export default function StatsBar() {
         }}
       >
         {stats.map((stat, i) => (
-          <div
+          <motion.div
             key={stat.label + i}
+            initial={{ opacity: 0, y: 16 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+            transition={{ duration: 0.6, delay: i * 0.1, ease: 'easeOut' }}
             className="stats-tile"
             style={{
               flex: 1,
@@ -57,7 +67,7 @@ export default function StatsBar() {
             >
               {stat.label}
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>

@@ -18,39 +18,115 @@ const extensionOptions = [
   'Multiple Projects',
 ];
 
-const budgetOptions = [
-  'Under £250K',
-  '£250K – £500K',
-  '£500K – £1M',
-  '£1M+',
+const serviceOptions = [
+  {
+    label: 'Design',
+    tooltip:
+      'Full architectural drawings, 3D renders, planning submissions, and material selections tailored to your home.',
+  },
+  {
+    label: 'Build',
+    tooltip:
+      'Construction delivered by our in-house team, with contract-backed milestones and a dedicated project manager throughout.',
+  },
 ];
+
+const budgetOptions = ['Under £150K', '£150K – £500K', '£500K – £1M', '£1M+'];
 
 const timelineOptions = [
-  'Ready to start',
-  'Within 1 month',
-  'Within 6 months',
-  'Next year',
+  'Within 1 Month',
+  'Within 3 Months',
+  'Within 6 Months',
+  'Next Year',
 ];
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7;
 
 const progressMap: Record<number, string> = {
-  1: '16%',
-  2: '33%',
-  3: '50%',
-  4: '66%',
-  5: '83%',
-  6: '100%',
+  1: '14%',
+  2: '28%',
+  3: '42%',
+  4: '57%',
+  5: '71%',
+  6: '85%',
+  7: '100%',
 };
 
 const stepHeadings: Record<number, string> = {
   1: 'What type of extension are you planning?',
-  2: 'What is your approximate investment?',
-  3: 'When are you looking to start your project?',
-  4: "Let's check availability in your area.",
-  5: "What's your name?",
-  6: 'How should we reach you?',
+  2: 'What services do you need?',
+  3: 'What is your approximate investment?',
+  4: 'When are you looking to start your project?',
+  5: 'Location of Your Project',
+  6: "What's your name?",
+  7: 'Enter your details and we will reach you shortly.',
 };
+
+const ukPostcodeRegex = /^[A-Za-z]{1,2}[0-9Rr][0-9A-Za-z]?\s?[0-9][A-Za-z]{2}$/;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/;
+
+function validatePostcode(value: string): boolean {
+  return ukPostcodeRegex.test(value.trim());
+}
+
+function validateEmail(value: string): boolean {
+  return emailRegex.test(value.trim());
+}
+
+function validatePhone(value: string): boolean {
+  const digits = value.replace(/[\s\-]/g, '');
+  return /^\d{10,11}$/.test(digits);
+}
+
+function InfoTooltip({ text }: { text: string }) {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', marginLeft: '8px' }}>
+      <span
+        onMouseEnter={() => setVisible(true)}
+        onMouseLeave={() => setVisible(false)}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '16px',
+          height: '16px',
+          borderRadius: '50%',
+          border: '1px solid rgba(0,0,0,0.35)',
+          fontSize: '10px',
+          fontWeight: 700,
+          color: 'rgba(0,0,0,0.45)',
+          cursor: 'default',
+          lineHeight: 1,
+          flexShrink: 0,
+        }}
+      >
+        i
+      </span>
+      {visible && (
+        <span
+          style={{
+            position: 'absolute',
+            bottom: 'calc(100% + 8px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: '#0a0a0a',
+            color: '#ffffff',
+            fontSize: '12px',
+            lineHeight: 1.55,
+            padding: '10px 14px',
+            width: '240px',
+            pointerEvents: 'none',
+            zIndex: 10,
+          }}
+        >
+          {text}
+        </span>
+      )}
+    </span>
+  );
+}
 
 function SelectCard({
   label,
@@ -93,12 +169,16 @@ function TextInput({
   label,
   value,
   onChange,
+  onBlur,
   type = 'text',
+  error,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
+  onBlur?: () => void;
   type?: string;
+  error?: string;
 }) {
   const [focused, setFocused] = useState(false);
 
@@ -122,13 +202,16 @@ function TextInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onBlur={() => {
+          setFocused(false);
+          onBlur?.();
+        }}
         style={{
           display: 'block',
           width: '100%',
           backgroundColor: 'transparent',
           border: 'none',
-          borderBottom: `1px solid ${focused ? '#c9a96e' : 'rgba(0,0,0,0.2)'}`,
+          borderBottom: `1px solid ${error ? '#c0392b' : focused ? '#c9a96e' : 'rgba(0,0,0,0.2)'}`,
           color: '#0a0a0a',
           fontSize: '14px',
           fontWeight: 400,
@@ -138,6 +221,18 @@ function TextInput({
           boxSizing: 'border-box',
         }}
       />
+      {error && (
+        <p
+          style={{
+            fontSize: '12px',
+            color: '#c0392b',
+            marginTop: '6px',
+            letterSpacing: 'normal',
+          }}
+        >
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -171,16 +266,20 @@ export default function ConsultationForm() {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
   const [selectedExtension, setSelectedExtension] = useState('');
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedBudget, setSelectedBudget] = useState('');
   const [selectedTimeline, setSelectedTimeline] = useState('');
   const [postcode, setPostcode] = useState('');
+  const [postcodeBlurred, setPostcodeBlurred] = useState(false);
+  const [postcodeError, setPostcodeError] = useState('');
   const [postcodeSubStep, setPostcodeSubStep] = useState<PostcodeSubStep>('input');
   const [formData, setFormData] = useState<FormData>({ name: '', email: '', phone: '' });
+  const [emailBlurred, setEmailBlurred] = useState(false);
+  const [phoneBlurred, setPhoneBlurred] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const progress = progressMap[step] ?? '16%';
+  const progress = progressMap[step] ?? '14%';
 
-  // Trigger 2s loading then show result
   useEffect(() => {
     if (postcodeSubStep === 'loading') {
       const t = setTimeout(() => setPostcodeSubStep('result'), 2000);
@@ -188,24 +287,59 @@ export default function ConsultationForm() {
     }
   }, [postcodeSubStep]);
 
+  const emailValid = validateEmail(formData.email);
+  const phoneValid = validatePhone(formData.phone);
+
+  const postcodeBasicValid =
+    postcode.trim().length >= 5 && postcode.trim().length <= 8;
+
+  const toggleService = (label: string) => {
+    setSelectedServices((prev) =>
+      prev.includes(label) ? prev.filter((s) => s !== label) : [...prev, label]
+    );
+  };
+
+  const handlePostcodeBlur = () => {
+    setPostcodeBlurred(true);
+    if (postcode.trim() !== '' && !validatePostcode(postcode)) {
+      setPostcodeError(
+        "Please check your postcode — it looks like there might be a typo or extra spaces."
+      );
+    } else {
+      setPostcodeError('');
+    }
+  };
+
+  const handleCheckAvailability = () => {
+    if (!validatePostcode(postcode)) {
+      setPostcodeError(
+        "Please check your postcode — it looks like there might be a typo or extra spaces."
+      );
+      return;
+    }
+    setPostcodeError('');
+    setPostcodeSubStep('loading');
+  };
+
   const canNext = () => {
     if (step === 1) return selectedExtension !== '';
-    if (step === 2) return selectedBudget !== '';
-    if (step === 3) return selectedTimeline !== '';
-    if (step === 4) return false;
-    if (step === 5) return formData.name.trim() !== '';
-    if (step === 6) return formData.email.trim() !== '';
+    if (step === 2) return selectedServices.length > 0;
+    if (step === 3) return selectedBudget !== '';
+    if (step === 4) return selectedTimeline !== '';
+    if (step === 5) return false;
+    if (step === 6) return formData.name.trim() !== '';
+    if (step === 7) return emailValid && phoneValid && formData.email.trim() !== '' && formData.phone.trim() !== '';
     return false;
   };
 
   const goNext = () => {
-    if (step === 6) { setSubmitted(true); return; }
+    if (step === 7) { setSubmitted(true); return; }
     setDirection(1);
     setStep((s) => s + 1);
   };
 
   const goBack = () => {
-    if (step === 4 && postcodeSubStep !== 'input') {
+    if (step === 5 && postcodeSubStep !== 'input') {
       setPostcodeSubStep('input');
       return;
     }
@@ -214,14 +348,14 @@ export default function ConsultationForm() {
   };
 
   const getStepHeading = () => {
-    if (step === 4 && postcodeSubStep === 'result') {
-      return 'Good news — a project manager is available in your area.';
-    }
+    if (step === 5 && postcodeSubStep === 'loading') return 'Checking Our Availability';
+    if (step === 5 && postcodeSubStep === 'result')
+      return 'Good news, one of our project managers is available to discuss your enquiry.';
     return stepHeadings[step];
   };
 
-  const showBack = step > 1 && !(step === 4 && postcodeSubStep === 'loading');
-  const showNext = step !== 4;
+  const showBack = step > 1 && !(step === 5 && postcodeSubStep === 'loading');
+  const showNext = step !== 5;
 
   return (
     <section
@@ -377,6 +511,7 @@ export default function ConsultationForm() {
                   exit="exit"
                   transition={{ duration: 0.3 }}
                 >
+                  {/* STEP 1 — Extension type */}
                   {step === 1 && (
                     <div
                       className="form-options-grid"
@@ -398,7 +533,57 @@ export default function ConsultationForm() {
                     </div>
                   )}
 
+                  {/* STEP 2 — Services needed */}
                   {step === 2 && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '20px',
+                        marginBottom: '40px',
+                      }}
+                    >
+                      {serviceOptions.map((opt) => (
+                        <label
+                          key={opt.label}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedServices.includes(opt.label)}
+                            onChange={() => toggleService(opt.label)}
+                            style={{
+                              width: '18px',
+                              height: '18px',
+                              accentColor: '#c9a96e',
+                              cursor: 'pointer',
+                              flexShrink: 0,
+                            }}
+                          />
+                          <span
+                            style={{
+                              fontSize: '14px',
+                              fontWeight: 600,
+                              color: '#0a0a0a',
+                              letterSpacing: '0.08em',
+                              textTransform: 'uppercase',
+                            }}
+                          >
+                            {opt.label}
+                          </span>
+                          <InfoTooltip text={opt.tooltip} />
+                        </label>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* STEP 3 — Investment range */}
+                  {step === 3 && (
                     <div
                       className="form-options-grid"
                       style={{
@@ -419,7 +604,8 @@ export default function ConsultationForm() {
                     </div>
                   )}
 
-                  {step === 3 && (
+                  {/* STEP 4 — Timeline */}
+                  {step === 4 && (
                     <div
                       className="form-options-grid"
                       style={{
@@ -440,7 +626,8 @@ export default function ConsultationForm() {
                     </div>
                   )}
 
-                  {step === 4 && (
+                  {/* STEP 5 — Postcode */}
+                  {step === 5 && (
                     <div style={{ marginBottom: '40px' }}>
                       <AnimatePresence mode="wait">
                         <motion.div
@@ -462,25 +649,37 @@ export default function ConsultationForm() {
                                   letterSpacing: 'normal',
                                 }}
                               >
-                                Enter your postcode to see if a project manager is available near you.
+                                Enter your postcode to check our availability.
                               </p>
                               <TextInput
                                 label="Postcode"
                                 value={postcode}
-                                onChange={setPostcode}
+                                onChange={(v) => {
+                                  const filtered = v.replace(/[^A-Za-z0-9 ]/g, '');
+                                  setPostcode(filtered);
+                                  if (postcodeBlurred && filtered.trim() !== '') {
+                                    setPostcodeError(
+                                      validatePostcode(filtered)
+                                        ? ''
+                                        : "Please check your postcode — it looks like there might be a typo or extra spaces."
+                                    );
+                                  }
+                                }}
+                                onBlur={handlePostcodeBlur}
+                                error={postcodeError}
                               />
                               <button
                                 type="button"
-                                onClick={() => setPostcodeSubStep('loading')}
-                                disabled={postcode.trim() === ''}
+                                onClick={handleCheckAvailability}
+                                disabled={!postcodeBasicValid}
                                 style={{
                                   ...navBtnBase,
                                   marginTop: '32px',
-                                  opacity: postcode.trim() === '' ? 0.3 : 1,
-                                  cursor: postcode.trim() === '' ? 'not-allowed' : 'pointer',
+                                  opacity: postcodeBasicValid ? 1 : 0.3,
+                                  cursor: postcodeBasicValid ? 'pointer' : 'not-allowed',
                                 }}
                                 onMouseEnter={(e) => {
-                                  if (postcode.trim() !== '') {
+                                  if (postcodeBasicValid) {
                                     e.currentTarget.style.backgroundColor = '#c9a96e';
                                     e.currentTarget.style.borderColor = '#c9a96e';
                                   }
@@ -527,7 +726,7 @@ export default function ConsultationForm() {
                                   letterSpacing: 'normal',
                                 }}
                               >
-                                Checking project manager availability near you...
+                                Checking project manager availability...
                               </p>
                             </div>
                           )}
@@ -567,7 +766,8 @@ export default function ConsultationForm() {
                     </div>
                   )}
 
-                  {step === 5 && (
+                  {/* STEP 6 — Name */}
+                  {step === 6 && (
                     <div
                       style={{
                         display: 'flex',
@@ -584,7 +784,8 @@ export default function ConsultationForm() {
                     </div>
                   )}
 
-                  {step === 6 && (
+                  {/* STEP 7 — Contact details */}
+                  {step === 7 && (
                     <div
                       style={{
                         display: 'flex',
@@ -597,13 +798,29 @@ export default function ConsultationForm() {
                         label="Email Address"
                         type="email"
                         value={formData.email}
-                        onChange={(v) => setFormData((f) => ({ ...f, email: v }))}
+                        onChange={(v) => {
+                          setFormData((f) => ({ ...f, email: v }));
+                        }}
+                        onBlur={() => setEmailBlurred(true)}
+                        error={
+                          emailBlurred && formData.email.trim() !== '' && !emailValid
+                            ? 'Please enter a valid email address.'
+                            : undefined
+                        }
                       />
                       <TextInput
                         label="Phone Number"
                         type="tel"
                         value={formData.phone}
-                        onChange={(v) => setFormData((f) => ({ ...f, phone: v }))}
+                        onChange={(v) => {
+                          setFormData((f) => ({ ...f, phone: v }));
+                        }}
+                        onBlur={() => setPhoneBlurred(true)}
+                        error={
+                          phoneBlurred && formData.phone.trim() !== '' && !phoneValid
+                            ? 'Please enter a valid UK phone number.'
+                            : undefined
+                        }
                       />
                     </div>
                   )}
@@ -667,7 +884,7 @@ export default function ConsultationForm() {
                       e.currentTarget.style.borderColor = '#0a0a0a';
                     }}
                   >
-                    {step === 6 ? 'Request a Consultation' : 'Next →'}
+                    {step === 7 ? 'Request a Consultation' : 'Next →'}
                   </button>
                 )}
               </div>

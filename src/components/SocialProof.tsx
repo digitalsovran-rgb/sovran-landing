@@ -131,7 +131,10 @@ export default function SocialProof() {
       style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}
     >
       <div className="inner">
-        <h2
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
           style={{
             fontSize: 'clamp(30px, 3.5vw, 48px)',
             fontWeight: 900,
@@ -144,7 +147,7 @@ export default function SocialProof() {
           }}
         >
           Stories of Success
-        </h2>
+        </motion.h2>
 
         <div
           className="testimonials-grid"

@@ -134,7 +134,10 @@ export default function ValueProps() {
           margin: '0 auto',
         }}
       >
-        <h2
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
           style={{
             fontSize: 'clamp(36px, 4.5vw, 56px)',
             fontWeight: 900,
@@ -147,7 +150,7 @@ export default function ValueProps() {
           }}
         >
           Extensions. Done Properly.
-        </h2>
+        </motion.h2>
 
         {/* Top row — 3 cards */}
         <div

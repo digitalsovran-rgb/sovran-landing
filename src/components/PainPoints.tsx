@@ -85,7 +85,10 @@ export default function PainPoints() {
         >
           {/* Left column */}
           <div style={{ flex: '0 0 40%', maxWidth: '40%' }}>
-            <h2
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
               style={{
                 fontSize: 'clamp(34px, 3.8vw, 52px)',
                 fontWeight: 900,
@@ -95,7 +98,7 @@ export default function PainPoints() {
               }}
             >
               Extending your home shouldn&apos;t feel like a risk.
-            </h2>
+            </motion.h2>
             <p
               style={{
                 fontSize: '15px',

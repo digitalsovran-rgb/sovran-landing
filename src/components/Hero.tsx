@@ -93,7 +93,7 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
             style={{
-              fontSize: 'clamp(22px, 3.5vw, 44px)',
+              fontSize: 'clamp(36px, 6vw, 76px)',
               fontWeight: 900,
               color: '#ffffff',
               margin: '0 auto',
@@ -103,8 +103,8 @@ export default function Hero() {
               fontFamily: 'Inter, sans-serif',
             }}
           >
-            <div className="hero-hl">Extending Your London Home?</div>
-            <div className="hero-hl">Do It Once. Do It Right.</div>
+            <div className="hero-hl">EXTENDING YOUR HOME?</div>
+            <div className="hero-hl">DO IT ONCE. DO IT RIGHT.</div>
           </motion.h1>
 
           <motion.p
