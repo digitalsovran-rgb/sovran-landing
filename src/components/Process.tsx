@@ -121,12 +121,12 @@ export default function Process() {
         <p
           style={{
             textAlign: 'center',
-            fontSize: '13px',
+            fontSize: 'clamp(36px, 4.5vw, 52px)',
             fontWeight: 900,
             textTransform: 'uppercase',
-            letterSpacing: '0.15em',
+            letterSpacing: '-0.02em',
             color: '#f5f0eb',
-            marginBottom: '40px',
+            marginBottom: '60px',
             fontFamily: 'Inter, sans-serif',
           }}
         >
