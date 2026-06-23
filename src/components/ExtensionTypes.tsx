@@ -117,6 +117,24 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
 export default function ExtensionTypes() {
   return (
     <section id="projects" style={{ backgroundColor: '#f5f0eb' }}>
+      <div
+        style={{
+          textAlign: 'center',
+          padding: '100px 24px 60px',
+        }}
+      >
+        <h2
+          style={{
+            fontSize: 'clamp(32px, 4vw, 48px)',
+            fontWeight: 900,
+            color: '#0a0a0a',
+            letterSpacing: '-0.02em',
+            fontFamily: 'Inter, sans-serif',
+          }}
+        >
+          Our Recent Extension Projects
+        </h2>
+      </div>
       {extensions.map((ext) => (
         <ExtRow key={ext.title} ext={ext} />
       ))}

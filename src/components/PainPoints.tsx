@@ -106,7 +106,7 @@ export default function PainPoints() {
                 letterSpacing: 'normal',
               }}
             >
-              Yet for many homeowners and developers, it does.
+              Yet for many homeowners, it does.
             </p>
           </div>
 

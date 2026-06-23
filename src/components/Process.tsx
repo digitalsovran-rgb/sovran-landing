@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 
 const steps = [
   {
@@ -30,16 +29,21 @@ const steps = [
 ];
 
 function StepItem({ step, i }: { step: (typeof steps)[0]; i: number }) {
-  const [iconHovered, setIconHovered] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   return (
     <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         flex: 1,
         textAlign: 'center',
         position: 'relative',
         zIndex: 1,
-        padding: '0 8px',
+        padding: '24px 20px',
+        backgroundColor: hovered ? '#f5f0eb' : 'transparent',
+        transition: 'background-color 0.3s ease',
+        cursor: 'default',
       }}
     >
       {/* Step number */}
@@ -48,9 +52,10 @@ function StepItem({ step, i }: { step: (typeof steps)[0]; i: number }) {
           display: 'block',
           fontSize: '48px',
           fontWeight: 900,
-          color: 'rgba(201,169,110,0.4)',
+          color: hovered ? '#0a0a0a' : 'rgba(201,169,110,0.4)',
           letterSpacing: '-0.02em',
           lineHeight: 1,
+          transition: 'color 0.3s ease',
         }}
       >
         {step.num}
@@ -62,115 +67,45 @@ function StepItem({ step, i }: { step: (typeof steps)[0]; i: number }) {
           display: 'block',
           fontSize: '13px',
           fontWeight: 600,
-          color: '#ffffff',
+          color: hovered ? '#0a0a0a' : '#ffffff',
           textTransform: 'uppercase',
           letterSpacing: '0.2em',
           marginTop: '8px',
+          transition: 'color 0.3s ease',
         }}
       >
         {step.label}
       </span>
 
-      {/* + circle with tooltip */}
+      {/* Tooltip text — visible on hover */}
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'center',
-          marginTop: '10px',
-          position: 'relative',
+          fontSize: '13px',
+          lineHeight: 1.6,
+          color: '#0a0a0a',
+          maxWidth: '220px',
+          margin: '12px auto 0',
+          opacity: hovered ? 1 : 0,
+          transition: 'opacity 0.3s ease',
+          pointerEvents: 'none',
         }}
       >
-        {/* Tooltip */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '100%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            marginBottom: '12px',
-            backgroundColor: '#0a0a0a',
-            border: '1px solid rgba(255,255,255,0.12)',
-            color: 'rgba(255,255,255,0.8)',
-            fontSize: '12px',
-            lineHeight: 1.6,
-            padding: '16px 20px',
-            maxWidth: '200px',
-            width: 'max-content',
-            pointerEvents: 'none',
-            opacity: iconHovered ? 1 : 0,
-            transition: 'opacity 0.2s',
-            zIndex: 10,
-            textAlign: 'left',
-          }}
-        >
-          {step.tooltip}
-          {/* Triangle border */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '-6px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 0,
-              height: 0,
-              borderLeft: '6px solid transparent',
-              borderRight: '6px solid transparent',
-              borderTop: '6px solid rgba(255,255,255,0.12)',
-            }}
-          />
-          {/* Triangle fill */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '-5px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 0,
-              height: 0,
-              borderLeft: '5px solid transparent',
-              borderRight: '5px solid transparent',
-              borderTop: '5px solid #0a0a0a',
-            }}
-          />
-        </div>
-
-        {/* Pulsing + icon */}
-        <motion.div
-          animate={{ scale: [1, 1.15, 1], opacity: [1, 0.6, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          onMouseEnter={() => setIconHovered(true)}
-          onMouseLeave={() => setIconHovered(false)}
-          style={{
-            width: '20px',
-            height: '20px',
-            border: '1px solid rgba(255,255,255,0.3)',
-            background: 'transparent',
-            color: 'rgba(255,255,255,0.5)',
-            fontSize: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '50%',
-            cursor: 'pointer',
-            userSelect: 'none',
-          }}
-        >
-          +
-        </motion.div>
+        {step.tooltip}
       </div>
 
-      {/* Arrowhead at right edge of step (except last) */}
+      {/* Arrowhead at right edge (except last) */}
       {i < steps.length - 1 && (
         <div
           style={{
             position: 'absolute',
             right: '-1px',
-            top: '21px',
+            top: '48px',
             width: 0,
             height: 0,
             borderTop: '4px solid transparent',
             borderBottom: '4px solid transparent',
             borderLeft: '6px solid rgba(255,255,255,0.2)',
+            zIndex: 2,
           }}
         />
       )}
@@ -182,6 +117,22 @@ export default function Process() {
   return (
     <section style={{ backgroundColor: '#0a0a0a', padding: '80px 0' }}>
       <div className="process-inner">
+        {/* Section title */}
+        <p
+          style={{
+            textAlign: 'center',
+            fontSize: '13px',
+            fontWeight: 900,
+            textTransform: 'uppercase',
+            letterSpacing: '0.15em',
+            color: '#c9a96e',
+            marginBottom: '40px',
+            fontFamily: 'Inter, sans-serif',
+          }}
+        >
+          Our Process
+        </p>
+
         <div
           className="process-row"
           style={{
@@ -194,7 +145,7 @@ export default function Process() {
           <div
             style={{
               position: 'absolute',
-              top: '24px',
+              top: '48px',
               left: '10%',
               right: '10%',
               height: '1px',

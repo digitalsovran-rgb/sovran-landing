@@ -1,8 +1,8 @@
 const stats = [
-  { value: '15+', label: 'Years in London' },
+  { value: '15+', label: 'Years of Experience' },
+  { value: '98%', label: 'Planning Success Rate' },
+  { value: '£25M+', label: 'Value Delivered' },
   { value: '1,000+', label: 'Projects Delivered' },
-  { value: '95%', label: 'Planning Success Rate' },
-  { value: '£100K–£25M+', label: 'Projects Delivered' },
 ];
 
 export default function StatsBar() {

@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type FormData = {
   name: string;
-  postcode: string;
   email: string;
   phone: string;
 };
+
+type PostcodeSubStep = 'input' | 'loading' | 'result';
 
 const extensionOptions = [
   'Rear Extension',
@@ -14,7 +15,7 @@ const extensionOptions = [
   'Side Return',
   'Double Storey',
   'Wrap Around',
-  'Not Sure Yet',
+  'Multiple Projects',
 ];
 
 const budgetOptions = [
@@ -23,6 +24,33 @@ const budgetOptions = [
   '£500K – £1M',
   '£1M+',
 ];
+
+const timelineOptions = [
+  'Ready to start',
+  'Within 1 month',
+  'Within 6 months',
+  'Next year',
+];
+
+const TOTAL_STEPS = 6;
+
+const progressMap: Record<number, string> = {
+  1: '16%',
+  2: '33%',
+  3: '50%',
+  4: '66%',
+  5: '83%',
+  6: '100%',
+};
+
+const stepHeadings: Record<number, string> = {
+  1: 'What type of extension are you planning?',
+  2: 'What is your approximate investment?',
+  3: 'When are you looking to start your project?',
+  4: "Let's check availability in your area.",
+  5: "What's your name?",
+  6: 'How should we reach you?',
+};
 
 function SelectCard({
   label,
@@ -107,6 +135,7 @@ function TextInput({
           padding: '16px 0',
           outline: 'none',
           transition: 'border-bottom-color 0.2s',
+          boxSizing: 'border-box',
         }}
       />
     </div>
@@ -119,46 +148,80 @@ const slideVariants = {
   exit: (dir: number) => ({ opacity: 0, x: dir > 0 ? -40 : 40 }),
 };
 
+const fadeVariants = {
+  enter: { opacity: 0, y: 10 },
+  center: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -10 },
+};
+
+const navBtnBase: React.CSSProperties = {
+  backgroundColor: '#0a0a0a',
+  color: '#ffffff',
+  border: '1px solid #0a0a0a',
+  fontSize: '13px',
+  fontWeight: 500,
+  letterSpacing: '0.1em',
+  textTransform: 'uppercase',
+  padding: '16px 40px',
+  cursor: 'pointer',
+  transition: 'background-color 0.3s, border-color 0.3s',
+};
+
 export default function ConsultationForm() {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
   const [selectedExtension, setSelectedExtension] = useState('');
   const [selectedBudget, setSelectedBudget] = useState('');
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    postcode: '',
-    email: '',
-    phone: '',
-  });
+  const [selectedTimeline, setSelectedTimeline] = useState('');
+  const [postcode, setPostcode] = useState('');
+  const [postcodeSubStep, setPostcodeSubStep] = useState<PostcodeSubStep>('input');
+  const [formData, setFormData] = useState<FormData>({ name: '', email: '', phone: '' });
   const [submitted, setSubmitted] = useState(false);
 
-  const progressMap: Record<number, string> = { 1: '33%', 2: '66%', 3: '100%' };
-  const progress = progressMap[step] ?? '33%';
+  const progress = progressMap[step] ?? '16%';
+
+  // Trigger 2s loading then show result
+  useEffect(() => {
+    if (postcodeSubStep === 'loading') {
+      const t = setTimeout(() => setPostcodeSubStep('result'), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [postcodeSubStep]);
 
   const canNext = () => {
     if (step === 1) return selectedExtension !== '';
     if (step === 2) return selectedBudget !== '';
-    if (step === 3)
-      return formData.name.trim() !== '' && formData.email.trim() !== '';
+    if (step === 3) return selectedTimeline !== '';
+    if (step === 4) return false;
+    if (step === 5) return formData.name.trim() !== '';
+    if (step === 6) return formData.email.trim() !== '';
     return false;
   };
 
   const goNext = () => {
-    if (step === 3) { setSubmitted(true); return; }
+    if (step === 6) { setSubmitted(true); return; }
     setDirection(1);
     setStep((s) => s + 1);
   };
 
   const goBack = () => {
+    if (step === 4 && postcodeSubStep !== 'input') {
+      setPostcodeSubStep('input');
+      return;
+    }
     setDirection(-1);
     setStep((s) => s - 1);
   };
 
-  const stepHeadings: Record<number, string> = {
-    1: 'What type of extension are you planning?',
-    2: 'What is your approximate investment?',
-    3: 'How should we reach you?',
+  const getStepHeading = () => {
+    if (step === 4 && postcodeSubStep === 'result') {
+      return 'Good news — a project manager is available in your area.';
+    }
+    return stepHeadings[step];
   };
+
+  const showBack = step > 1 && !(step === 4 && postcodeSubStep === 'loading');
+  const showNext = step !== 4;
 
   return (
     <section
@@ -287,8 +350,10 @@ export default function ConsultationForm() {
                   marginBottom: '8px',
                 }}
               >
-                Step {step} of 3
+                Step {step} of {TOTAL_STEPS}
               </p>
+
+              {/* Heading */}
               <h3
                 style={{
                   fontSize: 'clamp(20px, 2.2vw, 28px)',
@@ -298,7 +363,7 @@ export default function ConsultationForm() {
                   marginBottom: '36px',
                 }}
               >
-                {stepHeadings[step]}
+                {getStepHeading()}
               </h3>
 
               {/* Animated step content */}
@@ -356,6 +421,154 @@ export default function ConsultationForm() {
 
                   {step === 3 && (
                     <div
+                      className="form-options-grid"
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(2, 1fr)',
+                        gap: '12px',
+                        marginBottom: '40px',
+                      }}
+                    >
+                      {timelineOptions.map((opt) => (
+                        <SelectCard
+                          key={opt}
+                          label={opt}
+                          selected={selectedTimeline === opt}
+                          onClick={() => setSelectedTimeline(opt)}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {step === 4 && (
+                    <div style={{ marginBottom: '40px' }}>
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={postcodeSubStep}
+                          variants={fadeVariants}
+                          initial="enter"
+                          animate="center"
+                          exit="exit"
+                          transition={{ duration: 0.3 }}
+                        >
+                          {postcodeSubStep === 'input' && (
+                            <div>
+                              <p
+                                style={{
+                                  fontSize: '14px',
+                                  color: 'rgba(0,0,0,0.55)',
+                                  lineHeight: 1.65,
+                                  marginBottom: '32px',
+                                  letterSpacing: 'normal',
+                                }}
+                              >
+                                Enter your postcode to see if a project manager is available near you.
+                              </p>
+                              <TextInput
+                                label="Postcode"
+                                value={postcode}
+                                onChange={setPostcode}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setPostcodeSubStep('loading')}
+                                disabled={postcode.trim() === ''}
+                                style={{
+                                  ...navBtnBase,
+                                  marginTop: '32px',
+                                  opacity: postcode.trim() === '' ? 0.3 : 1,
+                                  cursor: postcode.trim() === '' ? 'not-allowed' : 'pointer',
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (postcode.trim() !== '') {
+                                    e.currentTarget.style.backgroundColor = '#c9a96e';
+                                    e.currentTarget.style.borderColor = '#c9a96e';
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#0a0a0a';
+                                  e.currentTarget.style.borderColor = '#0a0a0a';
+                                }}
+                              >
+                                Check Availability
+                              </button>
+                            </div>
+                          )}
+
+                          {postcodeSubStep === 'loading' && (
+                            <div style={{ paddingTop: '16px' }}>
+                              <div
+                                style={{
+                                  height: '2px',
+                                  backgroundColor: 'rgba(0,0,0,0.08)',
+                                  position: 'relative',
+                                  marginBottom: '24px',
+                                  overflow: 'hidden',
+                                }}
+                              >
+                                <motion.div
+                                  initial={{ width: '0%' }}
+                                  animate={{ width: '100%' }}
+                                  transition={{ duration: 2, ease: 'linear' }}
+                                  style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    height: '100%',
+                                    backgroundColor: '#c9a96e',
+                                  }}
+                                />
+                              </div>
+                              <p
+                                style={{
+                                  fontSize: '14px',
+                                  color: 'rgba(0,0,0,0.55)',
+                                  lineHeight: 1.6,
+                                  letterSpacing: 'normal',
+                                }}
+                              >
+                                Checking project manager availability near you...
+                              </p>
+                            </div>
+                          )}
+
+                          {postcodeSubStep === 'result' && (
+                            <div style={{ paddingTop: '8px' }}>
+                              <p
+                                style={{
+                                  fontSize: '14px',
+                                  color: 'rgba(0,0,0,0.55)',
+                                  lineHeight: 1.65,
+                                  marginBottom: '32px',
+                                  letterSpacing: 'normal',
+                                }}
+                              >
+                                Let&apos;s get your consultation booked.
+                              </p>
+                              <button
+                                type="button"
+                                onClick={goNext}
+                                style={{ ...navBtnBase }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#c9a96e';
+                                  e.currentTarget.style.borderColor = '#c9a96e';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#0a0a0a';
+                                  e.currentTarget.style.borderColor = '#0a0a0a';
+                                }}
+                              >
+                                Continue
+                              </button>
+                            </div>
+                          )}
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
+                  )}
+
+                  {step === 5 && (
+                    <div
                       style={{
                         display: 'flex',
                         flexDirection: 'column',
@@ -366,32 +579,31 @@ export default function ConsultationForm() {
                       <TextInput
                         label="Name"
                         value={formData.name}
-                        onChange={(v) =>
-                          setFormData((f) => ({ ...f, name: v }))
-                        }
+                        onChange={(v) => setFormData((f) => ({ ...f, name: v }))}
                       />
-                      <TextInput
-                        label="Postcode (optional)"
-                        value={formData.postcode}
-                        onChange={(v) =>
-                          setFormData((f) => ({ ...f, postcode: v }))
-                        }
-                      />
+                    </div>
+                  )}
+
+                  {step === 6 && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '32px',
+                        marginBottom: '40px',
+                      }}
+                    >
                       <TextInput
                         label="Email Address"
                         type="email"
                         value={formData.email}
-                        onChange={(v) =>
-                          setFormData((f) => ({ ...f, email: v }))
-                        }
+                        onChange={(v) => setFormData((f) => ({ ...f, email: v }))}
                       />
                       <TextInput
                         label="Phone Number"
                         type="tel"
                         value={formData.phone}
-                        onChange={(v) =>
-                          setFormData((f) => ({ ...f, phone: v }))
-                        }
+                        onChange={(v) => setFormData((f) => ({ ...f, phone: v }))}
                       />
                     </div>
                   )}
@@ -403,11 +615,16 @@ export default function ConsultationForm() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: step > 1 ? 'space-between' : 'flex-end',
+                  justifyContent:
+                    showBack && showNext
+                      ? 'space-between'
+                      : showNext
+                      ? 'flex-end'
+                      : 'flex-start',
                   marginTop: '8px',
                 }}
               >
-                {step > 1 && (
+                {showBack && (
                   <button
                     type="button"
                     onClick={goBack}
@@ -422,47 +639,37 @@ export default function ConsultationForm() {
                       padding: '0',
                       transition: 'color 0.2s',
                     }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.color = '#0a0a0a')
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.color = 'rgba(0,0,0,0.4)')
-                    }
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#0a0a0a')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(0,0,0,0.4)')}
                   >
                     ← Back
                   </button>
                 )}
 
-                <button
-                  type="button"
-                  onClick={goNext}
-                  disabled={!canNext()}
-                  style={{
-                    backgroundColor: '#0a0a0a',
-                    color: '#ffffff',
-                    border: '1px solid #0a0a0a',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                    padding: '16px 40px',
-                    cursor: canNext() ? 'pointer' : 'not-allowed',
-                    opacity: canNext() ? 1 : 0.3,
-                    transition: 'background-color 0.3s, border-color 0.3s',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (canNext()) {
-                      e.currentTarget.style.backgroundColor = '#c9a96e';
-                      e.currentTarget.style.borderColor = '#c9a96e';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#0a0a0a';
-                    e.currentTarget.style.borderColor = '#0a0a0a';
-                  }}
-                >
-                  {step === 3 ? 'Book My Consultation →' : 'Next →'}
-                </button>
+                {showNext && (
+                  <button
+                    type="button"
+                    onClick={goNext}
+                    disabled={!canNext()}
+                    style={{
+                      ...navBtnBase,
+                      cursor: canNext() ? 'pointer' : 'not-allowed',
+                      opacity: canNext() ? 1 : 0.3,
+                    }}
+                    onMouseEnter={(e) => {
+                      if (canNext()) {
+                        e.currentTarget.style.backgroundColor = '#c9a96e';
+                        e.currentTarget.style.borderColor = '#c9a96e';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#0a0a0a';
+                      e.currentTarget.style.borderColor = '#0a0a0a';
+                    }}
+                  >
+                    {step === 6 ? 'Request a Consultation' : 'Next →'}
+                  </button>
+                )}
               </div>
             </>
           )}

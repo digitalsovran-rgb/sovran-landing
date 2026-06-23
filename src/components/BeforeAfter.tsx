@@ -9,13 +9,12 @@ const cards = [
 
 const labelStyle: React.CSSProperties = {
   position: 'absolute',
-  fontSize: '10px',
-  fontWeight: 500,
+  fontSize: '14px',
+  fontWeight: 900,
   letterSpacing: '0.15em',
   textTransform: 'uppercase',
   color: '#ffffff',
-  backgroundColor: 'rgba(0,0,0,0.5)',
-  padding: '6px 12px',
+  textShadow: '0 2px 8px rgba(0,0,0,0.6)',
   zIndex: 2,
   pointerEvents: 'none',
 };
@@ -70,6 +69,7 @@ export default function BeforeAfter() {
                   position: 'relative',
                   flex: 1,
                   overflow: 'hidden',
+                  marginBottom: '8px',
                 }}
               >
                 <img
@@ -106,7 +106,7 @@ export default function BeforeAfter() {
                     display: 'block',
                   }}
                 />
-                <div style={{ ...labelStyle, bottom: '16px', left: '50%', transform: 'translateX(-50%)' }}>After</div>
+                <div style={{ ...labelStyle, top: '16px', left: '50%', transform: 'translateX(-50%)' }}>After</div>
               </div>
             </div>
           ))}
