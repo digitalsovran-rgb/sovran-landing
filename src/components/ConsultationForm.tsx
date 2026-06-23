@@ -251,7 +251,7 @@ export default function ConsultationForm() {
             letterSpacing: 'normal',
           }}
         >
-          Our specialists will be in touch within 24 hours.
+          Check availability in your area.
         </p>
 
         <div

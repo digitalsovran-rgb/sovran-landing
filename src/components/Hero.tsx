@@ -98,7 +98,8 @@ export default function Hero() {
             textTransform: 'uppercase',
           }}
         >
-          Extending Your London Home?<br />Do It Once. Do It Right.
+          <span style={{ display: 'block' }}>Extending Your London Home?</span>
+          <span style={{ display: 'block' }}>Do It Once. Do It Right.</span>
         </motion.h1>
 
         <motion.p

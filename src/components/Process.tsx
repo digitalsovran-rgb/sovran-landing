@@ -115,7 +115,7 @@ function StepItem({ step, i }: { step: (typeof steps)[0]; i: number }) {
 
 export default function Process() {
   return (
-    <section style={{ backgroundColor: '#0a0a0a', padding: '80px 0' }}>
+    <section style={{ backgroundColor: '#0a0a0a', padding: '48px 0' }}>
       <div className="process-inner">
         {/* Section title */}
         <p
@@ -125,7 +125,7 @@ export default function Process() {
             fontWeight: 900,
             textTransform: 'uppercase',
             letterSpacing: '0.15em',
-            color: '#c9a96e',
+            color: '#f5f0eb',
             marginBottom: '40px',
             fontFamily: 'Inter, sans-serif',
           }}
