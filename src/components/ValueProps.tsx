@@ -129,7 +129,7 @@ export default function ValueProps() {
         style={{
           position: 'relative',
           zIndex: 2,
-          padding: '200px 40px 40px',
+          padding: '150px 40px 40px',
           maxWidth: '1200px',
           margin: '0 auto',
         }}

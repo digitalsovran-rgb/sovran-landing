@@ -12,7 +12,6 @@ const labelStyle: React.CSSProperties = {
   fontSize: '28px',
   fontWeight: 900,
   letterSpacing: '0.15em',
-  textTransform: 'uppercase',
   color: '#ffffff',
   textShadow: '0 2px 8px rgba(0,0,0,0.6)',
   zIndex: 2,

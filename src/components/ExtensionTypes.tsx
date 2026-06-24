@@ -91,12 +91,12 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
             bottom: '16px',
             left: '16px',
             color: '#ffffff',
-            fontSize: '15px',
-            fontWeight: 400,
+            fontSize: '18px',
+            fontWeight: 700,
             textTransform: 'uppercase',
             letterSpacing: '0.1em',
             pointerEvents: 'none',
-            textShadow: '0 2px 6px rgba(0,0,0,0.6)',
+            textShadow: '0 2px 12px rgba(0,0,0,0.8), 0 1px 4px rgba(0,0,0,0.9)',
           }}
         >
           {ext.location}
@@ -172,7 +172,7 @@ export default function ExtensionTypes() {
             fontFamily: 'Inter, sans-serif',
           }}
         >
-          Recent Extension Projects Across London
+          RECENT EXTENSION PROJECTS ACROSS LONDON
         </motion.h2>
       </div>
       {extensions.map((ext) => (
