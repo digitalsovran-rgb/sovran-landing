@@ -74,12 +74,12 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
         justifyContent: 'space-between',
         backgroundColor: 'rgba(255,255,255,0.03)',
         border: '1px solid rgba(255,255,255,0.08)',
-        padding: '48px 44px',
-        minHeight: '420px',
+        padding: '56px 48px',
+        minHeight: '500px',
       }}
     >
       {/* Sliding testimonial content */}
-      <div style={{ flex: 1 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={index}
@@ -236,7 +236,7 @@ export default function SocialProof() {
         .social-proof-grid {
           display: flex;
           gap: 32px;
-          align-items: stretch;
+          align-items: center;
         }
         .social-proof-video {
           flex: 0 0 52%;
