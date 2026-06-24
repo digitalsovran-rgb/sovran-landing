@@ -1,10 +1,10 @@
-import { useRef } from 'react';
+import { useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 
 const cards = [
   { before: '/media/before1.png', after: '/media/after1.png' },
   { before: '/media/before2.png', after: '/media/after2.png' },
-  { before: '/media/before3.png?v=2', after: '/media/after3.png?v=2' },
+  { before: '/media/before3.png?v=3', after: '/media/after3.png?v=2' },
 ];
 
 const labelStyle: React.CSSProperties = {
@@ -19,9 +19,56 @@ const labelStyle: React.CSSProperties = {
   pointerEvents: 'none',
 };
 
+function ImageHalf({
+  src,
+  alt,
+  filter,
+  label,
+  labelPosition,
+  wrapperStyle,
+}: {
+  src: string;
+  alt: string;
+  filter?: string;
+  label: string;
+  labelPosition: React.CSSProperties;
+  wrapperStyle?: React.CSSProperties;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        flex: 1,
+        overflow: 'hidden',
+        ...wrapperStyle,
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <img
+        src={src}
+        alt={alt}
+        style={{
+          width: '100%',
+          height: '300px',
+          objectFit: 'cover',
+          objectPosition: 'center',
+          display: 'block',
+          filter: filter,
+          transform: hovered ? 'scale(1.04)' : 'scale(1)',
+          transition: 'transform 0.5s ease',
+        }}
+      />
+      <div style={{ ...labelStyle, ...labelPosition }}>{label}</div>
+    </div>
+  );
+}
+
 export default function BeforeAfter() {
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: '-80px' });
+  const isInView = useInView(sectionRef, { once: true, margin: '0px' });
 
   return (
     <section
@@ -30,9 +77,9 @@ export default function BeforeAfter() {
     >
       <div className="inner" style={{ textAlign: 'center', marginBottom: '60px' }}>
         <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
           style={{
             fontSize: 'clamp(32px, 4vw, 52px)',
             fontWeight: 900,
@@ -46,69 +93,29 @@ export default function BeforeAfter() {
       </div>
 
       <div className="inner">
-        <div
-          style={{
-            display: 'flex',
-            gap: '16px',
-          }}
-        >
+        <div style={{ display: 'flex', gap: '16px' }}>
           {cards.map((card, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 20, scale: 0.96 }}
-              animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 20, scale: 0.96 }}
-              transition={{ duration: 0.7, delay: i * 0.1, ease: 'easeOut' }}
-              style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-              }}
+              initial={{ opacity: 0, y: 40, scale: 0.97 }}
+              animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 40, scale: 0.97 }}
+              transition={{ duration: 0.9, delay: i * 0.1, ease: 'easeOut' }}
+              style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
             >
-              {/* Before half */}
-              <div
-                style={{
-                  position: 'relative',
-                  flex: 1,
-                  overflow: 'hidden',
-                  marginBottom: '8px',
-                }}
-              >
-                <img
-                  src={card.before}
-                  alt={`Before ${i + 1}`}
-                  style={{
-                    width: '100%',
-                    height: '300px',
-                    objectFit: 'cover',
-                    objectPosition: 'center',
-                    display: 'block',
-                    filter: 'grayscale(55%) brightness(0.9)',
-                  }}
-                />
-                <div style={{ ...labelStyle, bottom: '16px', left: '50%', transform: 'translateX(-50%)' }}>Before</div>
-              </div>
-
-              {/* After half */}
-              <div
-                style={{
-                  position: 'relative',
-                  flex: 1,
-                  overflow: 'hidden',
-                }}
-              >
-                <img
-                  src={card.after}
-                  alt={`After ${i + 1}`}
-                  style={{
-                    width: '100%',
-                    height: '300px',
-                    objectFit: 'cover',
-                    objectPosition: 'center',
-                    display: 'block',
-                  }}
-                />
-                <div style={{ ...labelStyle, top: '16px', left: '50%', transform: 'translateX(-50%)' }}>After</div>
-              </div>
+              <ImageHalf
+                src={card.before}
+                alt={`Before ${i + 1}`}
+                filter="grayscale(55%) brightness(0.9)"
+                label="Before"
+                labelPosition={{ bottom: '16px', left: '50%', transform: 'translateX(-50%)' }}
+                wrapperStyle={{ marginBottom: '8px' }}
+              />
+              <ImageHalf
+                src={card.after}
+                alt={`After ${i + 1}`}
+                label="After"
+                labelPosition={{ top: '16px', left: '50%', transform: 'translateX(-50%)' }}
+              />
             </motion.div>
           ))}
         </div>

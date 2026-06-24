@@ -53,9 +53,9 @@ const progressMap: Record<number, string> = {
 };
 
 const stepHeadings: Record<number, string> = {
-  1: 'What type of extension are you planning?',
+  1: 'Select your extension type',
   2: 'What services do you need?',
-  3: 'What is your approximate investment?',
+  3: 'Investment goals',
   4: 'When are you looking to start your project?',
   5: 'Location of Your Project',
   6: "What's your name?",
@@ -492,41 +492,45 @@ export default function ConsultationForm() {
             </motion.div>
           ) : (
             <>
-              {/* Progress bar */}
-              <div
-                style={{
-                  height: '2px',
-                  backgroundColor: 'rgba(0,0,0,0.08)',
-                  marginBottom: '48px',
-                  position: 'relative',
-                }}
-              >
-                <motion.div
-                  animate={{ width: progress }}
-                  transition={{ duration: 0.4 }}
+              {/* Progress bar — only shown on steps 1–5 */}
+              {step <= 5 && (
+                <div
                   style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    height: '100%',
-                    backgroundColor: '#c9a96e',
+                    height: '2px',
+                    backgroundColor: 'rgba(0,0,0,0.08)',
+                    marginBottom: '48px',
+                    position: 'relative',
                   }}
-                />
-              </div>
+                >
+                  <motion.div
+                    animate={{ width: progress }}
+                    transition={{ duration: 0.4 }}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      height: '100%',
+                      backgroundColor: '#c9a96e',
+                    }}
+                  />
+                </div>
+              )}
 
-              {/* Step indicator */}
-              <p
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 500,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.15em',
-                  color: 'rgba(0,0,0,0.4)',
-                  marginBottom: '8px',
-                }}
-              >
-                Step {step} of {TOTAL_STEPS}
-              </p>
+              {/* Step indicator — only shown on steps 1–5 */}
+              {step <= 5 && (
+                <p
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.15em',
+                    color: 'rgba(0,0,0,0.4)',
+                    marginBottom: '8px',
+                  }}
+                >
+                  Step {step} of {TOTAL_STEPS}
+                </p>
+              )}
 
               {/* Heading */}
               <h3

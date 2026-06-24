@@ -42,9 +42,9 @@ function StepItem({
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.6, delay: i * 0.1, ease: 'easeOut' }}
+      initial={{ opacity: 0, scale: 0.9, y: 40 }}
+      animate={isInView ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.9, y: 40 }}
+      transition={{ duration: 0.8, delay: i * 0.1, ease: 'easeOut' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -58,7 +58,6 @@ function StepItem({
         cursor: 'default',
       }}
     >
-      {/* Step number */}
       <span
         style={{
           display: 'block',
@@ -73,7 +72,6 @@ function StepItem({
         {step.num}
       </span>
 
-      {/* Step label */}
       <span
         style={{
           display: 'block',
@@ -89,7 +87,6 @@ function StepItem({
         {step.label}
       </span>
 
-      {/* Tooltip text — visible on hover */}
       <div
         style={{
           fontSize: '13px',
@@ -105,7 +102,6 @@ function StepItem({
         {step.tooltip}
       </div>
 
-      {/* Arrowhead at right edge (except last) */}
       {i < steps.length - 1 && (
         <div
           style={{
@@ -127,16 +123,15 @@ function StepItem({
 
 export default function Process() {
   const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-80px' });
+  const isInView = useInView(ref, { once: true, margin: '0px' });
 
   return (
     <section ref={ref} style={{ backgroundColor: '#0a0a0a', padding: '48px 0' }}>
       <div className="process-inner">
-        {/* Section title */}
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
           style={{
             textAlign: 'center',
             fontSize: 'clamp(36px, 4.5vw, 52px)',
@@ -159,7 +154,6 @@ export default function Process() {
             width: '100%',
           }}
         >
-          {/* Connecting line behind all steps */}
           <div
             style={{
               position: 'absolute',

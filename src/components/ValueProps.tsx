@@ -37,9 +37,9 @@ function ValueCard({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
-      transition={{ duration: 0.6, delay }}
+      initial={{ opacity: 0, y: 40 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+      transition={{ duration: 0.8, delay, ease: 'easeOut' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -87,7 +87,7 @@ function ValueCard({
 
 export default function ValueProps() {
   const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-80px' });
+  const isInView = useInView(ref, { once: true, margin: '0px' });
 
   return (
     <section
@@ -124,20 +124,20 @@ export default function ValueProps() {
         }}
       />
 
-      {/* All content */}
+      {/* All content — pushed down to reveal face above headline */}
       <div
         style={{
           position: 'relative',
           zIndex: 2,
-          padding: '120px 40px',
+          padding: '200px 40px 40px',
           maxWidth: '1200px',
           margin: '0 auto',
         }}
       >
         <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
           style={{
             fontSize: 'clamp(36px, 4.5vw, 56px)',
             fontWeight: 900,

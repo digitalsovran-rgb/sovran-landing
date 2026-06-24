@@ -36,9 +36,9 @@ function TestimonialCard({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
-      transition={{ duration: 0.6, delay }}
+      initial={{ opacity: 0, y: 40 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+      transition={{ duration: 0.8, delay, ease: 'easeOut' }}
       style={{
         flex: 1,
         backgroundColor: 'rgba(255,255,255,0.04)',
@@ -49,7 +49,6 @@ function TestimonialCard({
         alignItems: 'flex-start',
       }}
     >
-      {/* Profile picture */}
       <img
         src={t.image}
         alt={t.name}
@@ -65,7 +64,6 @@ function TestimonialCard({
         }}
       />
 
-      {/* Stars */}
       <div
         style={{
           fontSize: '16px',
@@ -77,7 +75,6 @@ function TestimonialCard({
         ★★★★★
       </div>
 
-      {/* Quote */}
       <p
         style={{
           fontSize: '15px',
@@ -92,7 +89,6 @@ function TestimonialCard({
         {t.quote}
       </p>
 
-      {/* Attribution */}
       <div style={{ marginTop: '32px' }}>
         <p
           style={{
@@ -123,7 +119,7 @@ function TestimonialCard({
 
 export default function SocialProof() {
   const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-80px' });
+  const isInView = useInView(ref, { once: true, margin: '0px' });
 
   return (
     <section
@@ -132,9 +128,9 @@ export default function SocialProof() {
     >
       <div className="inner">
         <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
           style={{
             fontSize: 'clamp(30px, 3.5vw, 48px)',
             fontWeight: 900,
@@ -146,7 +142,7 @@ export default function SocialProof() {
             lineHeight: 1.1,
           }}
         >
-          Stories of Success
+          Success Stories
         </motion.h2>
 
         <div

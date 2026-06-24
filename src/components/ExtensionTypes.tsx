@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 
 const extensions = [
@@ -7,48 +7,49 @@ const extensions = [
     desc: 'Open the back of your home to the garden.',
     image: '/media/rearext.png',
     imageLeft: true,
-    location: 'Richmond, London',
+    location: 'Richmond, TW9',
   },
   {
     title: 'Loft Conversion',
     desc: 'Turn unused space into the room you need.',
     image: '/media/loftconver.png?v=3',
     imageLeft: false,
-    location: 'Wimbledon, London',
+    location: 'Wimbledon, SW19',
   },
   {
     title: 'Side Return',
     desc: 'Reclaim the narrow gap beside your property.',
     image: '/media/sideret.png',
     imageLeft: true,
-    location: 'Chiswick, London',
+    location: 'Chiswick, W4',
   },
   {
     title: 'Double Storey',
     desc: 'Two floors of new space. One build.',
     image: '/media/doublstor.png?v=2',
     imageLeft: false,
-    location: 'Hampstead, London',
+    location: 'Hampstead, NW3',
   },
   {
     title: 'Wrap Around',
     desc: 'Change the entire feel of your home.',
     image: '/media/wraparound.png',
     imageLeft: true,
-    location: 'Notting Hill, London',
+    location: 'Notting Hill, W11',
   },
 ];
 
 function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-60px' });
+  const isInView = useInView(ref, { once: true, margin: '0px' });
+  const [imgHovered, setImgHovered] = useState(false);
+
+  const imgFromX = ext.imageLeft ? -60 : 60;
+  const textFromX = ext.imageLeft ? 60 : -60;
 
   return (
-    <motion.div
+    <div
       ref={ref}
-      initial={{ opacity: 0, y: 24 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
-      transition={{ duration: 0.7, ease: 'easeOut' }}
       className="ext-row"
       style={{
         display: 'flex',
@@ -57,13 +58,18 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
       }}
     >
       {/* Image block */}
-      <div
+      <motion.div
+        initial={{ opacity: 0, x: imgFromX }}
+        animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: imgFromX }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
         className="ext-img-block"
         style={{
           flex: '0 0 60%',
           position: 'relative',
           overflow: 'hidden',
         }}
+        onMouseEnter={() => setImgHovered(true)}
+        onMouseLeave={() => setImgHovered(false)}
       >
         <img
           src={ext.image}
@@ -74,29 +80,34 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
             objectFit: 'cover',
             objectPosition: 'center',
             display: 'block',
+            transform: imgHovered ? 'scale(1.04)' : 'scale(1)',
+            transition: 'transform 0.5s ease',
           }}
         />
-        {/* Location label */}
+        {/* Location label — no background, text-shadow only */}
         <div
           style={{
             position: 'absolute',
             bottom: '16px',
             left: '16px',
-            backgroundColor: 'rgba(10,10,10,0.6)',
             color: '#ffffff',
-            fontSize: '11px',
+            fontSize: '15px',
+            fontWeight: 400,
             textTransform: 'uppercase',
             letterSpacing: '0.1em',
-            padding: '6px 14px',
             pointerEvents: 'none',
+            textShadow: '0 2px 6px rgba(0,0,0,0.6)',
           }}
         >
           {ext.location}
         </div>
-      </div>
+      </motion.div>
 
       {/* Text block */}
-      <div
+      <motion.div
+        initial={{ opacity: 0, x: textFromX }}
+        animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: textFromX }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
         className="ext-text-block"
         style={{
           flex: '0 0 40%',
@@ -131,14 +142,14 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
             {ext.desc}
           </p>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }
 
 export default function ExtensionTypes() {
   const headingRef = useRef<HTMLDivElement>(null);
-  const isHeadingInView = useInView(headingRef, { once: true, margin: '-60px' });
+  const isHeadingInView = useInView(headingRef, { once: true, margin: '0px' });
 
   return (
     <section id="projects" style={{ backgroundColor: '#f5f0eb' }}>
@@ -150,9 +161,9 @@ export default function ExtensionTypes() {
         }}
       >
         <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={isHeadingInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          initial={{ opacity: 0, y: 40 }}
+          animate={isHeadingInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
           style={{
             fontSize: 'clamp(32px, 4vw, 48px)',
             fontWeight: 900,

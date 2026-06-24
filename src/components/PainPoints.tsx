@@ -22,9 +22,9 @@ function PainTile({
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
-      transition={{ duration: 0.5, delay }}
+      initial={{ opacity: 0, x: 60 }}
+      animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 60 }}
+      transition={{ duration: 0.8, delay, ease: 'easeOut' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -67,7 +67,7 @@ function PainTile({
 
 export default function PainPoints() {
   const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-80px' });
+  const isInView = useInView(ref, { once: true, margin: '0px' });
 
   return (
     <section
@@ -86,9 +86,9 @@ export default function PainPoints() {
           {/* Left column */}
           <div style={{ flex: '0 0 40%', maxWidth: '40%' }}>
             <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.6, ease: 'easeOut' }}
+              initial={{ opacity: 0, x: -60 }}
+              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -60 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
               style={{
                 fontSize: 'clamp(34px, 3.8vw, 52px)',
                 fontWeight: 900,
@@ -97,9 +97,12 @@ export default function PainPoints() {
                 lineHeight: 1.05,
               }}
             >
-              Extending your home shouldn&apos;t feel like a risk.
+              Extending your home shouldn&apos;t feel like a nightmare.
             </motion.h2>
-            <p
+            <motion.p
+              initial={{ opacity: 0, x: -60 }}
+              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -60 }}
+              transition={{ duration: 0.8, delay: 0.1, ease: 'easeOut' }}
               style={{
                 fontSize: '15px',
                 fontWeight: 400,
@@ -110,7 +113,7 @@ export default function PainPoints() {
               }}
             >
               Yet for many homeowners, it does.
-            </p>
+            </motion.p>
           </div>
 
           {/* Right column — tiles */}

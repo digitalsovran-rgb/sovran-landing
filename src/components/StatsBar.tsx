@@ -10,7 +10,7 @@ const stats = [
 
 export default function StatsBar() {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-40px' });
+  const isInView = useInView(ref, { once: true, margin: '0px' });
 
   return (
     <div
@@ -31,9 +31,9 @@ export default function StatsBar() {
         {stats.map((stat, i) => (
           <motion.div
             key={stat.label + i}
-            initial={{ opacity: 0, y: 16 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-            transition={{ duration: 0.6, delay: i * 0.1, ease: 'easeOut' }}
+            initial={{ opacity: 0, y: 40 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+            transition={{ duration: 0.8, delay: i * 0.1, ease: 'easeOut' }}
             className="stats-tile"
             style={{
               flex: 1,
