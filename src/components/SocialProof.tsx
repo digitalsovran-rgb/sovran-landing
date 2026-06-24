@@ -1,5 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { motion, useInView, AnimatePresence, Variants } from 'framer-motion';
+
+const slideVariants: Variants = {
+  enter: (d: number) => ({ opacity: 0, x: d > 0 ? 30 : -30 }),
+  center: { opacity: 1, x: 0 },
+  exit: (d: number) => ({ opacity: 0, x: d > 0 ? -30 : 30 }),
+};
 
 const testimonials = [
   {
@@ -77,9 +83,10 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
           <motion.div
             key={index}
             custom={direction}
-            initial={(d: number) => ({ opacity: 0, x: d > 0 ? 30 : -30 })}
-            animate={{ opacity: 1, x: 0 }}
-            exit={(d: number) => ({ opacity: 0, x: d > 0 ? -30 : 30 })}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
             transition={{ duration: 0.4, ease: 'easeOut' }}
           >
             {/* Profile */}
