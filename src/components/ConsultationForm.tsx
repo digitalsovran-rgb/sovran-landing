@@ -40,7 +40,7 @@ const timelineOptions = [
   'Next Year',
 ];
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 5;
 
 const progressMap: Record<number, string> = {
   1: '14%',
@@ -530,7 +530,7 @@ export default function ConsultationForm() {
                     marginBottom: '8px',
                   }}
                 >
-                  Step {step} of 5
+                  Step {step} of {TOTAL_STEPS}
                 </p>
               )}
 
