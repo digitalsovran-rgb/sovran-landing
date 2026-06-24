@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion, useInView, AnimatePresence, Variants } from 'framer-motion';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
+import type { Variants } from 'framer-motion';
 
 const slideVariants: Variants = {
   enter: (d: number) => ({ opacity: 0, x: d > 0 ? 30 : -30 }),
