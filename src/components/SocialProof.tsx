@@ -74,8 +74,8 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
         justifyContent: 'space-between',
         backgroundColor: 'rgba(255,255,255,0.03)',
         border: '1px solid rgba(255,255,255,0.08)',
-        padding: '56px 48px',
-        minHeight: '500px',
+        padding: '44px 48px',
+        minHeight: '420px',
       }}
     >
       {/* Sliding testimonial content */}
@@ -91,7 +91,7 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
             transition={{ duration: 0.4, ease: 'easeOut' }}
           >
             {/* Profile */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '28px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
               <img
                 src={t.image}
                 alt={t.name}
@@ -139,7 +139,7 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
                 lineHeight: 1.65,
                 fontStyle: 'italic',
                 letterSpacing: 'normal',
-                marginBottom: '28px',
+                marginBottom: '20px',
               }}
             >
               {t.quote}
@@ -164,7 +164,7 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
         style={{
           height: '1px',
           backgroundColor: 'rgba(255,255,255,0.1)',
-          margin: '28px 0 20px',
+          margin: '20px 0 16px',
         }}
       />
 
