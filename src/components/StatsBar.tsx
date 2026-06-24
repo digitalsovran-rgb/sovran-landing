@@ -10,7 +10,7 @@ const stats = [
 
 export default function StatsBar() {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '0px' });
+  const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
 
   return (
     <div

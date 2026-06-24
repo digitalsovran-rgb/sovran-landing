@@ -374,19 +374,21 @@ export default function ConsultationForm() {
         >
           Tell Us About Your Project.
         </h2>
-        <p
-          style={{
-            fontSize: '15px',
-            fontWeight: 400,
-            color: 'rgba(0,0,0,0.55)',
-            textAlign: 'center',
-            marginTop: '16px',
-            marginBottom: '60px',
-            letterSpacing: 'normal',
-          }}
-        >
-          Let&apos;s check availability in your area.
-        </p>
+        {step <= 5 && (
+          <p
+            style={{
+              fontSize: '15px',
+              fontWeight: 400,
+              color: 'rgba(0,0,0,0.55)',
+              textAlign: 'center',
+              marginTop: '16px',
+              marginBottom: '60px',
+              letterSpacing: 'normal',
+            }}
+          >
+            Let&apos;s check availability in your area.
+          </p>
+        )}
 
         <div
           className="form-inner"
@@ -528,7 +530,7 @@ export default function ConsultationForm() {
                     marginBottom: '8px',
                   }}
                 >
-                  Step {step} of {TOTAL_STEPS}
+                  Step {step} of 5
                 </p>
               )}
 

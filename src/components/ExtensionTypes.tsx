@@ -41,7 +41,7 @@ const extensions = [
 
 function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '0px' });
+  const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
   const [imgHovered, setImgHovered] = useState(false);
 
   const imgFromX = ext.imageLeft ? -60 : 60;
@@ -149,7 +149,7 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
 
 export default function ExtensionTypes() {
   const headingRef = useRef<HTMLDivElement>(null);
-  const isHeadingInView = useInView(headingRef, { once: true, margin: '0px' });
+  const isHeadingInView = useInView(headingRef, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
 
   return (
     <section id="projects" style={{ backgroundColor: '#f5f0eb' }}>

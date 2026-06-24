@@ -68,7 +68,7 @@ function ImageHalf({
 
 export default function BeforeAfter() {
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: '0px' });
+  const isInView = useInView(sectionRef, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
 
   return (
     <section

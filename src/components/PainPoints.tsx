@@ -67,7 +67,7 @@ function PainTile({
 
 export default function PainPoints() {
   const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '0px' });
+  const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
 
   return (
     <section
