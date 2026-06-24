@@ -43,13 +43,11 @@ const timelineOptions = [
 const TOTAL_STEPS = 5;
 
 const progressMap: Record<number, string> = {
-  1: '14%',
-  2: '28%',
-  3: '42%',
-  4: '57%',
-  5: '71%',
-  6: '85%',
-  7: '100%',
+  1: '20%',
+  2: '40%',
+  3: '60%',
+  4: '80%',
+  5: '100%',
 };
 
 const stepHeadings: Record<number, string> = {
@@ -374,21 +372,20 @@ export default function ConsultationForm() {
         >
           Tell Us About Your Project.
         </h2>
-        {step <= 5 && (
-          <p
-            style={{
-              fontSize: '15px',
-              fontWeight: 400,
-              color: 'rgba(0,0,0,0.55)',
-              textAlign: 'center',
-              marginTop: '16px',
-              marginBottom: '60px',
-              letterSpacing: 'normal',
-            }}
-          >
-            Let&apos;s check availability in your area.
-          </p>
-        )}
+        <p
+          style={{
+            fontSize: '15px',
+            fontWeight: 400,
+            color: 'rgba(0,0,0,0.55)',
+            textAlign: 'center',
+            marginTop: '16px',
+            marginBottom: '60px',
+            letterSpacing: 'normal',
+            minHeight: '24px',
+          }}
+        >
+          {step <= 5 ? "Let’s check availability in your area." : ' '}
+        </p>
 
         <div
           className="form-inner"
