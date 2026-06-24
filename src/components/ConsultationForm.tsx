@@ -146,9 +146,9 @@ function SelectCard({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        border: `1px solid ${selected ? '#c9a96e' : hovered ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.12)'}`,
-        backgroundColor: selected ? 'rgba(201,169,110,0.08)' : 'transparent',
-        color: selected ? '#c9a96e' : '#0a0a0a',
+        border: `1px solid ${selected ? '#0a0a0a' : hovered ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.12)'}`,
+        backgroundColor: selected ? '#0a0a0a' : 'transparent',
+        color: selected ? '#f5f0eb' : '#0a0a0a',
         fontSize: '12px',
         fontWeight: 500,
         textTransform: 'uppercase',
@@ -156,7 +156,7 @@ function SelectCard({
         padding: '24px 16px',
         textAlign: 'center',
         cursor: 'pointer',
-        transition: 'border-color 0.2s, background-color 0.2s, color 0.2s',
+        transition: 'all 0.2s ease',
         width: '100%',
       }}
     >
@@ -282,7 +282,7 @@ export default function ConsultationForm() {
 
   useEffect(() => {
     if (postcodeSubStep === 'loading') {
-      const t = setTimeout(() => setPostcodeSubStep('result'), 2000);
+      const t = setTimeout(() => setPostcodeSubStep('result'), 4000);
       return () => clearTimeout(t);
     }
   }, [postcodeSubStep]);
@@ -431,7 +431,7 @@ export default function ConsultationForm() {
                   marginBottom: '24px',
                 }}
               >
-                Thank you.
+                Thank You.
               </h2>
               <p
                 style={{
@@ -440,14 +440,55 @@ export default function ConsultationForm() {
                   color: 'rgba(0,0,0,0.6)',
                   lineHeight: 1.7,
                   maxWidth: '500px',
-                  margin: '0 auto',
+                  margin: '0 auto 40px',
                   letterSpacing: 'normal',
                 }}
               >
-                Our specialists will be in touch within 24 hours. In the
-                meantime, feel free to explore our work or send any information
-                ahead of your consultation.
+                A member of our team will be in touch shortly to discuss your
+                project and confirm availability in your area. In the meantime,
+                feel free to explore our recent work.
               </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSubmitted(false);
+                  setStep(1);
+                  setDirection(1);
+                  setSelectedExtension('');
+                  setSelectedServices([]);
+                  setSelectedBudget('');
+                  setSelectedTimeline('');
+                  setPostcode('');
+                  setPostcodeBlurred(false);
+                  setPostcodeError('');
+                  setPostcodeSubStep('input');
+                  setFormData({ name: '', email: '', phone: '' });
+                  setEmailBlurred(false);
+                  setPhoneBlurred(false);
+                }}
+                style={{
+                  backgroundColor: '#ffffff',
+                  color: '#0a0a0a',
+                  border: '1px solid #0a0a0a',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  padding: '16px 40px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#0a0a0a';
+                  e.currentTarget.style.color = '#ffffff';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.color = '#0a0a0a';
+                }}
+              >
+                Submit Another Enquiry
+              </button>
             </motion.div>
           ) : (
             <>
@@ -708,7 +749,7 @@ export default function ConsultationForm() {
                                 <motion.div
                                   initial={{ width: '0%' }}
                                   animate={{ width: '100%' }}
-                                  transition={{ duration: 2, ease: 'linear' }}
+                                  transition={{ duration: 4, ease: 'linear' }}
                                   style={{
                                     position: 'absolute',
                                     top: 0,
