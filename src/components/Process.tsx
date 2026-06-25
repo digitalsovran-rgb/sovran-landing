@@ -4,28 +4,28 @@ import { motion, useInView } from 'framer-motion';
 const steps = [
   {
     num: '01',
-    label: 'Consultation',
-    tooltip: 'We learn about your project, vision, and budget. No commitment required.',
+    label: 'Discovery',
+    tooltip: 'Every exceptional project begins with listening & understanding how you want to live, work, and experience your space.',
   },
   {
     num: '02',
     label: 'Design',
-    tooltip: 'Full architectural drawings, 3D renders, and material selections tailored to your home. Includes interior design and structural engineering.',
+    tooltip: 'Architecture, interiors, and technical expertise come together to transform ideas into a fully realised design.',
   },
   {
     num: '03',
     label: 'Planning',
-    tooltip: 'We handle every submission. Former planning officers ensure the strongest possible application.',
+    tooltip: 'We manage planning submissions, building regulations, party wall matters, and other key requirements, keeping your project moving forward with confidence.',
   },
   {
     num: '04',
-    label: 'Build',
-    tooltip: "Our construction team works to contract-backed milestones. You always know what's happening on site.",
+    label: 'Construction',
+    tooltip: 'Your project is delivered by experienced specialists, with clear communication, regular updates, and practical coordination around access, deliveries, and day-to-day decisions throughout the build.',
   },
   {
     num: '05',
     label: 'Handover',
-    tooltip: 'A full walkthrough of your completed space. Snagging handled before we leave.',
+    tooltip: 'A carefully curated handover, where every detail has been checked, refined, and completed so you can step into a space that feels joyful, indulgent, and entirely your own.',
   },
 ];
 
@@ -143,7 +143,7 @@ export default function Process() {
             fontFamily: 'Inter, sans-serif',
           }}
         >
-          A Seamless Process
+          The Sovran Method
         </motion.p>
 
         <div
