@@ -72,6 +72,9 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
         flexDirection: 'column',
         backgroundColor: 'rgba(255,255,255,0.03)',
         border: '1px solid rgba(255,255,255,0.08)',
+        maxWidth: '860px',
+        margin: '0 auto',
+        width: '100%',
       }}
     >
       {/* Horizontal content body — min-height anchors card across all 3 testimonials */}
