@@ -76,7 +76,7 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
         transition={{ duration: 0.8, ease: 'easeOut' }}
         className="ext-img-block"
         style={{
-          flex: '0 0 60%',
+          flex: '0 0 55%',
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -124,8 +124,8 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
         onMouseEnter={() => setTextHovered(true)}
         onMouseLeave={() => setTextHovered(false)}
         style={{
-          flex: '0 0 40%',
-          backgroundColor: textHovered ? '#f5f0eb' : '#ede7df',
+          flex: '0 0 45%',
+          backgroundColor: textHovered ? '#0a0a0a' : '#ede7df',
           transition: 'background-color 0.3s ease',
           display: 'flex',
           alignItems: 'center',
@@ -138,9 +138,10 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
             style={{
               fontSize: 'clamp(28px, 3vw, 42px)',
               fontWeight: 900,
-              color: '#0a0a0a',
+              color: textHovered ? '#f5f0eb' : '#0a0a0a',
               letterSpacing: '-0.02em',
               lineHeight: 1.05,
+              transition: 'color 0.3s ease',
             }}
           >
             {ext.title}
@@ -175,7 +176,7 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
                 margin: 0,
                 fontSize: '13px',
                 fontWeight: 400,
-                color: 'rgba(0,0,0,0.65)',
+                color: 'rgba(255,255,255,0.72)',
                 lineHeight: 1.65,
                 letterSpacing: 'normal',
                 opacity: textHovered ? 1 : 0,

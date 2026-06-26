@@ -66,20 +66,19 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
     <motion.div
       initial={{ opacity: 0, y: 40 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-      transition={{ duration: 0.8, delay: 0.15, ease: 'easeOut' }}
+      transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
       style={{
-        flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
         backgroundColor: 'rgba(255,255,255,0.03)',
         border: '1px solid rgba(255,255,255,0.08)',
-        padding: '44px 48px',
-        minHeight: '420px',
       }}
     >
-      {/* Sliding testimonial content */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      {/* Horizontal content body — min-height anchors card across all 3 testimonials */}
+      <div
+        className="sp-carousel-body"
+        style={{ display: 'flex', minHeight: '260px', overflow: 'hidden' }}
+      >
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={index}
@@ -89,94 +88,112 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
             animate="center"
             exit="exit"
             transition={{ duration: 0.4, ease: 'easeOut' }}
+            style={{ display: 'flex', flex: 1 }}
           >
-            {/* Profile */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
+            {/* Left — profile, name, title, stars */}
+            <div
+              className="sp-carousel-left"
+              style={{
+                flex: '0 0 38%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '48px 40px',
+                borderRight: '1px solid rgba(255,255,255,0.08)',
+              }}
+            >
               <img
                 src={t.image}
                 alt={t.name}
                 style={{
-                  width: '64px',
-                  height: '64px',
+                  width: '110px',
+                  height: '110px',
                   borderRadius: '50%',
                   objectFit: 'cover',
                   objectPosition: 'center top',
                   border: '2px solid rgba(201,169,110,0.3)',
                   flexShrink: 0,
+                  marginBottom: '8px',
                 }}
               />
-              <div>
-                <p
-                  style={{
-                    fontSize: '16px',
-                    fontWeight: 700,
-                    color: '#ffffff',
-                    letterSpacing: '0.01em',
-                  }}
-                >
-                  {t.name}
-                </p>
-                <p
-                  style={{
-                    fontSize: '13px',
-                    fontWeight: 400,
-                    color: 'rgba(255,255,255,0.4)',
-                    marginTop: '3px',
-                    letterSpacing: 'normal',
-                  }}
-                >
-                  {t.title}
-                </p>
+              <p
+                style={{
+                  fontSize: '17px',
+                  fontWeight: 700,
+                  color: '#ffffff',
+                  letterSpacing: '0.01em',
+                  textAlign: 'center',
+                  margin: 0,
+                }}
+              >
+                {t.name}
+              </p>
+              <p
+                style={{
+                  fontSize: '13px',
+                  fontWeight: 400,
+                  color: 'rgba(255,255,255,0.4)',
+                  letterSpacing: 'normal',
+                  textAlign: 'center',
+                  margin: 0,
+                }}
+              >
+                {t.title}
+              </p>
+              <div
+                style={{
+                  fontSize: '17px',
+                  color: '#c9a96e',
+                  letterSpacing: '3px',
+                  marginTop: '4px',
+                }}
+              >
+                ★★★★★
               </div>
             </div>
 
-            {/* Quote */}
-            <p
-              style={{
-                fontSize: '18px',
-                fontWeight: 400,
-                color: 'rgba(255,255,255,0.8)',
-                lineHeight: 1.65,
-                fontStyle: 'italic',
-                letterSpacing: 'normal',
-                marginBottom: '20px',
-              }}
-            >
-              {t.quote}
-            </p>
-
-            {/* Stars */}
+            {/* Right — quote */}
             <div
+              className="sp-carousel-right"
               style={{
-                fontSize: '18px',
-                color: '#c9a96e',
-                letterSpacing: '3px',
+                flex: '0 0 62%',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '48px 56px',
               }}
             >
-              ★★★★★
+              <p
+                style={{
+                  fontSize: '21px',
+                  fontWeight: 400,
+                  color: 'rgba(255,255,255,0.82)',
+                  lineHeight: 1.7,
+                  fontStyle: 'italic',
+                  letterSpacing: 'normal',
+                  margin: 0,
+                }}
+              >
+                {t.quote}
+              </p>
             </div>
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* Divider */}
-      <div
-        style={{
-          height: '1px',
-          backgroundColor: 'rgba(255,255,255,0.1)',
-          margin: '20px 0 16px',
-        }}
-      />
+      <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
 
-      {/* Bottom row */}
+      {/* Footer row */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          padding: '16px 48px',
         }}
       >
-        {/* Pagination label */}
         <span
           style={{
             fontSize: '12px',
@@ -189,7 +206,6 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
           {pad(index)} / {pad(testimonials.length - 1)}
         </span>
 
-        {/* Google rating */}
         <span
           style={{
             fontSize: '12px',
@@ -201,7 +217,6 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
           4.9 Google Reviews
         </span>
 
-        {/* Dot navigation */}
         <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
           {testimonials.map((_, i) => (
             <button
@@ -233,29 +248,29 @@ export default function SocialProof() {
   return (
     <>
       <style>{`
-        .social-proof-grid {
-          display: flex;
-          gap: 32px;
-          align-items: center;
-        }
-        .social-proof-video {
-          flex: 0 0 52%;
-        }
         @media (max-width: 767px) {
-          .social-proof-grid {
+          .sp-carousel-body {
             flex-direction: column;
+            min-height: auto !important;
           }
-          .social-proof-video {
-            flex: none;
+          .sp-carousel-left {
+            border-right: none !important;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            flex: none !important;
             width: 100%;
+            padding: 32px 24px !important;
+          }
+          .sp-carousel-right {
+            flex: none !important;
+            width: 100%;
+            padding: 28px 24px !important;
           }
         }
       `}</style>
-      <section
-        ref={ref}
-        style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}
-      >
+      <section ref={ref} style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}>
         <div className="inner">
+
+          {/* Section heading */}
           <motion.h2
             initial={{ opacity: 0, y: 40 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
@@ -274,43 +289,60 @@ export default function SocialProof() {
             Success Stories
           </motion.h2>
 
-          <div className="social-proof-grid">
-            {/* Left — YouTube embed */}
-            <motion.div
-              className="social-proof-video"
-              initial={{ opacity: 0, y: 40 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
+          {/* Row 1 — full-width video */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+            style={{ marginBottom: '72px' }}
+          >
+            <div
+              style={{
+                position: 'relative',
+                width: '100%',
+                paddingBottom: '56.25%',
+                height: 0,
+                overflow: 'hidden',
+              }}
             >
-              <div
+              <iframe
+                src="https://www.youtube.com/embed/_TxXLSWW57Q"
+                title="Sovran project showcase"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
                 style={{
-                  position: 'relative',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
                   width: '100%',
-                  paddingBottom: '56.25%', /* 16:9 */
-                  height: 0,
-                  overflow: 'hidden',
+                  height: '100%',
+                  border: 'none',
                 }}
-              >
-                <iframe
-                  src="https://www.youtube.com/embed/_TxXLSWW57Q"
-                  title="Sovran project showcase"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    border: 'none',
-                  }}
-                />
-              </div>
-            </motion.div>
+              />
+            </div>
+          </motion.div>
 
-            {/* Right — rotating carousel */}
-            <TestimonialCarousel isInView={isInView} />
-          </div>
+          {/* Row 2 — label */}
+          <motion.p
+            initial={{ opacity: 0, y: 40 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+            transition={{ duration: 0.8, delay: 0.1, ease: 'easeOut' }}
+            style={{
+              textAlign: 'center',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: '#c9a96e',
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              margin: '0 0 32px',
+            }}
+          >
+            More Stories, More Reviews
+          </motion.p>
+
+          {/* Row 2 — wide horizontal carousel */}
+          <TestimonialCarousel isInView={isInView} />
+
         </div>
       </section>
     </>
