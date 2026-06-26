@@ -77,7 +77,7 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
       {/* Horizontal content body — min-height anchors card across all 3 testimonials */}
       <div
         className="sp-carousel-body"
-        style={{ display: 'flex', minHeight: '260px', overflow: 'hidden' }}
+        style={{ display: 'flex', minHeight: '170px', overflow: 'hidden' }}
       >
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
@@ -99,8 +99,8 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px',
-                padding: '48px 40px',
+                gap: '6px',
+                padding: '32px 28px',
                 borderRight: '1px solid rgba(255,255,255,0.08)',
               }}
             >
@@ -108,14 +108,14 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
                 src={t.image}
                 alt={t.name}
                 style={{
-                  width: '110px',
-                  height: '110px',
+                  width: '90px',
+                  height: '90px',
                   borderRadius: '50%',
                   objectFit: 'cover',
                   objectPosition: 'center top',
                   border: '2px solid rgba(201,169,110,0.3)',
                   flexShrink: 0,
-                  marginBottom: '8px',
+                  marginBottom: '2px',
                 }}
               />
               <p
@@ -147,7 +147,7 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
                   fontSize: '17px',
                   color: '#c9a96e',
                   letterSpacing: '3px',
-                  marginTop: '4px',
+                  marginTop: '2px',
                 }}
               >
                 ★★★★★
@@ -161,7 +161,7 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
                 flex: '0 0 62%',
                 display: 'flex',
                 alignItems: 'center',
-                padding: '48px 56px',
+                padding: '32px 36px',
               }}
             >
               <p
@@ -191,7 +191,7 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '16px 48px',
+          padding: '13px 36px',
         }}
       >
         <span
@@ -296,6 +296,7 @@ export default function SocialProof() {
             transition={{ duration: 0.8, ease: 'easeOut' }}
             style={{ marginBottom: '72px' }}
           >
+            <div style={{ maxWidth: '860px', margin: '0 auto' }}>
             <div
               style={{
                 position: 'relative',
@@ -320,6 +321,7 @@ export default function SocialProof() {
                 }}
               />
             </div>
+            </div>
           </motion.div>
 
           {/* Row 2 — label */}
@@ -337,7 +339,7 @@ export default function SocialProof() {
               margin: '0 0 32px',
             }}
           >
-            More Stories, More Reviews
+            More Client Stories
           </motion.p>
 
           {/* Row 2 — wide horizontal carousel */}
