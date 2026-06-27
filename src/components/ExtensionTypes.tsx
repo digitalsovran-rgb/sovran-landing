@@ -6,7 +6,7 @@ const extensions = [
     title: 'Rear Extension',
     desc: 'Open the back of your home to the garden.',
     longDesc:
-      'This Georgian property gained a full-width glass extension across the rear, opening the kitchen, dining and living areas into a single uninterrupted space. Slim black-framed sliding doors run the entire width of the new structure, folding the garden into the room on warmer days. A glass balustrade was set into the raised terrace, keeping the sightline to the lawn clear from every angle of the new kitchen island. Inside, oak flooring carries through from the original house into the extension, with no visible step or threshold between old and new.',
+      'This Georgian property gained a full-width glass extension across the rear, opening the kitchen, dining and living areas into a single uninterrupted space. Slim black-framed sliding doors run the entire width of the new structure, folding the garden into the room on warmer days. A paved terrace was laid directly outside the doors, with steps leading down to the lawn, keeping the new space and garden feeling like one continuous area. Inside, oak flooring carries through from the original house into the extension, with no visible step or threshold between old and new.',
     image: '/media/rearext.png',
     imageLeft: true,
     location: 'Richmond, TW9',
@@ -147,26 +147,45 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
             {ext.title}
           </h3>
 
-          {/* Description — short tagline fades out, long desc fades in on hover */}
+          {/* Description — default state fades out, long desc fades in on hover */}
           <div style={{ position: 'relative', marginTop: '16px', minHeight: '260px' }}>
-            <p
+            {/* Default: short tagline + read more cue, fades out together */}
+            <div
               style={{
                 position: 'absolute',
                 top: 0,
                 left: 0,
                 right: 0,
-                margin: 0,
-                fontSize: '15px',
-                fontWeight: 400,
-                color: 'rgba(0,0,0,0.6)',
-                lineHeight: 1.65,
-                letterSpacing: 'normal',
                 opacity: textHovered ? 0 : 1,
                 transition: 'opacity 0.3s ease',
               }}
             >
-              {ext.desc}
-            </p>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: '15px',
+                  fontWeight: 400,
+                  color: 'rgba(0,0,0,0.6)',
+                  lineHeight: 1.65,
+                  letterSpacing: 'normal',
+                }}
+              >
+                {ext.desc}
+              </p>
+              <p
+                style={{
+                  margin: '12px 0 0',
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  color: '#c9a96e',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                }}
+              >
+                Read More
+              </p>
+            </div>
+            {/* Hover: long description fades in */}
             <p
               style={{
                 position: 'absolute',

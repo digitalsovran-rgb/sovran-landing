@@ -9,21 +9,16 @@ const steps = [
   },
   {
     num: '02',
-    label: 'Design',
-    tooltip: 'Architecture, interiors, and technical expertise come together to transform ideas into a fully realised design.',
+    label: 'Design & Planning',
+    tooltip: 'We transform your vision into a buildable design while managing planning application, regulations, and approvals, giving you confidence before construction begins.',
   },
   {
     num: '03',
-    label: 'Planning',
-    tooltip: 'We manage planning submissions, building regulations, party wall matters, and other key requirements, keeping your project moving forward with confidence.',
-  },
-  {
-    num: '04',
     label: 'Construction',
     tooltip: 'Your project is delivered by experienced specialists, with clear communication, regular updates, and practical coordination around access, deliveries, and day-to-day decisions throughout the build.',
   },
   {
-    num: '05',
+    num: '04',
     label: 'Handover',
     tooltip: 'A carefully curated handover, where every detail has been checked, refined, and completed so you can step into a space that feels joyful, indulgent, and entirely your own.',
   },
