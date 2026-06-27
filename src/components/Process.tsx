@@ -19,8 +19,8 @@ const steps = [
   },
   {
     num: '04',
-    label: 'Handover',
-    tooltip: 'A carefully curated handover, where every detail has been checked, refined, and completed so you can step into a space that feels joyful, indulgent, and entirely your own.',
+    label: 'Completion & Aftercare',
+    tooltip: 'We remain by your side even after completion, providing 6 months dedicated aftercare to address any settlement refinements, and a 10-year workmanship guarantee.',
   },
 ];
 
