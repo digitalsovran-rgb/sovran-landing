@@ -77,6 +77,22 @@ export default function BeforeAfter() {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [carouselDir, setCarouselDir] = useState(1);
+  const timerRef = useRef<number | null>(null);
+
+  const startTimer = () => {
+    if (timerRef.current !== null) clearInterval(timerRef.current);
+    timerRef.current = window.setInterval(() => {
+      setCarouselDir(1);
+      setCarouselIndex((i) => (i + 1) % cards.length);
+    }, 5500);
+  };
+
+  const stopTimer = () => {
+    if (timerRef.current !== null) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768);
@@ -84,9 +100,19 @@ export default function BeforeAfter() {
     return () => window.removeEventListener('resize', handler);
   }, []);
 
+  useEffect(() => {
+    if (isMobile) {
+      startTimer();
+    } else {
+      stopTimer();
+    }
+    return () => stopTimer();
+  }, [isMobile]);
+
   const goTo = (i: number) => {
     setCarouselDir(i > carouselIndex ? 1 : -1);
     setCarouselIndex(i);
+    if (isMobile) startTimer();
   };
 
   return (
