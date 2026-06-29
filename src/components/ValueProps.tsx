@@ -37,6 +37,7 @@ function ValueCard({
 
   return (
     <motion.div
+      className="value-card"
       initial={{ opacity: 0, y: 40 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
       transition={{ duration: 0.8, delay, ease: 'easeOut' }}
@@ -58,6 +59,7 @@ function ValueCard({
         }}
       />
       <h3
+        className="value-card-title"
         style={{
           fontSize: '18px',
           fontWeight: 700,
@@ -71,6 +73,7 @@ function ValueCard({
         {card.title}
       </h3>
       <p
+        className="value-card-body"
         style={{
           fontSize: '13px',
           fontWeight: 400,
@@ -136,6 +139,7 @@ export default function ValueProps() {
         }}
       >
         <motion.h2
+          className="value-heading"
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}

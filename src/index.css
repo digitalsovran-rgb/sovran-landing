@@ -66,6 +66,7 @@ img {
 
   .hero-bg {
     background-attachment: scroll !important;
+    background-image: url('/media/heroepicel.png') !important;
   }
 
   /* Hero content */
@@ -105,20 +106,39 @@ img {
     max-width: 100% !important;
   }
 
-  /* Value props */
+  /* Value props — compact 2-column grid on mobile */
+  .value-heading {
+    margin-bottom: 32px !important;
+  }
   .value-content {
-    padding-top: 80px !important;
+    padding: 60px 16px 40px !important;
   }
   .value-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+  .value-grid > *:nth-child(3) {
+    grid-column: 1 / -1;
   }
   .value-bottom-row {
-    flex-direction: column !important;
-    align-items: stretch !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+    flex-direction: unset !important;
+    align-items: unset !important;
   }
   .value-bottom-card {
     max-width: 100% !important;
-    flex: 1 !important;
+    flex: unset !important;
+  }
+  .value-card {
+    padding: 20px 16px !important;
+  }
+  .value-card-title {
+    font-size: 15px !important;
+  }
+  .value-card-body {
+    font-size: 12px !important;
   }
 
   /* Extension types — stack rows, tap to reveal */
@@ -133,11 +153,8 @@ img {
   .ext-text-block {
     flex: auto !important;
     width: 100% !important;
-    padding: 40px 24px !important;
+    padding: 32px 24px !important;
     cursor: pointer !important;
-  }
-  .ext-mob-tap {
-    display: block !important;
   }
 
   /* Testimonials */

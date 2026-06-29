@@ -12,20 +12,37 @@ import Footer from './components/Footer';
 
 function FloatingCTA() {
   const [hovered, setHovered] = useState(false);
-  const [visible, setVisible] = useState(true);
+  const [formVisible, setFormVisible] = useState(false);
+  const [heroVisible, setHeroVisible] = useState(true);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
 
   useEffect(() => {
-    const section = document.getElementById('consultation');
-    if (!section) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setVisible(!entry.isIntersecting),
-      { threshold: 0.1 }
-    );
-    observer.observe(section);
-    return () => observer.disconnect();
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
   }, []);
 
-  if (!visible) return null;
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+
+    const form = document.getElementById('consultation');
+    if (form) {
+      const o = new IntersectionObserver(([e]) => setFormVisible(e.isIntersecting), { threshold: 0.1 });
+      o.observe(form);
+      observers.push(o);
+    }
+
+    const hero = document.getElementById('hero');
+    if (hero) {
+      const o = new IntersectionObserver(([e]) => setHeroVisible(e.isIntersecting), { threshold: 0 });
+      o.observe(hero);
+      observers.push(o);
+    }
+
+    return () => observers.forEach((o) => o.disconnect());
+  }, []);
+
+  const shouldShow = !formVisible && !(heroVisible && isMobile);
 
   return (
     <>
@@ -59,7 +76,9 @@ function FloatingCTA() {
           textTransform: 'uppercase',
           letterSpacing: '0.1em',
           cursor: 'pointer',
-          transition: 'background-color 0.3s ease, color 0.3s ease',
+          opacity: shouldShow ? 1 : 0,
+          pointerEvents: shouldShow ? 'auto' : 'none',
+          transition: 'opacity 0.3s ease, background-color 0.3s ease, color 0.3s ease',
         }}
       >
         Get In Touch

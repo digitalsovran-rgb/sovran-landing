@@ -26,6 +26,7 @@ export default function Hero() {
         @media (max-width: 767px) { .hero-hl { white-space: normal; } }
       `}</style>
       <section
+        id="hero"
         style={{
           position: 'relative',
           height: '100vh',

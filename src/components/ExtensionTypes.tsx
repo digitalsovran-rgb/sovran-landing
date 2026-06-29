@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 
 const extensions = [
@@ -49,13 +49,14 @@ const extensions = [
   },
 ];
 
-function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
+function ExtRow({ ext, isMobile }: { ext: (typeof extensions)[0]; isMobile: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
   const [imgHovered, setImgHovered] = useState(false);
   const [hoverActive, setHoverActive] = useState(false);
-  const [clickActive, setClickActive] = useState(false);
-  const textHovered = hoverActive || clickActive;
+  const [expanded, setExpanded] = useState(false);
+
+  const textHovered = isMobile ? expanded : hoverActive;
 
   const imgFromX = ext.imageLeft ? -60 : 60;
   const textFromX = ext.imageLeft ? 60 : -60;
@@ -98,7 +99,6 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
             transition: 'transform 0.5s ease',
           }}
         />
-        {/* Location label — no background, text-shadow only */}
         <div
           style={{
             position: 'absolute',
@@ -123,15 +123,15 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
         animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: textFromX }}
         transition={{ duration: 0.8, ease: 'easeOut' }}
         className="ext-text-block"
-        onMouseEnter={() => setHoverActive(true)}
-        onMouseLeave={() => setHoverActive(false)}
-        onClick={() => setClickActive((c) => !c)}
+        onMouseEnter={() => { if (!isMobile) setHoverActive(true); }}
+        onMouseLeave={() => { if (!isMobile) setHoverActive(false); }}
+        onClick={() => { if (isMobile) setExpanded((e) => !e); }}
         style={{
           flex: '0 0 45%',
           backgroundColor: textHovered ? '#0a0a0a' : '#ede7df',
           transition: 'background-color 0.3s ease',
           display: 'flex',
-          alignItems: 'center',
+          alignItems: isMobile ? 'flex-start' : 'center',
           padding: '60px',
           cursor: 'default',
         }}
@@ -150,77 +150,126 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
             {ext.title}
           </h3>
 
-          {/* Description — default state fades out, long desc fades in on hover */}
-          <div style={{ position: 'relative', marginTop: '16px', minHeight: '260px' }}>
-            {/* Default: short tagline + read more cue, fades out together */}
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                opacity: textHovered ? 0 : 1,
-                transition: 'opacity 0.3s ease',
-              }}
-            >
+          {isMobile ? (
+            /* Mobile: document-flow content, max-height transition */
+            <div style={{ marginTop: '14px' }}>
+              {/* Collapsed content */}
+              <div
+                style={{
+                  maxHeight: expanded ? '0' : '100px',
+                  overflow: 'hidden',
+                  opacity: expanded ? 0 : 1,
+                  transition: 'max-height 0.35s ease, opacity 0.2s ease',
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: '15px',
+                    fontWeight: 400,
+                    color: 'rgba(0,0,0,0.6)',
+                    lineHeight: 1.65,
+                    letterSpacing: 'normal',
+                  }}
+                >
+                  {ext.desc}
+                </p>
+                <p
+                  style={{
+                    margin: '10px 0 0',
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    color: '#c9a96e',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                  }}
+                >
+                  + Read More
+                </p>
+              </div>
+              {/* Expanded long description */}
+              <div
+                style={{
+                  maxHeight: expanded ? '600px' : '0',
+                  overflow: 'hidden',
+                  opacity: expanded ? 1 : 0,
+                  transition: 'max-height 0.4s ease, opacity 0.3s ease',
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: '13px',
+                    fontWeight: 400,
+                    color: 'rgba(255,255,255,0.72)',
+                    lineHeight: 1.65,
+                    letterSpacing: 'normal',
+                  }}
+                >
+                  {ext.longDesc}
+                </p>
+              </div>
+            </div>
+          ) : (
+            /* Desktop: opacity cross-fade with fixed minHeight */
+            <div style={{ position: 'relative', marginTop: '16px', minHeight: '260px' }}>
+              {/* Default: short tagline + read more cue, fades out together */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  opacity: textHovered ? 0 : 1,
+                  transition: 'opacity 0.3s ease',
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: '15px',
+                    fontWeight: 400,
+                    color: 'rgba(0,0,0,0.6)',
+                    lineHeight: 1.65,
+                    letterSpacing: 'normal',
+                  }}
+                >
+                  {ext.desc}
+                </p>
+                <p
+                  style={{
+                    margin: '12px 0 0',
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    color: '#c9a96e',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                  }}
+                >
+                  Read More
+                </p>
+              </div>
+              {/* Hover: long description fades in */}
               <p
                 style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
                   margin: 0,
-                  fontSize: '15px',
+                  fontSize: '13px',
                   fontWeight: 400,
-                  color: 'rgba(0,0,0,0.6)',
+                  color: 'rgba(255,255,255,0.72)',
                   lineHeight: 1.65,
                   letterSpacing: 'normal',
+                  opacity: textHovered ? 1 : 0,
+                  transition: 'opacity 0.3s ease',
                 }}
               >
-                {ext.desc}
-              </p>
-              <p
-                style={{
-                  margin: '12px 0 0',
-                  fontSize: '11px',
-                  fontWeight: 500,
-                  color: '#c9a96e',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                }}
-              >
-                Read More
-              </p>
-              <p
-                className="ext-mob-tap"
-                style={{
-                  margin: '16px 0 0',
-                  fontSize: '22px',
-                  fontWeight: 300,
-                  color: '#c9a96e',
-                  lineHeight: 1,
-                  display: 'none',
-                }}
-              >
-                +
+                {ext.longDesc}
               </p>
             </div>
-            {/* Hover: long description fades in */}
-            <p
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                margin: 0,
-                fontSize: '13px',
-                fontWeight: 400,
-                color: 'rgba(255,255,255,0.72)',
-                lineHeight: 1.65,
-                letterSpacing: 'normal',
-                opacity: textHovered ? 1 : 0,
-                transition: 'opacity 0.3s ease',
-              }}
-            >
-              {ext.longDesc}
-            </p>
-          </div>
+          )}
         </div>
       </motion.div>
     </div>
@@ -230,6 +279,13 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
 export default function ExtensionTypes() {
   const headingRef = useRef<HTMLDivElement>(null);
   const isHeadingInView = useInView(headingRef, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
 
   return (
     <section id="projects" style={{ backgroundColor: '#f5f0eb' }}>
@@ -256,7 +312,7 @@ export default function ExtensionTypes() {
         </motion.h2>
       </div>
       {extensions.map((ext) => (
-        <ExtRow key={ext.title} ext={ext} />
+        <ExtRow key={ext.title} ext={ext} isMobile={isMobile} />
       ))}
     </section>
   );
