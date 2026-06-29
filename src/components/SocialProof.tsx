@@ -91,6 +91,7 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
             animate="center"
             exit="exit"
             transition={{ duration: 0.4, ease: 'easeOut' }}
+            className="sp-carousel-inner"
             style={{ display: 'flex', flex: 1 }}
           >
             {/* Left — profile, name, title, stars */}
@@ -264,6 +265,9 @@ export default function SocialProof() {
           .sp-carousel-body {
             flex-direction: column;
             min-height: auto !important;
+          }
+          .sp-carousel-inner {
+            flex-direction: column !important;
           }
           .sp-carousel-left {
             border-right: none !important;

@@ -78,6 +78,7 @@ export default function BeforeAfter() {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [carouselDir, setCarouselDir] = useState(1);
   const timerRef = useRef<number | null>(null);
+  const touchStartX = useRef<number>(0);
 
   const startTimer = () => {
     if (timerRef.current !== null) clearInterval(timerRef.current);
@@ -115,6 +116,23 @@ export default function BeforeAfter() {
     if (isMobile) startTimer();
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(delta) < 50) return;
+    if (delta < 0) {
+      setCarouselDir(1);
+      setCarouselIndex((i) => (i + 1) % cards.length);
+    } else {
+      setCarouselDir(-1);
+      setCarouselIndex((i) => (i - 1 + cards.length) % cards.length);
+    }
+    startTimer();
+  };
+
   return (
     <section
       ref={sectionRef}
@@ -144,6 +162,9 @@ export default function BeforeAfter() {
             initial={{ opacity: 0, y: 40 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            style={{ touchAction: 'pan-y' }}
           >
             <AnimatePresence mode="wait" custom={carouselDir}>
               <motion.div
@@ -172,7 +193,8 @@ export default function BeforeAfter() {
                 />
               </motion.div>
             </AnimatePresence>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px' }}>
+            <p style={{ textAlign: 'center', marginTop: '12px', fontSize: '14px', color: 'rgba(201,169,110,0.5)', letterSpacing: '0.1em', userSelect: 'none', pointerEvents: 'none' }}>&#8249; &nbsp; &bull; &nbsp; &#8250;</p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '12px' }}>
               {cards.map((_, i) => (
                 <button
                   key={i}

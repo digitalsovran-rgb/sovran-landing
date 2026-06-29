@@ -23,7 +23,12 @@ export default function Hero() {
     <>
       <style>{`
         .hero-hl { white-space: nowrap; }
-        @media (max-width: 767px) { .hero-hl { white-space: normal; } }
+        @media (max-width: 767px) {
+          .hero-hl { white-space: normal; }
+          .hero-h1 { font-size: clamp(24px, 6.5vw, 32px) !important; font-weight: 800 !important; }
+          .hero-label { font-size: 10px !important; margin-bottom: 24px !important; }
+          .hero-desc { font-size: 13px !important; }
+        }
       `}</style>
       <section
         id="hero"
@@ -75,6 +80,7 @@ export default function Hero() {
           }}
         >
           <motion.p
+            className="hero-label"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -91,6 +97,7 @@ export default function Hero() {
           </motion.p>
 
           <motion.h1
+            className="hero-h1"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
@@ -110,6 +117,7 @@ export default function Hero() {
           </motion.h1>
 
           <motion.p
+            className="hero-desc"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
@@ -123,7 +131,7 @@ export default function Hero() {
               letterSpacing: 'normal',
             }}
           >
-            A seamless design and build experience, combining architecture, planning and construction under one roof. Thoughtfully designed, expertly managed, and built to the highest standards.
+            Premium Design &amp; Build. Architecture, planning, and construction delivered as one seamless experience.
           </motion.p>
 
           <motion.div
