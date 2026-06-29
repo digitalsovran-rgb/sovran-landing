@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Hero from './components/Hero';
 import StatsBar from './components/StatsBar';
 import BeforeAfter from './components/BeforeAfter';
@@ -12,12 +12,26 @@ import Footer from './components/Footer';
 
 function FloatingCTA() {
   const [hovered, setHovered] = useState(false);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const section = document.getElementById('consultation');
+    if (!section) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setVisible(!entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  if (!visible) return null;
 
   return (
     <>
       <style>{`
         @media (max-width: 767px) {
-          .floating-cta { padding: 14px 20px !important; }
+          .floating-cta { bottom: 16px !important; right: 16px !important; padding: 14px 20px !important; }
         }
       `}</style>
       <button

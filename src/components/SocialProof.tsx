@@ -168,6 +168,7 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
               }}
             >
               <p
+                className="sp-quote-p"
                 style={{
                   fontSize: '21px',
                   fontWeight: 400,
@@ -275,6 +276,10 @@ export default function SocialProof() {
             flex: none !important;
             width: 100%;
             padding: 28px 24px !important;
+          }
+          .sp-quote-p {
+            font-size: 16px !important;
+            line-height: 1.65 !important;
           }
         }
       `}</style>

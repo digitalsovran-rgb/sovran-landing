@@ -53,7 +53,9 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
   const [imgHovered, setImgHovered] = useState(false);
-  const [textHovered, setTextHovered] = useState(false);
+  const [hoverActive, setHoverActive] = useState(false);
+  const [clickActive, setClickActive] = useState(false);
+  const textHovered = hoverActive || clickActive;
 
   const imgFromX = ext.imageLeft ? -60 : 60;
   const textFromX = ext.imageLeft ? 60 : -60;
@@ -121,8 +123,9 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
         animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: textFromX }}
         transition={{ duration: 0.8, ease: 'easeOut' }}
         className="ext-text-block"
-        onMouseEnter={() => setTextHovered(true)}
-        onMouseLeave={() => setTextHovered(false)}
+        onMouseEnter={() => setHoverActive(true)}
+        onMouseLeave={() => setHoverActive(false)}
+        onClick={() => setClickActive((c) => !c)}
         style={{
           flex: '0 0 45%',
           backgroundColor: textHovered ? '#0a0a0a' : '#ede7df',
@@ -183,6 +186,19 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
                 }}
               >
                 Read More
+              </p>
+              <p
+                className="ext-mob-tap"
+                style={{
+                  margin: '16px 0 0',
+                  fontSize: '22px',
+                  fontWeight: 300,
+                  color: '#c9a96e',
+                  lineHeight: 1,
+                  display: 'none',
+                }}
+              >
+                +
               </p>
             </div>
             {/* Hover: long description fades in */}

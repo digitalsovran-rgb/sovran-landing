@@ -63,6 +63,7 @@ export default function Hero() {
 
         {/* Content */}
         <div
+          className="hero-content"
           style={{
             position: 'relative',
             zIndex: 1,
@@ -128,6 +129,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
+            className="hero-btns"
             style={{
               display: 'flex',
               gap: '16px',
@@ -138,6 +140,7 @@ export default function Hero() {
           >
             <button
               onClick={scrollToForm}
+              className="hero-btn"
               style={{
                 ...btnBase,
                 backgroundColor: '#ffffff',
@@ -158,6 +161,7 @@ export default function Hero() {
 
             <button
               onClick={scrollToProjects}
+              className="hero-btn"
               style={{
                 ...btnBase,
                 backgroundColor: 'transparent',

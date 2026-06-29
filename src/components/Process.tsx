@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { useState, useRef, useEffect } from 'react';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 
 const steps = [
   {
@@ -119,6 +119,14 @@ function StepItem({
 export default function Process() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+  const [openStep, setOpenStep] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
 
   return (
     <section ref={ref} style={{ backgroundColor: '#0a0a0a', padding: '48px 0' }}>
@@ -141,30 +149,126 @@ export default function Process() {
           The Sovran Method
         </motion.p>
 
-        <div
-          className="process-row"
-          style={{
-            display: 'flex',
-            position: 'relative',
-            width: '100%',
-          }}
-        >
+        {isMobile ? (
+          /* Mobile: vertical accordion */
+          <div style={{ padding: '0 24px 16px' }}>
+            {steps.map((step, i) => (
+              <motion.div
+                key={step.num}
+                initial={{ opacity: 0, y: 30 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                transition={{ duration: 0.6, delay: i * 0.08, ease: 'easeOut' }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenStep(openStep === i ? null : i)}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '20px 0',
+                    background: 'none',
+                    border: 'none',
+                    borderBottom: `1px solid rgba(255,255,255,${openStep === i ? '0.12' : '0.08'})`,
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <span
+                      style={{
+                        fontSize: '24px',
+                        fontWeight: 900,
+                        color: openStep === i ? '#c9a96e' : 'rgba(201,169,110,0.4)',
+                        letterSpacing: '-0.005em',
+                        lineHeight: 1,
+                        minWidth: '36px',
+                        transition: 'color 0.25s ease',
+                      }}
+                    >
+                      {step.num}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        color: '#ffffff',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.15em',
+                      }}
+                    >
+                      {step.label}
+                    </span>
+                  </div>
+                  <span
+                    style={{
+                      color: '#c9a96e',
+                      fontSize: '20px',
+                      lineHeight: 1,
+                      flexShrink: 0,
+                      marginLeft: '12px',
+                      display: 'inline-block',
+                      transform: openStep === i ? 'rotate(45deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.25s ease',
+                    }}
+                  >
+                    +
+                  </span>
+                </button>
+                <AnimatePresence>
+                  {openStep === i && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                      style={{
+                        fontSize: '14px',
+                        color: 'rgba(255,255,255,0.55)',
+                        lineHeight: 1.65,
+                        letterSpacing: 'normal',
+                        margin: 0,
+                        paddingTop: '16px',
+                        paddingBottom: '24px',
+                        paddingLeft: '52px',
+                        paddingRight: '0',
+                      }}
+                    >
+                      {step.tooltip}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          /* Desktop: horizontal strip */
           <div
+            className="process-row"
             style={{
-              position: 'absolute',
-              top: '48px',
-              left: '10%',
-              right: '10%',
-              height: '1px',
-              backgroundColor: 'rgba(255,255,255,0.15)',
-              zIndex: 0,
+              display: 'flex',
+              position: 'relative',
+              width: '100%',
             }}
-          />
+          >
+            <div
+              style={{
+                position: 'absolute',
+                top: '48px',
+                left: '10%',
+                right: '10%',
+                height: '1px',
+                backgroundColor: 'rgba(255,255,255,0.15)',
+                zIndex: 0,
+              }}
+            />
 
-          {steps.map((step, i) => (
-            <StepItem key={step.num} step={step} i={i} isInView={isInView} />
-          ))}
-        </div>
+            {steps.map((step, i) => (
+              <StepItem key={step.num} step={step} i={i} isInView={isInView} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

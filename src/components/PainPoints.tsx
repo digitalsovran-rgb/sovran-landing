@@ -84,7 +84,7 @@ export default function PainPoints() {
           }}
         >
           {/* Left column */}
-          <div style={{ flex: '0 0 40%', maxWidth: '40%' }}>
+          <div className="pain-left" style={{ flex: '0 0 40%', maxWidth: '40%' }}>
             <motion.h2
               initial={{ opacity: 0, x: -60 }}
               animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -60 }}

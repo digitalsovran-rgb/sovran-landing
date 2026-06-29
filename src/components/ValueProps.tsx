@@ -126,6 +126,7 @@ export default function ValueProps() {
 
       {/* All content — pushed down to reveal face above headline */}
       <div
+        className="value-content"
         style={{
           position: 'relative',
           zIndex: 2,
