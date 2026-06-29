@@ -93,12 +93,12 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
             style={{
-              fontSize: 'clamp(36px, 6vw, 76px)',
+              fontSize: 'clamp(36px, 5.8vw, 73px)',
               fontWeight: 900,
               color: '#ffffff',
               margin: '0 auto',
               lineHeight: 1.05,
-              letterSpacing: '-0.02em',
+              letterSpacing: '-0.005em',
               textTransform: 'uppercase',
               fontFamily: 'Inter, sans-serif',
             }}

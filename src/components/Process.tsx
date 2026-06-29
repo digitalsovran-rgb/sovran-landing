@@ -59,7 +59,7 @@ function StepItem({
           fontSize: '48px',
           fontWeight: 900,
           color: hovered ? '#0a0a0a' : 'rgba(201,169,110,0.4)',
-          letterSpacing: '-0.02em',
+          letterSpacing: '-0.005em',
           lineHeight: 1,
           transition: 'color 0.3s ease',
         }}
@@ -129,10 +129,10 @@ export default function Process() {
           transition={{ duration: 0.8, ease: 'easeOut' }}
           style={{
             textAlign: 'center',
-            fontSize: 'clamp(36px, 4.5vw, 52px)',
+            fontSize: 'clamp(36px, 4.35vw, 50px)',
             fontWeight: 900,
             textTransform: 'uppercase',
-            letterSpacing: '-0.02em',
+            letterSpacing: '-0.005em',
             color: '#f5f0eb',
             marginBottom: '60px',
             fontFamily: 'Inter, sans-serif',

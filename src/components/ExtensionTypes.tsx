@@ -136,10 +136,10 @@ function ExtRow({ ext }: { ext: (typeof extensions)[0] }) {
         <div style={{ width: '100%' }}>
           <h3
             style={{
-              fontSize: 'clamp(28px, 3vw, 42px)',
+              fontSize: 'clamp(28px, 2.9vw, 40px)',
               fontWeight: 900,
               color: textHovered ? '#f5f0eb' : '#0a0a0a',
-              letterSpacing: '-0.02em',
+              letterSpacing: '-0.005em',
               lineHeight: 1.05,
               transition: 'color 0.3s ease',
             }}
@@ -229,14 +229,14 @@ export default function ExtensionTypes() {
           animate={isHeadingInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
           style={{
-            fontSize: 'clamp(32px, 4vw, 48px)',
+            fontSize: 'clamp(32px, 3.85vw, 46px)',
             fontWeight: 900,
             color: '#0a0a0a',
-            letterSpacing: '-0.02em',
+            letterSpacing: '-0.005em',
             fontFamily: 'Inter, sans-serif',
           }}
         >
-          RECENT EXTENSION PROJECTS ACROSS LONDON
+          RECENT EXTENSION PROJECTS
         </motion.h2>
       </div>
       {extensions.map((ext) => (

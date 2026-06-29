@@ -80,10 +80,10 @@ export default function BeforeAfter() {
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
           style={{
-            fontSize: 'clamp(32px, 4vw, 52px)',
+            fontSize: 'clamp(32px, 3.85vw, 50px)',
             fontWeight: 900,
             color: '#0a0a0a',
-            letterSpacing: '-0.02em',
+            letterSpacing: '-0.005em',
             fontFamily: 'Inter, sans-serif',
           }}
         >

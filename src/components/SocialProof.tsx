@@ -287,10 +287,10 @@ export default function SocialProof() {
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
             style={{
-              fontSize: 'clamp(30px, 3.5vw, 48px)',
+              fontSize: 'clamp(30px, 3.35vw, 46px)',
               fontWeight: 900,
               color: '#ffffff',
-              letterSpacing: '-0.02em',
+              letterSpacing: '-0.005em',
               textAlign: 'center',
               maxWidth: '800px',
               margin: '0 auto 64px',

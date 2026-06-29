@@ -36,7 +36,7 @@ function FloatingCTA() {
           padding: '16px 28px',
           backgroundColor: hovered ? '#c9a96e' : '#0a0a0a',
           color: hovered ? '#0a0a0a' : '#f5f0eb',
-          border: '1px solid rgba(245,240,235,0.15)',
+          border: '2px solid #f5f0eb',
           borderRadius: 0,
           boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
           fontSize: '13px',

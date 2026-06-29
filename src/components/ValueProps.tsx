@@ -139,10 +139,10 @@ export default function ValueProps() {
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
           style={{
-            fontSize: 'clamp(36px, 4.5vw, 56px)',
+            fontSize: 'clamp(36px, 4.35vw, 54px)',
             fontWeight: 900,
             color: '#f5f0eb',
-            letterSpacing: '-0.02em',
+            letterSpacing: '-0.005em',
             textAlign: 'center',
             textTransform: 'uppercase',
             fontFamily: 'Inter, sans-serif',

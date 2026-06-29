@@ -49,7 +49,7 @@ export default function StatsBar() {
                 fontSize: '32px',
                 fontWeight: 900,
                 color: '#ffffff',
-                letterSpacing: '-0.02em',
+                letterSpacing: '-0.005em',
                 lineHeight: 1,
                 marginBottom: '10px',
               }}

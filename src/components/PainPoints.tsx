@@ -90,10 +90,10 @@ export default function PainPoints() {
               animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -60 }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
               style={{
-                fontSize: 'clamp(34px, 3.8vw, 52px)',
+                fontSize: 'clamp(34px, 3.65vw, 50px)',
                 fontWeight: 900,
                 color: '#ffffff',
-                letterSpacing: '-0.02em',
+                letterSpacing: '-0.005em',
                 lineHeight: 1.05,
               }}
             >
