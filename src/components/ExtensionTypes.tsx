@@ -34,7 +34,7 @@ const extensions = [
     desc: 'Two floors of new space. One build.',
     longDesc:
       'A red brick double-storey addition was built across the rear of this terraced home, matching the existing brickwork so closely the join is barely visible from the garden. The ground floor opens entirely through black-framed glazing into a new kitchen and dining space, while the bedroom above takes full advantage of the extra floor with a wall of glass overlooking the garden. Internally, the ceiling height was raised on both levels to avoid the boxed-in feeling many double-storey extensions create. The planting beneath the new windows was left untouched during construction, softening the new structure within weeks of completion.',
-    image: '/media/doublstor.png?v=2',
+    image: '/media/doublstor.png?v=3',
     imageLeft: false,
     location: 'Hampstead, NW3',
   },
