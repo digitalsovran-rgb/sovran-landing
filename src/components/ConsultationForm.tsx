@@ -273,23 +273,21 @@ function WheelPicker({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<number | null>(null);
+  const itemRefsRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  // ITEM_HEIGHT × 3 = exactly 3 rows visible (1 above, selected, 1 below)
-  // PADDING = ITEM_HEIGHT = (CONTAINER_HEIGHT - ITEM_HEIGHT) / 2  ← symmetric at every edge
   const ITEM_HEIGHT = 56;
-  const CONTAINER_HEIGHT = ITEM_HEIGHT * 3; // 168px
-  const PADDING = ITEM_HEIGHT;              // 56px
+  const CONTAINER_HEIGHT = ITEM_HEIGHT * 3;
+  const PADDING = ITEM_HEIGHT;
 
-  // Fixed pill width derived from the longest option — prevents jumping on scroll
   const longestOption = options.reduce((a, b) => a.length > b.length ? a : b, '');
   const PILL_WIDTH = Math.max(150, longestOption.length * 8 + 60);
 
   const initIdx = value
     ? (options.indexOf(value) === -1 ? defaultIndex : options.indexOf(value))
     : defaultIndex;
-  const [activeIndex, setActiveIndex] = useState(initIdx);
+  const [centeredIndex, setCenteredIndex] = useState(initIdx);
 
-  // Callback ref: sets scrollTop synchronously before first paint — no visible jump
+  // Sets scrollTop synchronously before first paint — no visible jump
   const assignRef = (el: HTMLDivElement | null) => {
     containerRef.current = el;
     if (el) el.scrollTop = initIdx * ITEM_HEIGHT;
@@ -297,40 +295,66 @@ function WheelPicker({
 
   useEffect(() => {
     if (!value) onChange(options[initIdx]);
+
+    const root = containerRef.current;
+    if (!root) return;
+
+    // Fires asynchronously — never blocks scroll momentum
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setCenteredIndex(Number((entry.target as HTMLElement).dataset.idx));
+          }
+        });
+      },
+      {
+        root,
+        // Shrink detection box to the exact center row: [56px, 112px] within 168px container
+        rootMargin: `-${PADDING}px 0px -${PADDING}px 0px`,
+        threshold: 0.5,
+      }
+    );
+
+    itemRefsRef.current.forEach((el) => { if (el) observer.observe(el); });
+
     return () => {
+      observer.disconnect();
       if (scrollTimerRef.current !== null) clearTimeout(scrollTimerRef.current);
     };
   }, []);
 
+  // Scroll handler does nothing visual — only commits the settled value after 80ms
   const handleScroll = () => {
     const el = containerRef.current;
     if (!el) return;
-    const idx = Math.round(el.scrollTop / ITEM_HEIGHT);
-    const clamped = Math.max(0, Math.min(idx, options.length - 1));
-    setActiveIndex(clamped);
     if (scrollTimerRef.current !== null) clearTimeout(scrollTimerRef.current);
     scrollTimerRef.current = window.setTimeout(() => {
+      const idx = Math.round(el.scrollTop / ITEM_HEIGHT);
+      const clamped = Math.max(0, Math.min(idx, options.length - 1));
       onChange(options[clamped]);
     }, 80);
   };
 
   return (
-    <div style={{ position: 'relative', height: `${CONTAINER_HEIGHT}px`, overflow: 'hidden' }}>
-      {/* Top fade — covers exactly the row above center */}
+    // isolation: isolate creates a contained stacking context so z-index values
+    // below are self-consistent: pill(1) < items(2) < fades(3) < arrow(4)
+    <div style={{ position: 'relative', height: `${CONTAINER_HEIGHT}px`, overflow: 'hidden', isolation: 'isolate' } as React.CSSProperties}>
+      {/* Top fade */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0,
         height: `${PADDING}px`,
         background: 'linear-gradient(to bottom, rgba(245,240,235,1) 40%, rgba(245,240,235,0))',
-        zIndex: 2, pointerEvents: 'none',
+        zIndex: 3, pointerEvents: 'none',
       }} />
-      {/* Bottom fade — covers exactly the row below center */}
+      {/* Bottom fade */}
       <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0,
         height: `${PADDING}px`,
         background: 'linear-gradient(to top, rgba(245,240,235,1) 40%, rgba(245,240,235,0))',
-        zIndex: 2, pointerEvents: 'none',
+        zIndex: 3, pointerEvents: 'none',
       }} />
-      {/* Static solid triangle arrow — never scrolls, always at center-row height */}
+      {/* Static chevron arrow */}
       <svg
         width="32" height="32" viewBox="0 0 24 24"
         style={{
@@ -338,15 +362,28 @@ function WheelPicker({
           left: '14px',
           top: '50%',
           transform: 'translateY(-50%)',
-          zIndex: 3,
+          zIndex: 4,
           pointerEvents: 'none',
         }}
         aria-hidden="true"
       >
-        {/* Solid filled right-pointing triangle — bold and unambiguous */}
         <polygon points="4,2 4,22 20,12" fill="#0a0a0a"/>
       </svg>
-      {/* Scroll list */}
+      {/* Static black pill — permanently anchored at center row, items scroll through it */}
+      <div style={{
+        position: 'absolute',
+        top: `${PADDING}px`,
+        left: '54px',
+        width: `${PILL_WIDTH}px`,
+        maxWidth: 'calc(100% - 58px)',
+        height: `${ITEM_HEIGHT}px`,
+        backgroundColor: '#0a0a0a',
+        borderRadius: '7px',
+        zIndex: 1,
+        pointerEvents: 'none',
+      }} />
+      {/* Scroll list — no explicit z-index so it doesn't create a stacking context,
+          allowing item divs at z:2 to paint above the pill at z:1 */}
       <div
         ref={assignRef}
         onScroll={handleScroll}
@@ -357,70 +394,54 @@ function WheelPicker({
           scrollSnapType: 'y mandatory',
           WebkitOverflowScrolling: 'touch',
           position: 'relative',
-          zIndex: 0,
           scrollbarWidth: 'none',
         } as React.CSSProperties}
       >
-        {/* Top spacer: PADDING = ITEM_HEIGHT → empty space at list start equals one row */}
         <div style={{ height: `${PADDING}px`, flexShrink: 0 }} />
         {options.map((opt, i) => {
-          const isSelected = i === activeIndex;
+          const isCentered = i === centeredIndex;
           return (
             <div
               key={opt}
+              data-idx={i}
+              ref={(el) => { itemRefsRef.current[i] = el; }}
               style={{
                 height: `${ITEM_HEIGHT}px`,
                 display: 'flex',
                 alignItems: 'center',
-                // Selected: left-aligned + paddingLeft so pill sits just right of the static arrow
-                // Non-selected: centered plain text
-                justifyContent: isSelected ? 'flex-start' : 'center',
-                paddingLeft: isSelected ? '54px' : '0',
+                justifyContent: 'flex-start',
+                paddingLeft: '54px',
                 scrollSnapAlign: 'center',
-                opacity: isSelected ? 1 : 0.32,
+                opacity: isCentered ? 1 : 0.32,
                 transition: 'opacity 0.15s ease',
                 cursor: 'pointer',
                 userSelect: 'none',
+                position: 'relative',
+                zIndex: 2,
               } as React.CSSProperties}
               onClick={() => {
                 containerRef.current?.scrollTo({ top: i * ITEM_HEIGHT, behavior: 'smooth' });
-                setActiveIndex(i);
+                setCenteredIndex(i);
                 onChange(options[i]);
               }}
             >
-              {isSelected ? (
-                /* Fixed-width black pill — same width for every option in this step */
-                <div style={{
-                  backgroundColor: '#0a0a0a',
-                  borderRadius: '7px',
-                  width: `${PILL_WIDTH}px`,
-                  maxWidth: 'calc(100% - 58px)',
-                  padding: '9px 0',
-                  textAlign: 'center',
-                  color: '#f5f0eb',
-                  fontSize: '17px',
-                  fontWeight: 700,
-                  letterSpacing: '-0.01em',
-                  whiteSpace: 'nowrap',
-                  lineHeight: 1.3,
-                  flexShrink: 0,
-                }}>
-                  {opt}
-                </div>
-              ) : (
-                <span style={{
-                  fontSize: '16px',
-                  fontWeight: 400,
-                  color: '#0a0a0a',
-                  letterSpacing: 'normal',
-                }}>
-                  {opt}
-                </span>
-              )}
+              <span style={{
+                display: 'block',
+                width: `${PILL_WIDTH}px`,
+                maxWidth: 'calc(100% - 4px)',
+                textAlign: 'center',
+                fontSize: isCentered ? '17px' : '16px',
+                fontWeight: isCentered ? 700 : 400,
+                color: isCentered ? '#f5f0eb' : '#0a0a0a',
+                letterSpacing: isCentered ? '-0.01em' : 'normal',
+                whiteSpace: 'nowrap',
+                lineHeight: 1.3,
+              }}>
+                {opt}
+              </span>
             </div>
           );
         })}
-        {/* Bottom spacer: same height → symmetric empty space at list end */}
         <div style={{ height: `${PADDING}px`, flexShrink: 0 }} />
       </div>
     </div>
