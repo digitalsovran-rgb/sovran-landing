@@ -10,10 +10,10 @@ type FormData = {
 type PostcodeSubStep = 'input' | 'loading' | 'result';
 
 const extensionOptions = [
+  'Rear Extension',
   'Loft Conversion',
   'Side Return',
   'Double Storey',
-  'Rear Extension',
   'Wrap Around',
   'Multiple Projects',
 ];
@@ -303,7 +303,7 @@ function WheelPicker({
     if (prevIdx !== idx) {
       const prevDiv = itemRefsRef.current[prevIdx];
       const prevSpan = spanRefsRef.current[prevIdx];
-      if (prevDiv) prevDiv.style.opacity = '0.32';
+      if (prevDiv) prevDiv.style.opacity = '0.55';
       if (prevSpan) {
         prevSpan.style.color = '#0a0a0a';
         prevSpan.style.fontSize = '16px';
@@ -316,7 +316,7 @@ function WheelPicker({
     const newSpan = spanRefsRef.current[idx];
     if (newDiv) newDiv.style.opacity = '1';
     if (newSpan) {
-      newSpan.style.color = '#f5f0eb';
+      newSpan.style.color = '#0a0a0a';
       newSpan.style.fontSize = '17px';
       newSpan.style.fontWeight = '700';
       newSpan.style.letterSpacing = '-0.01em';
@@ -406,8 +406,8 @@ function WheelPicker({
       >
         <polygon points="4,2 4,22 20,12" fill="#0a0a0a"/>
       </svg>
-      {/* Static black pill — z:1, behind the scroll container (z:2).
-          Transparent scroll container background reveals it; item text scrolls above it. */}
+      {/* Outlined pill — z:1, behind the scroll container (z:2).
+          Transparent fill + dark border frames the selected item without heavy fill. */}
       <div style={{
         position: 'absolute',
         top: `${PADDING}px`,
@@ -415,7 +415,8 @@ function WheelPicker({
         width: `${PILL_WIDTH}px`,
         maxWidth: 'calc(100% - 58px)',
         height: `${ITEM_HEIGHT}px`,
-        backgroundColor: '#0a0a0a',
+        backgroundColor: 'rgba(10,10,10,0.08)',
+        border: '2px solid #0a0a0a',
         borderRadius: '7px',
         zIndex: 1,
         pointerEvents: 'none',
@@ -453,7 +454,7 @@ function WheelPicker({
                 justifyContent: 'flex-start',
                 paddingLeft: '54px',
                 scrollSnapAlign: 'center',
-                opacity: isInitial ? 1 : 0.32,
+                opacity: isInitial ? 1 : 0.55,
                 transition: 'opacity 0.15s ease',
                 cursor: 'pointer',
                 userSelect: 'none',
@@ -473,7 +474,7 @@ function WheelPicker({
                   textAlign: 'center',
                   fontSize: isInitial ? '17px' : '16px',
                   fontWeight: isInitial ? 700 : 400,
-                  color: isInitial ? '#f5f0eb' : '#0a0a0a',
+                  color: '#0a0a0a',
                   letterSpacing: isInitial ? '-0.01em' : 'normal',
                   whiteSpace: 'nowrap',
                   lineHeight: 1.3,
@@ -790,7 +791,7 @@ export default function ConsultationForm() {
                           options={extensionOptions}
                           value={selectedExtension}
                           onChange={setSelectedExtension}
-                          defaultIndex={Math.floor(extensionOptions.length / 2)}
+                          defaultIndex={extensionOptions.indexOf('Rear Extension')}
                         />
                       </div>
                     ) : (
@@ -872,7 +873,7 @@ export default function ConsultationForm() {
                           options={budgetOptions}
                           value={selectedBudget}
                           onChange={setSelectedBudget}
-                          defaultIndex={Math.floor(budgetOptions.length / 2)}
+                          defaultIndex={budgetOptions.indexOf('£150K – £500K')}
                         />
                       </div>
                     ) : (
@@ -905,7 +906,7 @@ export default function ConsultationForm() {
                           options={timelineOptions}
                           value={selectedTimeline}
                           onChange={setSelectedTimeline}
-                          defaultIndex={Math.floor(timelineOptions.length / 2)}
+                          defaultIndex={timelineOptions.indexOf('Within 1 Month')}
                         />
                       </div>
                     ) : (

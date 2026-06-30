@@ -26,8 +26,8 @@ export default function Hero() {
         @media (max-width: 767px) {
           .hero-hl { white-space: normal; }
           .hero-h1 { font-size: clamp(24px, 6.5vw, 32px) !important; font-weight: 800 !important; }
-          .hero-label { font-size: 10px !important; margin-bottom: 24px !important; }
-          .hero-desc { font-size: 13px !important; }
+          .hero-label { font-size: 10px !important; margin-bottom: 24px !important; font-weight: 600 !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
+          .hero-desc { font-size: 13px !important; font-weight: 500 !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
         }
       `}</style>
       <section

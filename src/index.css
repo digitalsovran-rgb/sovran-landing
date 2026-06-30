@@ -69,7 +69,14 @@ img {
 
   .hero-bg {
     background-attachment: scroll !important;
-    background-image: url('/media/heroepicel.png') !important;
+    background-image: url('/media/heroepicel.png?v=2') !important;
+  }
+
+  /* Hero — compact height on mobile, trim excess grass below CTAs */
+  #hero {
+    height: auto !important;
+    min-height: unset !important;
+    padding-bottom: 48px !important;
   }
 
   /* Hero content */
@@ -80,20 +87,23 @@ img {
     flex-direction: column !important;
     align-items: stretch !important;
     padding: 0 !important;
+    margin-top: 40px !important;
   }
   .hero-btn {
     width: 100% !important;
     text-align: center !important;
   }
 
-  /* Stats tiles — 2×2 on mobile */
+  /* Stats tiles — 2×2 on mobile with both horizontal and vertical dividers */
   .stats-tiles {
     flex-wrap: wrap !important;
   }
   .stats-tile {
     flex: 0 0 50% !important;
-    border-right: none !important;
     border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+  }
+  .stats-tile:nth-child(even) {
+    border-right: none !important;
   }
   .stats-tile:nth-child(n+3) {
     border-bottom: none !important;
@@ -136,7 +146,7 @@ img {
   }
   .value-card {
     padding: 20px 16px !important;
-    background-color: rgba(245,240,235,0.55) !important;
+    background-color: rgba(245,240,235,0.88) !important;
   }
   .value-card-title {
     font-size: 15px !important;
