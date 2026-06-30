@@ -10,10 +10,10 @@ type FormData = {
 type PostcodeSubStep = 'input' | 'loading' | 'result';
 
 const extensionOptions = [
-  'Rear Extension',
   'Loft Conversion',
   'Side Return',
   'Double Storey',
+  'Rear Extension',
   'Wrap Around',
   'Multiple Projects',
 ];
@@ -726,6 +726,7 @@ export default function ConsultationForm() {
                           options={extensionOptions}
                           value={selectedExtension}
                           onChange={setSelectedExtension}
+                          defaultIndex={Math.floor(extensionOptions.length / 2)}
                         />
                       </div>
                     ) : (
