@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type FormData = {
@@ -260,6 +260,118 @@ const navBtnBase: React.CSSProperties = {
   transition: 'background-color 0.3s, border-color 0.3s',
 };
 
+function WheelPicker({
+  options,
+  value,
+  onChange,
+}: {
+  options: string[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scrollTimerRef = useRef<number | null>(null);
+  const ITEM_HEIGHT = 52;
+  const CONTAINER_HEIGHT = 200;
+  const PADDING = (CONTAINER_HEIGHT - ITEM_HEIGHT) / 2;
+  const [activeIndex, setActiveIndex] = useState(() => {
+    const idx = options.indexOf(value);
+    return idx === -1 ? 0 : idx;
+  });
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.scrollTop = activeIndex * ITEM_HEIGHT;
+    if (value === '') onChange(options[0]);
+    return () => {
+      if (scrollTimerRef.current !== null) clearTimeout(scrollTimerRef.current);
+    };
+  }, []);
+
+  const handleScroll = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    const idx = Math.round(el.scrollTop / ITEM_HEIGHT);
+    const clamped = Math.max(0, Math.min(idx, options.length - 1));
+    setActiveIndex(clamped);
+    if (scrollTimerRef.current !== null) clearTimeout(scrollTimerRef.current);
+    scrollTimerRef.current = window.setTimeout(() => {
+      onChange(options[clamped]);
+    }, 80);
+  };
+
+  return (
+    <div style={{ position: 'relative', height: `${CONTAINER_HEIGHT}px`, overflow: 'hidden' }}>
+      {/* Top fade */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0,
+        height: `${PADDING}px`,
+        background: 'linear-gradient(to bottom, rgba(245,240,235,1) 60%, rgba(245,240,235,0))',
+        zIndex: 2, pointerEvents: 'none',
+      }} />
+      {/* Bottom fade */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        height: `${PADDING}px`,
+        background: 'linear-gradient(to top, rgba(245,240,235,1) 60%, rgba(245,240,235,0))',
+        zIndex: 2, pointerEvents: 'none',
+      }} />
+      {/* Selection indicator band */}
+      <div style={{
+        position: 'absolute', top: `${PADDING}px`, left: 0, right: 0,
+        height: `${ITEM_HEIGHT}px`,
+        borderTop: '1px solid rgba(0,0,0,0.12)',
+        borderBottom: '1px solid rgba(0,0,0,0.12)',
+        pointerEvents: 'none', zIndex: 1,
+      }} />
+      {/* Scroll list */}
+      <div
+        ref={containerRef}
+        onScroll={handleScroll}
+        className="wheel-scroll"
+        style={{
+          height: `${CONTAINER_HEIGHT}px`,
+          overflowY: 'scroll',
+          scrollSnapType: 'y mandatory',
+          position: 'relative',
+          zIndex: 0,
+        } as React.CSSProperties}
+      >
+        <div style={{ height: `${PADDING}px` }} />
+        {options.map((opt, i) => (
+          <div
+            key={opt}
+            style={{
+              height: `${ITEM_HEIGHT}px`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              scrollSnapAlign: 'center',
+              fontSize: i === activeIndex ? '20px' : '16px',
+              fontWeight: i === activeIndex ? 700 : 400,
+              color: '#0a0a0a',
+              opacity: i === activeIndex ? 1 : 0.35,
+              transition: 'font-size 0.15s ease, opacity 0.15s ease',
+              cursor: 'pointer',
+              userSelect: 'none',
+              textAlign: 'center',
+            } as React.CSSProperties}
+            onClick={() => {
+              containerRef.current?.scrollTo({ top: i * ITEM_HEIGHT, behavior: 'smooth' });
+              setActiveIndex(i);
+              onChange(options[i]);
+            }}
+          >
+            {opt}
+          </div>
+        ))}
+        <div style={{ height: `${PADDING}px` }} />
+      </div>
+    </div>
+  );
+}
+
 export default function ConsultationForm() {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
@@ -275,6 +387,13 @@ export default function ConsultationForm() {
   const [emailBlurred, setEmailBlurred] = useState(false);
   const [phoneBlurred, setPhoneBlurred] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
 
   const progress = progressMap[step] ?? '14%';
 
@@ -356,10 +475,12 @@ export default function ConsultationForm() {
   const showNext = step !== 5;
 
   return (
-    <section
-      id="consultation"
-      style={{ backgroundColor: '#f5f0eb', padding: '100px 0' }}
-    >
+    <>
+      <style>{`.wheel-scroll::-webkit-scrollbar { display: none; }`}</style>
+      <section
+        id="consultation"
+        style={{ backgroundColor: '#f5f0eb', padding: '100px 0' }}
+      >
       <div className="inner">
         <h2
           style={{
@@ -368,24 +489,12 @@ export default function ConsultationForm() {
             color: '#0a0a0a',
             letterSpacing: '-0.02em',
             textAlign: 'center',
+            marginBottom: '60px',
           }}
         >
           Tell Us About Your Project.
         </h2>
-        <p
-          style={{
-            fontSize: '15px',
-            fontWeight: 400,
-            color: 'rgba(0,0,0,0.55)',
-            textAlign: 'center',
-            marginTop: '16px',
-            marginBottom: '60px',
-            letterSpacing: 'normal',
-            minHeight: '24px',
-          }}
-        >
-          {step <= 5 ? "Let’s check availability in your area." : ' '}
-        </p>
+        
 
         <div
           className="form-inner"
@@ -557,24 +666,34 @@ export default function ConsultationForm() {
                 >
                   {/* STEP 1 — Extension type */}
                   {step === 1 && (
-                    <div
-                      className="form-options-grid"
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(3, 1fr)',
-                        gap: '12px',
-                        marginBottom: '40px',
-                      }}
-                    >
-                      {extensionOptions.map((opt) => (
-                        <SelectCard
-                          key={opt}
-                          label={opt}
-                          selected={selectedExtension === opt}
-                          onClick={() => setSelectedExtension(opt)}
+                    isMobile ? (
+                      <div style={{ marginBottom: '40px' }}>
+                        <WheelPicker
+                          options={extensionOptions}
+                          value={selectedExtension}
+                          onChange={setSelectedExtension}
                         />
-                      ))}
-                    </div>
+                      </div>
+                    ) : (
+                      <div
+                        className="form-options-grid"
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(3, 1fr)',
+                          gap: '12px',
+                          marginBottom: '40px',
+                        }}
+                      >
+                        {extensionOptions.map((opt) => (
+                          <SelectCard
+                            key={opt}
+                            label={opt}
+                            selected={selectedExtension === opt}
+                            onClick={() => setSelectedExtension(opt)}
+                          />
+                        ))}
+                      </div>
+                    )
                   )}
 
                   {/* STEP 2 — Services needed */}
@@ -628,46 +747,66 @@ export default function ConsultationForm() {
 
                   {/* STEP 3 — Investment range */}
                   {step === 3 && (
-                    <div
-                      className="form-options-grid"
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(2, 1fr)',
-                        gap: '12px',
-                        marginBottom: '40px',
-                      }}
-                    >
-                      {budgetOptions.map((opt) => (
-                        <SelectCard
-                          key={opt}
-                          label={opt}
-                          selected={selectedBudget === opt}
-                          onClick={() => setSelectedBudget(opt)}
+                    isMobile ? (
+                      <div style={{ marginBottom: '40px' }}>
+                        <WheelPicker
+                          options={budgetOptions}
+                          value={selectedBudget}
+                          onChange={setSelectedBudget}
                         />
-                      ))}
-                    </div>
+                      </div>
+                    ) : (
+                      <div
+                        className="form-options-grid"
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(2, 1fr)',
+                          gap: '12px',
+                          marginBottom: '40px',
+                        }}
+                      >
+                        {budgetOptions.map((opt) => (
+                          <SelectCard
+                            key={opt}
+                            label={opt}
+                            selected={selectedBudget === opt}
+                            onClick={() => setSelectedBudget(opt)}
+                          />
+                        ))}
+                      </div>
+                    )
                   )}
 
                   {/* STEP 4 — Timeline */}
                   {step === 4 && (
-                    <div
-                      className="form-options-grid"
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(2, 1fr)',
-                        gap: '12px',
-                        marginBottom: '40px',
-                      }}
-                    >
-                      {timelineOptions.map((opt) => (
-                        <SelectCard
-                          key={opt}
-                          label={opt}
-                          selected={selectedTimeline === opt}
-                          onClick={() => setSelectedTimeline(opt)}
+                    isMobile ? (
+                      <div style={{ marginBottom: '40px' }}>
+                        <WheelPicker
+                          options={timelineOptions}
+                          value={selectedTimeline}
+                          onChange={setSelectedTimeline}
                         />
-                      ))}
-                    </div>
+                      </div>
+                    ) : (
+                      <div
+                        className="form-options-grid"
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(2, 1fr)',
+                          gap: '12px',
+                          marginBottom: '40px',
+                        }}
+                      >
+                        {timelineOptions.map((opt) => (
+                          <SelectCard
+                            key={opt}
+                            label={opt}
+                            selected={selectedTimeline === opt}
+                            onClick={() => setSelectedTimeline(opt)}
+                          />
+                        ))}
+                      </div>
+                    )
                   )}
 
                   {/* STEP 5 — Postcode */}
@@ -936,6 +1075,7 @@ export default function ConsultationForm() {
           )}
         </div>
       </div>
-    </section>
+      </section>
+    </>
   );
 }

@@ -48,7 +48,7 @@ function FloatingCTA() {
     <>
       <style>{`
         @media (max-width: 767px) {
-          .floating-cta { bottom: 16px !important; right: 16px !important; padding: 14px 20px !important; }
+          .floating-cta { bottom: 16px !important; right: 16px !important; padding: 10px 16px !important; font-size: 11px !important; }
         }
       `}</style>
       <button

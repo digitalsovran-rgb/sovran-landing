@@ -102,20 +102,23 @@ export default function ValueProps() {
       }}
     >
       {/* Background image */}
-      <img
-        src="/media/humantouch.png"
-        alt="Extensions done properly"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          objectPosition: 'center',
-          display: 'block',
-          zIndex: 0,
-        }}
-      />
+      <picture>
+        <source media="(max-width: 768px)" srcSet="/media/humantouchmob.png" />
+        <img
+          src="/media/humantouch.png"
+          alt="Extensions done properly"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center',
+            display: 'block',
+            zIndex: 0,
+          }}
+        />
+      </picture>
 
       {/* Dark overlay */}
       <div

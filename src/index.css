@@ -136,6 +136,7 @@ img {
   }
   .value-card {
     padding: 20px 16px !important;
+    background-color: rgba(245,240,235,0.55) !important;
   }
   .value-card-title {
     font-size: 15px !important;

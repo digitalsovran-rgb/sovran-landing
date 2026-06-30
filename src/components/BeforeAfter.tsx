@@ -166,34 +166,65 @@ export default function BeforeAfter() {
             onTouchEnd={handleTouchEnd}
             style={{ touchAction: 'pan-y' }}
           >
-            <AnimatePresence mode="wait" custom={carouselDir}>
-              <motion.div
-                key={carouselIndex}
-                custom={carouselDir}
-                variants={baSlideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.35, ease: 'easeOut' }}
-                style={{ display: 'flex', flexDirection: 'column' }}
+            <div style={{ position: 'relative' }}>
+              <AnimatePresence mode="wait" custom={carouselDir}>
+                <motion.div
+                  key={carouselIndex}
+                  custom={carouselDir}
+                  variants={baSlideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.35, ease: 'easeOut' }}
+                  style={{ display: 'flex', flexDirection: 'column' }}
+                >
+                  <ImageHalf
+                    src={cards[carouselIndex].before}
+                    alt={`Before ${carouselIndex + 1}`}
+                    filter="grayscale(55%) brightness(0.9)"
+                    label="Before"
+                    labelPosition={{ bottom: '16px', left: '50%', transform: 'translateX(-50%)' }}
+                    wrapperStyle={{ marginBottom: '8px' }}
+                  />
+                  <ImageHalf
+                    src={cards[carouselIndex].after}
+                    alt={`After ${carouselIndex + 1}`}
+                    label="After"
+                    labelPosition={{ top: '16px', left: '50%', transform: 'translateX(-50%)' }}
+                  />
+                </motion.div>
+              </AnimatePresence>
+              <button
+                type="button"
+                aria-label="Previous"
+                onClick={() => { setCarouselDir(-1); setCarouselIndex((i) => (i - 1 + cards.length) % cards.length); startTimer(); }}
+                style={{
+                  position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)',
+                  background: 'rgba(0,0,0,0.3)', border: 'none', borderRadius: '50%',
+                  padding: '8px', cursor: 'pointer', zIndex: 10,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
               >
-                <ImageHalf
-                  src={cards[carouselIndex].before}
-                  alt={`Before ${carouselIndex + 1}`}
-                  filter="grayscale(55%) brightness(0.9)"
-                  label="Before"
-                  labelPosition={{ bottom: '16px', left: '50%', transform: 'translateX(-50%)' }}
-                  wrapperStyle={{ marginBottom: '8px' }}
-                />
-                <ImageHalf
-                  src={cards[carouselIndex].after}
-                  alt={`After ${carouselIndex + 1}`}
-                  label="After"
-                  labelPosition={{ top: '16px', left: '50%', transform: 'translateX(-50%)' }}
-                />
-              </motion.div>
-            </AnimatePresence>
-            <p style={{ textAlign: 'center', marginTop: '12px', fontSize: '14px', color: 'rgba(201,169,110,0.5)', letterSpacing: '0.1em', userSelect: 'none', pointerEvents: 'none' }}>&#8249; &nbsp; &bull; &nbsp; &#8250;</p>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M15 18l-6-6 6-6" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                aria-label="Next"
+                onClick={() => { setCarouselDir(1); setCarouselIndex((i) => (i + 1) % cards.length); startTimer(); }}
+                style={{
+                  position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
+                  background: 'rgba(0,0,0,0.3)', border: 'none', borderRadius: '50%',
+                  padding: '8px', cursor: 'pointer', zIndex: 10,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 18l6-6-6-6" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '12px' }}>
               {cards.map((_, i) => (
                 <button
