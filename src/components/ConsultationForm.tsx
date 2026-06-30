@@ -271,19 +271,19 @@ function WheelPicker({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<number | null>(null);
-  const ITEM_HEIGHT = 52;
-  const CONTAINER_HEIGHT = 200;
+  const ITEM_HEIGHT = 56;
+  const CONTAINER_HEIGHT = 210;
   const PADDING = (CONTAINER_HEIGHT - ITEM_HEIGHT) / 2;
-  const [activeIndex, setActiveIndex] = useState(() => {
-    const idx = options.indexOf(value);
-    return idx === -1 ? 0 : idx;
-  });
+  const initIdx = options.indexOf(value) === -1 ? 0 : options.indexOf(value);
+  const [activeIndex, setActiveIndex] = useState(initIdx);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    el.scrollTop = activeIndex * ITEM_HEIGHT;
-    if (value === '') onChange(options[0]);
+    // Always scroll to the correct initial position synchronously
+    el.scrollTop = initIdx * ITEM_HEIGHT;
+    // Pre-select first option when no selection exists
+    if (!value) onChange(options[0]);
     return () => {
       if (scrollTimerRef.current !== null) clearTimeout(scrollTimerRef.current);
     };
@@ -307,23 +307,15 @@ function WheelPicker({
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0,
         height: `${PADDING}px`,
-        background: 'linear-gradient(to bottom, rgba(245,240,235,1) 60%, rgba(245,240,235,0))',
+        background: 'linear-gradient(to bottom, rgba(245,240,235,1) 55%, rgba(245,240,235,0))',
         zIndex: 2, pointerEvents: 'none',
       }} />
       {/* Bottom fade */}
       <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0,
         height: `${PADDING}px`,
-        background: 'linear-gradient(to top, rgba(245,240,235,1) 60%, rgba(245,240,235,0))',
+        background: 'linear-gradient(to top, rgba(245,240,235,1) 55%, rgba(245,240,235,0))',
         zIndex: 2, pointerEvents: 'none',
-      }} />
-      {/* Selection indicator band */}
-      <div style={{
-        position: 'absolute', top: `${PADDING}px`, left: 0, right: 0,
-        height: `${ITEM_HEIGHT}px`,
-        borderTop: '1px solid rgba(0,0,0,0.12)',
-        borderBottom: '1px solid rgba(0,0,0,0.12)',
-        pointerEvents: 'none', zIndex: 1,
       }} />
       {/* Scroll list */}
       <div
@@ -339,33 +331,66 @@ function WheelPicker({
         } as React.CSSProperties}
       >
         <div style={{ height: `${PADDING}px` }} />
-        {options.map((opt, i) => (
-          <div
-            key={opt}
-            style={{
-              height: `${ITEM_HEIGHT}px`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              scrollSnapAlign: 'center',
-              fontSize: i === activeIndex ? '20px' : '16px',
-              fontWeight: i === activeIndex ? 700 : 400,
-              color: '#0a0a0a',
-              opacity: i === activeIndex ? 1 : 0.35,
-              transition: 'font-size 0.15s ease, opacity 0.15s ease',
-              cursor: 'pointer',
-              userSelect: 'none',
-              textAlign: 'center',
-            } as React.CSSProperties}
-            onClick={() => {
-              containerRef.current?.scrollTo({ top: i * ITEM_HEIGHT, behavior: 'smooth' });
-              setActiveIndex(i);
-              onChange(options[i]);
-            }}
-          >
-            {opt}
-          </div>
-        ))}
+        {options.map((opt, i) => {
+          const isSelected = i === activeIndex;
+          return (
+            <div
+              key={opt}
+              style={{
+                height: `${ITEM_HEIGHT}px`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                scrollSnapAlign: 'center',
+                opacity: isSelected ? 1 : 0.32,
+                transition: 'opacity 0.15s ease',
+                cursor: 'pointer',
+                userSelect: 'none',
+              } as React.CSSProperties}
+              onClick={() => {
+                containerRef.current?.scrollTo({ top: i * ITEM_HEIGHT, behavior: 'smooth' });
+                setActiveIndex(i);
+                onChange(options[i]);
+              }}
+            >
+              {isSelected ? (
+                /* Selected: chevron + black pill */
+                <>
+                  <svg
+                    width="28" height="28" viewBox="0 0 24 24" fill="none"
+                    style={{ flexShrink: 0, marginRight: '6px' }}
+                    aria-hidden="true"
+                  >
+                    <path d="M9 6l6 6-6 6" stroke="#0a0a0a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <div style={{
+                    backgroundColor: '#0a0a0a',
+                    borderRadius: '7px',
+                    padding: '9px 22px',
+                    color: '#f5f0eb',
+                    fontSize: '17px',
+                    fontWeight: 700,
+                    letterSpacing: '-0.01em',
+                    whiteSpace: 'nowrap',
+                    lineHeight: 1.3,
+                  }}>
+                    {opt}
+                  </div>
+                </>
+              ) : (
+                /* Non-selected: plain muted text */
+                <span style={{
+                  fontSize: '16px',
+                  fontWeight: 400,
+                  color: '#0a0a0a',
+                  letterSpacing: 'normal',
+                }}>
+                  {opt}
+                </span>
+              )}
+            </div>
+          );
+        })}
         <div style={{ height: `${PADDING}px` }} />
       </div>
     </div>
