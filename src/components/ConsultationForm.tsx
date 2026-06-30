@@ -274,6 +274,7 @@ function WheelPicker({
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<number | null>(null);
   const itemRefsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const spanRefsRef = useRef<(HTMLSpanElement | null)[]>([]);
 
   const ITEM_HEIGHT = 56;
   const CONTAINER_HEIGHT = ITEM_HEIGHT * 3;
@@ -285,12 +286,43 @@ function WheelPicker({
   const initIdx = value
     ? (options.indexOf(value) === -1 ? defaultIndex : options.indexOf(value))
     : defaultIndex;
-  const [centeredIndex, setCenteredIndex] = useState(initIdx);
+
+  // Mutable ref — tracks which index is highlighted without triggering any re-render
+  const centeredIndexRef = useRef<number>(initIdx);
 
   // Sets scrollTop synchronously before first paint — no visible jump
   const assignRef = (el: HTMLDivElement | null) => {
     containerRef.current = el;
     if (el) el.scrollTop = initIdx * ITEM_HEIGHT;
+  };
+
+  // Imperative highlight update — zero React involvement, zero re-render
+  const applyHighlight = (idx: number) => {
+    const prevIdx = centeredIndexRef.current;
+
+    if (prevIdx !== idx) {
+      const prevDiv = itemRefsRef.current[prevIdx];
+      const prevSpan = spanRefsRef.current[prevIdx];
+      if (prevDiv) prevDiv.style.opacity = '0.32';
+      if (prevSpan) {
+        prevSpan.style.color = '#0a0a0a';
+        prevSpan.style.fontSize = '16px';
+        prevSpan.style.fontWeight = '400';
+        prevSpan.style.letterSpacing = 'normal';
+      }
+    }
+
+    const newDiv = itemRefsRef.current[idx];
+    const newSpan = spanRefsRef.current[idx];
+    if (newDiv) newDiv.style.opacity = '1';
+    if (newSpan) {
+      newSpan.style.color = '#f5f0eb';
+      newSpan.style.fontSize = '17px';
+      newSpan.style.fontWeight = '700';
+      newSpan.style.letterSpacing = '-0.01em';
+    }
+
+    centeredIndexRef.current = idx;
   };
 
   useEffect(() => {
@@ -299,12 +331,15 @@ function WheelPicker({
     const root = containerRef.current;
     if (!root) return;
 
-    // Fires asynchronously — never blocks scroll momentum
+    // Seed imperative state after mount so centeredIndexRef matches the DOM
+    applyHighlight(initIdx);
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setCenteredIndex(Number((entry.target as HTMLElement).dataset.idx));
+            // Direct DOM mutation — no setState, no re-render, momentum unaffected
+            applyHighlight(Number((entry.target as HTMLElement).dataset.idx));
           }
         });
       },
@@ -404,7 +439,8 @@ function WheelPicker({
       >
         <div style={{ height: `${PADDING}px`, flexShrink: 0 }} />
         {options.map((opt, i) => {
-          const isCentered = i === centeredIndex;
+          // Static initial styles — applyHighlight overrides these imperatively after mount
+          const isInitial = i === initIdx;
           return (
             <div
               key={opt}
@@ -417,29 +453,32 @@ function WheelPicker({
                 justifyContent: 'flex-start',
                 paddingLeft: '54px',
                 scrollSnapAlign: 'center',
-                opacity: isCentered ? 1 : 0.32,
+                opacity: isInitial ? 1 : 0.32,
                 transition: 'opacity 0.15s ease',
                 cursor: 'pointer',
                 userSelect: 'none',
               } as React.CSSProperties}
               onClick={() => {
                 containerRef.current?.scrollTo({ top: i * ITEM_HEIGHT, behavior: 'smooth' });
-                setCenteredIndex(i);
+                applyHighlight(i);
                 onChange(options[i]);
               }}
             >
-              <span style={{
-                display: 'block',
-                width: `${PILL_WIDTH}px`,
-                maxWidth: 'calc(100% - 4px)',
-                textAlign: 'center',
-                fontSize: isCentered ? '17px' : '16px',
-                fontWeight: isCentered ? 700 : 400,
-                color: isCentered ? '#f5f0eb' : '#0a0a0a',
-                letterSpacing: isCentered ? '-0.01em' : 'normal',
-                whiteSpace: 'nowrap',
-                lineHeight: 1.3,
-              }}>
+              <span
+                ref={(el) => { spanRefsRef.current[i] = el; }}
+                style={{
+                  display: 'block',
+                  width: `${PILL_WIDTH}px`,
+                  maxWidth: 'calc(100% - 4px)',
+                  textAlign: 'center',
+                  fontSize: isInitial ? '17px' : '16px',
+                  fontWeight: isInitial ? 700 : 400,
+                  color: isInitial ? '#f5f0eb' : '#0a0a0a',
+                  letterSpacing: isInitial ? '-0.01em' : 'normal',
+                  whiteSpace: 'nowrap',
+                  lineHeight: 1.3,
+                }}
+              >
                 {opt}
               </span>
             </div>
