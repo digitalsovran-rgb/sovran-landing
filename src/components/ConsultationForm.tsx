@@ -273,19 +273,29 @@ function WheelPicker({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<number | null>(null);
+
+  // ITEM_HEIGHT × 3 = exactly 3 rows visible (1 above, selected, 1 below)
+  // PADDING = ITEM_HEIGHT = (CONTAINER_HEIGHT - ITEM_HEIGHT) / 2  ← symmetric at every edge
   const ITEM_HEIGHT = 56;
-  const CONTAINER_HEIGHT = 210;
-  const PADDING = (CONTAINER_HEIGHT - ITEM_HEIGHT) / 2;
-  // When a value is already stored use it; otherwise fall back to defaultIndex
+  const CONTAINER_HEIGHT = ITEM_HEIGHT * 3; // 168px
+  const PADDING = ITEM_HEIGHT;              // 56px
+
+  // Fixed pill width derived from the longest option — prevents jumping on scroll
+  const longestOption = options.reduce((a, b) => a.length > b.length ? a : b, '');
+  const PILL_WIDTH = Math.max(150, longestOption.length * 8 + 60);
+
   const initIdx = value
     ? (options.indexOf(value) === -1 ? defaultIndex : options.indexOf(value))
     : defaultIndex;
   const [activeIndex, setActiveIndex] = useState(initIdx);
 
+  // Callback ref: sets scrollTop synchronously before first paint — no visible jump
+  const assignRef = (el: HTMLDivElement | null) => {
+    containerRef.current = el;
+    if (el) el.scrollTop = initIdx * ITEM_HEIGHT;
+  };
+
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    el.scrollTop = initIdx * ITEM_HEIGHT;
     if (!value) onChange(options[initIdx]);
     return () => {
       if (scrollTimerRef.current !== null) clearTimeout(scrollTimerRef.current);
@@ -306,40 +316,39 @@ function WheelPicker({
 
   return (
     <div style={{ position: 'relative', height: `${CONTAINER_HEIGHT}px`, overflow: 'hidden' }}>
-      {/* Top fade */}
+      {/* Top fade — covers exactly the row above center */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0,
         height: `${PADDING}px`,
-        background: 'linear-gradient(to bottom, rgba(245,240,235,1) 55%, rgba(245,240,235,0))',
+        background: 'linear-gradient(to bottom, rgba(245,240,235,1) 40%, rgba(245,240,235,0))',
         zIndex: 2, pointerEvents: 'none',
       }} />
-      {/* Bottom fade */}
+      {/* Bottom fade — covers exactly the row below center */}
       <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0,
         height: `${PADDING}px`,
-        background: 'linear-gradient(to top, rgba(245,240,235,1) 55%, rgba(245,240,235,0))',
+        background: 'linear-gradient(to top, rgba(245,240,235,1) 40%, rgba(245,240,235,0))',
         zIndex: 2, pointerEvents: 'none',
       }} />
-      {/* Static chevron — never scrolls, anchored to center row */}
+      {/* Static solid triangle arrow — never scrolls, always at center-row height */}
       <svg
-        width="26" height="26" viewBox="0 0 24 24"
+        width="32" height="32" viewBox="0 0 24 24"
         style={{
           position: 'absolute',
-          left: '16px',
+          left: '14px',
           top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 3,
           pointerEvents: 'none',
-          flexShrink: 0,
         }}
         aria-hidden="true"
       >
-        {/* Solid filled right-chevron */}
-        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="#0a0a0a"/>
+        {/* Solid filled right-pointing triangle — bold and unambiguous */}
+        <polygon points="4,2 4,22 20,12" fill="#0a0a0a"/>
       </svg>
       {/* Scroll list */}
       <div
-        ref={containerRef}
+        ref={assignRef}
         onScroll={handleScroll}
         className="wheel-scroll"
         style={{
@@ -348,9 +357,11 @@ function WheelPicker({
           scrollSnapType: 'y mandatory',
           position: 'relative',
           zIndex: 0,
+          scrollbarWidth: 'none',
         } as React.CSSProperties}
       >
-        <div style={{ height: `${PADDING}px` }} />
+        {/* Top spacer: PADDING = ITEM_HEIGHT → empty space at list start equals one row */}
+        <div style={{ height: `${PADDING}px`, flexShrink: 0 }} />
         {options.map((opt, i) => {
           const isSelected = i === activeIndex;
           return (
@@ -360,10 +371,10 @@ function WheelPicker({
                 height: `${ITEM_HEIGHT}px`,
                 display: 'flex',
                 alignItems: 'center',
-                // Selected item: left-aligned with padding so pill clears the static chevron
+                // Selected: left-aligned + paddingLeft so pill sits just right of the static arrow
                 // Non-selected: centered plain text
                 justifyContent: isSelected ? 'flex-start' : 'center',
-                paddingLeft: isSelected ? '50px' : '0',
+                paddingLeft: isSelected ? '54px' : '0',
                 scrollSnapAlign: 'center',
                 opacity: isSelected ? 1 : 0.32,
                 transition: 'opacity 0.15s ease',
@@ -377,22 +388,25 @@ function WheelPicker({
               }}
             >
               {isSelected ? (
-                /* Selected: black pill only (chevron is the static overlay above) */
+                /* Fixed-width black pill — same width for every option in this step */
                 <div style={{
                   backgroundColor: '#0a0a0a',
                   borderRadius: '7px',
-                  padding: '9px 22px',
+                  width: `${PILL_WIDTH}px`,
+                  maxWidth: 'calc(100% - 58px)',
+                  padding: '9px 0',
+                  textAlign: 'center',
                   color: '#f5f0eb',
                   fontSize: '17px',
                   fontWeight: 700,
                   letterSpacing: '-0.01em',
                   whiteSpace: 'nowrap',
                   lineHeight: 1.3,
+                  flexShrink: 0,
                 }}>
                   {opt}
                 </div>
               ) : (
-                /* Non-selected: plain muted text, centered */
                 <span style={{
                   fontSize: '16px',
                   fontWeight: 400,
@@ -405,7 +419,8 @@ function WheelPicker({
             </div>
           );
         })}
-        <div style={{ height: `${PADDING}px` }} />
+        {/* Bottom spacer: same height → symmetric empty space at list end */}
+        <div style={{ height: `${PADDING}px`, flexShrink: 0 }} />
       </div>
     </div>
   );
