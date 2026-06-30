@@ -305,11 +305,11 @@ function WheelPicker({
   const handleScroll = () => {
     const el = containerRef.current;
     if (!el) return;
+    const idx = Math.round(el.scrollTop / ITEM_HEIGHT);
+    const clamped = Math.max(0, Math.min(idx, options.length - 1));
+    setActiveIndex(clamped);
     if (scrollTimerRef.current !== null) clearTimeout(scrollTimerRef.current);
     scrollTimerRef.current = window.setTimeout(() => {
-      const idx = Math.round(el.scrollTop / ITEM_HEIGHT);
-      const clamped = Math.max(0, Math.min(idx, options.length - 1));
-      setActiveIndex(clamped);
       onChange(options[clamped]);
     }, 80);
   };
