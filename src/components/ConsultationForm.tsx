@@ -337,9 +337,11 @@ function WheelPicker({
   };
 
   return (
-    // isolation: isolate creates a contained stacking context so z-index values
-    // below are self-consistent: pill(1) < items(2) < fades(3) < arrow(4)
-    <div style={{ position: 'relative', height: `${CONTAINER_HEIGHT}px`, overflow: 'hidden', isolation: 'isolate' } as React.CSSProperties}>
+    // No isolation/z-index on outer div — stacking order is resolved by siblings below.
+    // Layer order (back to front): pill(z:1) → scroll container(z:2) → fades(z:3) → arrow(z:4).
+    // The scroll container's transparent background lets the pill show through;
+    // item text renders inside the z:2 stacking context, naturally above the z:1 pill.
+    <div style={{ position: 'relative', height: `${CONTAINER_HEIGHT}px`, overflow: 'hidden' }}>
       {/* Top fade */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0,
@@ -369,7 +371,8 @@ function WheelPicker({
       >
         <polygon points="4,2 4,22 20,12" fill="#0a0a0a"/>
       </svg>
-      {/* Static black pill — permanently anchored at center row, items scroll through it */}
+      {/* Static black pill — z:1, behind the scroll container (z:2).
+          Transparent scroll container background reveals it; item text scrolls above it. */}
       <div style={{
         position: 'absolute',
         top: `${PADDING}px`,
@@ -382,8 +385,8 @@ function WheelPicker({
         zIndex: 1,
         pointerEvents: 'none',
       }} />
-      {/* Scroll list — no explicit z-index so it doesn't create a stacking context,
-          allowing item divs at z:2 to paint above the pill at z:1 */}
+      {/* Scroll list — z:2 sits above the pill so item text is always in front of it.
+          touch-action: pan-y ensures vertical swipes scroll the list, never the page. */}
       <div
         ref={assignRef}
         onScroll={handleScroll}
@@ -393,7 +396,9 @@ function WheelPicker({
           overflowY: 'scroll',
           scrollSnapType: 'y mandatory',
           WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-y',
           position: 'relative',
+          zIndex: 2,
           scrollbarWidth: 'none',
         } as React.CSSProperties}
       >
@@ -416,8 +421,6 @@ function WheelPicker({
                 transition: 'opacity 0.15s ease',
                 cursor: 'pointer',
                 userSelect: 'none',
-                position: 'relative',
-                zIndex: 2,
               } as React.CSSProperties}
               onClick={() => {
                 containerRef.current?.scrollTo({ top: i * ITEM_HEIGHT, behavior: 'smooth' });
