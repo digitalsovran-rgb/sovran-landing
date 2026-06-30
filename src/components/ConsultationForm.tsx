@@ -264,26 +264,29 @@ function WheelPicker({
   options,
   value,
   onChange,
+  defaultIndex = 0,
 }: {
   options: string[];
   value: string;
   onChange: (v: string) => void;
+  defaultIndex?: number;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<number | null>(null);
   const ITEM_HEIGHT = 56;
   const CONTAINER_HEIGHT = 210;
   const PADDING = (CONTAINER_HEIGHT - ITEM_HEIGHT) / 2;
-  const initIdx = options.indexOf(value) === -1 ? 0 : options.indexOf(value);
+  // When a value is already stored use it; otherwise fall back to defaultIndex
+  const initIdx = value
+    ? (options.indexOf(value) === -1 ? defaultIndex : options.indexOf(value))
+    : defaultIndex;
   const [activeIndex, setActiveIndex] = useState(initIdx);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    // Always scroll to the correct initial position synchronously
     el.scrollTop = initIdx * ITEM_HEIGHT;
-    // Pre-select first option when no selection exists
-    if (!value) onChange(options[0]);
+    if (!value) onChange(options[initIdx]);
     return () => {
       if (scrollTimerRef.current !== null) clearTimeout(scrollTimerRef.current);
     };
@@ -317,6 +320,23 @@ function WheelPicker({
         background: 'linear-gradient(to top, rgba(245,240,235,1) 55%, rgba(245,240,235,0))',
         zIndex: 2, pointerEvents: 'none',
       }} />
+      {/* Static chevron — never scrolls, anchored to center row */}
+      <svg
+        width="26" height="26" viewBox="0 0 24 24"
+        style={{
+          position: 'absolute',
+          left: '16px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          zIndex: 3,
+          pointerEvents: 'none',
+          flexShrink: 0,
+        }}
+        aria-hidden="true"
+      >
+        {/* Solid filled right-chevron */}
+        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="#0a0a0a"/>
+      </svg>
       {/* Scroll list */}
       <div
         ref={containerRef}
@@ -340,7 +360,10 @@ function WheelPicker({
                 height: `${ITEM_HEIGHT}px`,
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
+                // Selected item: left-aligned with padding so pill clears the static chevron
+                // Non-selected: centered plain text
+                justifyContent: isSelected ? 'flex-start' : 'center',
+                paddingLeft: isSelected ? '50px' : '0',
                 scrollSnapAlign: 'center',
                 opacity: isSelected ? 1 : 0.32,
                 transition: 'opacity 0.15s ease',
@@ -354,31 +377,22 @@ function WheelPicker({
               }}
             >
               {isSelected ? (
-                /* Selected: chevron + black pill */
-                <>
-                  <svg
-                    width="28" height="28" viewBox="0 0 24 24" fill="none"
-                    style={{ flexShrink: 0, marginRight: '6px' }}
-                    aria-hidden="true"
-                  >
-                    <path d="M9 6l6 6-6 6" stroke="#0a0a0a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <div style={{
-                    backgroundColor: '#0a0a0a',
-                    borderRadius: '7px',
-                    padding: '9px 22px',
-                    color: '#f5f0eb',
-                    fontSize: '17px',
-                    fontWeight: 700,
-                    letterSpacing: '-0.01em',
-                    whiteSpace: 'nowrap',
-                    lineHeight: 1.3,
-                  }}>
-                    {opt}
-                  </div>
-                </>
+                /* Selected: black pill only (chevron is the static overlay above) */
+                <div style={{
+                  backgroundColor: '#0a0a0a',
+                  borderRadius: '7px',
+                  padding: '9px 22px',
+                  color: '#f5f0eb',
+                  fontSize: '17px',
+                  fontWeight: 700,
+                  letterSpacing: '-0.01em',
+                  whiteSpace: 'nowrap',
+                  lineHeight: 1.3,
+                }}>
+                  {opt}
+                </div>
               ) : (
-                /* Non-selected: plain muted text */
+                /* Non-selected: plain muted text, centered */
                 <span style={{
                   fontSize: '16px',
                   fontWeight: 400,
@@ -778,6 +792,7 @@ export default function ConsultationForm() {
                           options={budgetOptions}
                           value={selectedBudget}
                           onChange={setSelectedBudget}
+                          defaultIndex={Math.floor(budgetOptions.length / 2)}
                         />
                       </div>
                     ) : (
@@ -810,6 +825,7 @@ export default function ConsultationForm() {
                           options={timelineOptions}
                           value={selectedTimeline}
                           onChange={setSelectedTimeline}
+                          defaultIndex={Math.floor(timelineOptions.length / 2)}
                         />
                       </div>
                     ) : (
