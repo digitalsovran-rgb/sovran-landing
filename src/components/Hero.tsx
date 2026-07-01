@@ -23,11 +23,14 @@ export default function Hero() {
     <>
       <style>{`
         .hero-hl { white-space: nowrap; }
+        .hero-desc-mobile { display: none; }
         @media (max-width: 767px) {
           .hero-hl { white-space: normal; }
           .hero-h1 { font-size: clamp(24px, 6.5vw, 32px) !important; font-weight: 800 !important; }
           .hero-label { font-size: 10px !important; margin-bottom: 24px !important; font-weight: 600 !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
           .hero-desc { font-size: 13px !important; font-weight: 500 !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
+          .hero-desc-desktop { display: none !important; }
+          .hero-desc-mobile { display: block !important; }
         }
       `}</style>
       <section
@@ -117,7 +120,25 @@ export default function Hero() {
           </motion.h1>
 
           <motion.p
-            className="hero-desc"
+            className="hero-desc hero-desc-desktop"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            style={{
+              fontSize: '16px',
+              fontWeight: 400,
+              color: 'rgba(255,255,255,0.7)',
+              maxWidth: '560px',
+              margin: '40px auto 0',
+              lineHeight: 1.75,
+              letterSpacing: 'normal',
+            }}
+          >
+            A seamless design and build experience, combining architecture, planning and construction under one roof. Thoughtfully designed, expertly managed, and built to the highest standards.
+          </motion.p>
+
+          <motion.p
+            className="hero-desc hero-desc-mobile"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
