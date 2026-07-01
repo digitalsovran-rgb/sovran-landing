@@ -72,11 +72,10 @@ img {
     background-image: url('/media/heroepicel.png?v=2') !important;
   }
 
-  /* Hero — compact height on mobile, trim excess grass below CTAs */
+  /* Hero — trim ~15% of the original 100vh to remove excess grass, keep content comfortable */
   #hero {
-    height: auto !important;
-    min-height: unset !important;
-    padding-bottom: 48px !important;
+    height: 85vh !important;
+    min-height: 480px !important;
   }
 
   /* Hero content */
@@ -94,19 +93,23 @@ img {
     text-align: center !important;
   }
 
-  /* Stats tiles — 2×2 on mobile with both horizontal and vertical dividers */
+  /* Stats tiles — 2×2 grid on mobile */
   .stats-tiles {
-    flex-wrap: wrap !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
   }
   .stats-tile {
-    flex: 0 0 50% !important;
+    flex: unset !important;
+    border-right: none !important;
+    border-bottom: none !important;
+  }
+  /* Horizontal divider: bottom border on the top-row tiles */
+  .stats-tile:nth-child(-n+2) {
     border-bottom: 1px solid rgba(255,255,255,0.08) !important;
   }
-  .stats-tile:nth-child(even) {
-    border-right: none !important;
-  }
-  .stats-tile:nth-child(n+3) {
-    border-bottom: none !important;
+  /* Vertical divider: right border on the left-column tiles */
+  .stats-tile:nth-child(odd) {
+    border-right: 1px solid rgba(255,255,255,0.08) !important;
   }
 
   /* Pain points */
