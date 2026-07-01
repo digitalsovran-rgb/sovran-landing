@@ -55,7 +55,7 @@ export default function Hero() {
           style={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: 'url(/media/heroepic.png?v=2)',
+            backgroundImage: 'url(/media/heroepic.png?v=3)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundAttachment: 'fixed',

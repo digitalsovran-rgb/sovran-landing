@@ -80,7 +80,7 @@ function TestimonialCarousel({ isInView }: { isInView: boolean }) {
       {/* Horizontal content body — min-height anchors card across all 3 testimonials */}
       <div
         className="sp-carousel-body"
-        style={{ display: 'flex', minHeight: '170px', overflow: 'hidden' }}
+        style={{ display: 'flex', minHeight: '280px', overflow: 'hidden' }}
       >
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
@@ -327,7 +327,7 @@ export default function SocialProof() {
               }}
             >
               <iframe
-                src="https://www.youtube.com/embed/_TxXLSWW57Q"
+                src="https://www.youtube.com/embed/GydHGCUn2Sg"
                 title="Sovran project showcase"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen

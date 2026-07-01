@@ -69,7 +69,7 @@ img {
 
   .hero-bg {
     background-attachment: scroll !important;
-    background-image: url('/media/heroepicel.png?v=2') !important;
+    background-image: url('/media/heroepicel.png?v=3') !important;
   }
 
   /* Hero — trim ~15% of the original 100vh to remove excess grass, keep content comfortable */
