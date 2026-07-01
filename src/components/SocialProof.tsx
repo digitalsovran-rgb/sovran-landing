@@ -264,7 +264,7 @@ export default function SocialProof() {
         @media (max-width: 767px) {
           .sp-carousel-body {
             flex-direction: column;
-            min-height: auto !important;
+            min-height: 500px !important;
           }
           .sp-carousel-inner {
             flex-direction: column !important;
@@ -277,7 +277,7 @@ export default function SocialProof() {
             padding: 32px 24px !important;
           }
           .sp-carousel-right {
-            flex: none !important;
+            flex: 1 !important;
             width: 100%;
             padding: 28px 24px !important;
           }

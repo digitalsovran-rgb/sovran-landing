@@ -303,7 +303,7 @@ function WheelPicker({
     if (prevIdx !== idx) {
       const prevDiv = itemRefsRef.current[prevIdx];
       const prevSpan = spanRefsRef.current[prevIdx];
-      if (prevDiv) prevDiv.style.opacity = '0.55';
+      if (prevDiv) prevDiv.style.opacity = '0.75';
       if (prevSpan) {
         prevSpan.style.color = '#0a0a0a';
         prevSpan.style.fontSize = '16px';
@@ -454,7 +454,7 @@ function WheelPicker({
                 justifyContent: 'flex-start',
                 paddingLeft: '54px',
                 scrollSnapAlign: 'center',
-                opacity: isInitial ? 1 : 0.55,
+                opacity: isInitial ? 1 : 0.75,
                 transition: 'opacity 0.15s ease',
                 cursor: 'pointer',
                 userSelect: 'none',
