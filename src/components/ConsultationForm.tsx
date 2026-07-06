@@ -569,7 +569,16 @@ export default function ConsultationForm() {
   };
 
   const goNext = () => {
-    if (step === 7) { setSubmitted(true); return; }
+    if (step === 7) {
+      setSubmitted(true);
+      if (typeof window !== 'undefined' && (window as any).dataLayer) {
+        (window as any).dataLayer.push({
+          event: 'form_complete',
+          form_name: 'consultation_form'
+        });
+      }
+      return;
+    }
     setDirection(1);
     setStep((s) => s + 1);
   };
