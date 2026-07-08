@@ -95,7 +95,7 @@ async function submitToMonday(data: MondaySubmission): Promise<void> {
     dropdown_mm47dr86: { labels: [data.extension] },
     numeric_mm47arbw: budgetLowerBounds[data.budget] ?? '',
     text_mm47r0fc: `Services: ${data.services.join(', ')} | Timeline: ${data.timeline} | Postcode: ${data.postcode}`,
-    dropdown_mm47gc2c: { labels: ['Landing Page'] },
+    dropdown_mm47gc2c: { labels: ['Website'] },
     deal_stage: { labels: ['New Enquiry'] },
   };
 
