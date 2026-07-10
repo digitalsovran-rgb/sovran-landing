@@ -63,8 +63,6 @@ const stepHeadings: Record<number, string> = {
 const ukPostcodeRegex = /^[A-Za-z]{1,2}[0-9Rr][0-9A-Za-z]?\s?[0-9][A-Za-z]{2}$/;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/;
 
-const GHL_LOCATION_ID = 'VNX7VxNMqlGtrJbs2RGG';
-
 type GHLSubmission = {
   name: string;
   email: string;
@@ -76,31 +74,19 @@ type GHLSubmission = {
 };
 
 async function submitToGHL(data: GHLSubmission): Promise<void> {
-  const apiKey = import.meta.env.VITE_GHL_API_KEY;
-  if (!apiKey) {
-    console.error('GHL API key is not configured (VITE_GHL_API_KEY is undefined)');
-    return;
-  }
-
-  const response = await fetch('https://services.leadconnectorhq.com/contacts/upsert', {
+  const response = await fetch('/api/ghl-submit', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
-      Version: '2021-07-28',
     },
     body: JSON.stringify({
-      locationId: GHL_LOCATION_ID,
       firstName: data.name,
       email: data.email,
       phone: data.phone,
-      tags: ['Landing Page'],
-      customFields: [
-        { key: 'budgets', field_value: data.budget },
-        { key: 'timeliness', field_value: data.timeline },
-        { key: 'extensions_types', field_value: data.extension },
-        { key: 'postcodes', field_value: data.postcode },
-      ],
+      budget: data.budget,
+      timeline: data.timeline,
+      extensionType: data.extension,
+      postcode: data.postcode,
     }),
   });
 
