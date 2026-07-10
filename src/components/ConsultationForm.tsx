@@ -33,13 +33,6 @@ const serviceOptions = [
 
 const budgetOptions = ['Under £150K', '£150K – £500K', '£500K – £1M', '£1M+'];
 
-const budgetLowerBounds: Record<string, string> = {
-  'Under £150K': '0',
-  '£150K – £500K': '150000',
-  '£500K – £1M': '500000',
-  '£1M+': '1000000',
-};
-
 const timelineOptions = [
   'Within 1 Month',
   'Within 3 Months',
@@ -70,60 +63,42 @@ const stepHeadings: Record<number, string> = {
 const ukPostcodeRegex = /^[A-Za-z]{1,2}[0-9Rr][0-9A-Za-z]?\s?[0-9][A-Za-z]{2}$/;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/;
 
-const MONDAY_BOARD_ID = 5098314640;
+const GHL_FORM_ID = '3AGQ4RlTC1kYMnWmiQgu';
+const GHL_LOCATION_ID = 'VNX7VxNMqlGtrJbs2RGG';
 
-type MondaySubmission = {
+type GHLSubmission = {
   name: string;
   email: string;
   phone: string;
   extension: string;
-  services: string[];
   budget: string;
   timeline: string;
   postcode: string;
 };
 
-async function submitToMonday(data: MondaySubmission): Promise<void> {
-  const apiKey = import.meta.env.VITE_MONDAY_API_KEY;
-  if (!apiKey) {
-    throw new Error('Monday.com API key is not configured');
-  }
-
-  const columnValues = {
-    email_mm51mezw: { email: data.email, text: data.email },
-    phone_mm51yhe7: { phone: data.phone, countryShortName: 'GB' },
-    dropdown_mm47dr86: { labels: [data.extension] },
-    numeric_mm47arbw: budgetLowerBounds[data.budget] ?? '',
-    text_mm47r0fc: `Services: ${data.services.join(', ')} | Timeline: ${data.timeline} | Postcode: ${data.postcode}`,
-    dropdown_mm47gc2c: { labels: ['Website'] },
-    deal_stage: { labels: ['New Enquiry'] },
-  };
-
-  const query = `mutation ($boardId: ID!, $itemName: String!, $columnValues: JSON!) {
-    create_item (board_id: $boardId, item_name: $itemName, column_values: $columnValues) {
-      id
-    }
-  }`;
-
-  const response = await fetch('https://api.monday.com/v2', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: apiKey,
-    },
-    body: JSON.stringify({
-      query,
-      variables: {
-        boardId: MONDAY_BOARD_ID,
-        itemName: data.name,
-        columnValues: JSON.stringify(columnValues),
-      },
-    }),
+async function submitToGHL(data: GHLSubmission): Promise<void> {
+  const body = new URLSearchParams({
+    formId: GHL_FORM_ID,
+    location_id: GHL_LOCATION_ID,
+    first_name: data.name,
+    email: data.email,
+    phone: data.phone,
+    single_line_15fdi: data.budget,
+    single_line_164cj: data.timeline,
+    single_line_17gsk: data.extension,
+    single_line_14c8z: data.postcode,
   });
 
-  const result = await response.json();
-  if (result.errors) {
-    throw new Error(JSON.stringify(result.errors));
+  const response = await fetch('https://backend.leadconnectorhq.com/forms/submit', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: body.toString(),
+  });
+
+  if (!response.ok) {
+    throw new Error(`GHL form submission failed with status ${response.status}`);
   }
 }
 
@@ -634,17 +609,16 @@ export default function ConsultationForm() {
 
   const goNext = () => {
     if (step === 7) {
-      submitToMonday({
+      submitToGHL({
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         extension: selectedExtension,
-        services: selectedServices,
         budget: selectedBudget,
         timeline: selectedTimeline,
         postcode,
       }).catch((err) => {
-        console.error('Monday.com submission failed:', err);
+        console.error('GHL form submission failed:', err);
       });
 
       setSubmitted(true);
