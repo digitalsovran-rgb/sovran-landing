@@ -1242,7 +1242,7 @@ export default function ConsultationForm() {
                       e.currentTarget.style.borderColor = '#0a0a0a';
                     }}
                   >
-                    {step === 7 ? 'Request a Consultation' : 'Next →'}
+                    {step === 7 ? 'Book Your Design Consultation' : 'Next →'}
                   </button>
                 )}
               </div>
