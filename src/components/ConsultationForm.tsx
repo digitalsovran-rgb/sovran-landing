@@ -63,7 +63,6 @@ const stepHeadings: Record<number, string> = {
 const ukPostcodeRegex = /^[A-Za-z]{1,2}[0-9Rr][0-9A-Za-z]?\s?[0-9][A-Za-z]{2}$/;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/;
 
-const GHL_FORM_ID = '3AGQ4RlTC1kYMnWmiQgu';
 const GHL_LOCATION_ID = 'VNX7VxNMqlGtrJbs2RGG';
 
 type GHLSubmission = {
@@ -77,28 +76,36 @@ type GHLSubmission = {
 };
 
 async function submitToGHL(data: GHLSubmission): Promise<void> {
-  const body = new URLSearchParams({
-    formId: GHL_FORM_ID,
-    location_id: GHL_LOCATION_ID,
-    first_name: data.name,
-    email: data.email,
-    phone: data.phone,
-    single_line_15fdi: data.budget,
-    single_line_164cj: data.timeline,
-    single_line_17gsk: data.extension,
-    single_line_14c8z: data.postcode,
-  });
+  const apiKey = import.meta.env.VITE_GHL_API_KEY;
+  if (!apiKey) {
+    console.error('GHL API key is not configured (VITE_GHL_API_KEY is undefined)');
+    return;
+  }
 
-  const response = await fetch('https://backend.leadconnectorhq.com/forms/submit', {
+  const response = await fetch('https://services.leadconnectorhq.com/contacts/upsert', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      Version: '2021-07-28',
     },
-    body: body.toString(),
+    body: JSON.stringify({
+      locationId: GHL_LOCATION_ID,
+      firstName: data.name,
+      email: data.email,
+      phone: data.phone,
+      tags: ['Landing Page'],
+      customFields: [
+        { key: 'single_line_15fdi', field_value: data.budget },
+        { key: 'single_line_164cj', field_value: data.timeline },
+        { key: 'single_line_17gsk', field_value: data.extension },
+        { key: 'single_line_14c8z', field_value: data.postcode },
+      ],
+    }),
   });
 
   if (!response.ok) {
-    throw new Error(`GHL form submission failed with status ${response.status}`);
+    throw new Error(`GHL contact upsert failed with status ${response.status}`);
   }
 }
 
