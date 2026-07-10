@@ -96,10 +96,10 @@ async function submitToGHL(data: GHLSubmission): Promise<void> {
       phone: data.phone,
       tags: ['Landing Page'],
       customFields: [
-        { key: 'single_line_15fdi', field_value: data.budget },
-        { key: 'single_line_164cj', field_value: data.timeline },
-        { key: 'single_line_17gsk', field_value: data.extension },
-        { key: 'single_line_14c8z', field_value: data.postcode },
+        { key: 'budgets', field_value: data.budget },
+        { key: 'timeliness', field_value: data.timeline },
+        { key: 'extensions_types', field_value: data.extension },
+        { key: 'postcodes', field_value: data.postcode },
       ],
     }),
   });
