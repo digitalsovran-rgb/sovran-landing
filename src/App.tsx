@@ -125,10 +125,7 @@ function BackToTopButton() {
     <>
       <style>{`
         @media (max-width: 767px) {
-          .back-to-top-btn { left: 20px !important; }
-        }
-        @media (min-width: 768px) {
-          .back-to-top-btn { left: 32px !important; }
+          .back-to-top-btn { left: 20px !important; right: auto !important; padding: 10px 16px !important; font-size: 11px !important; }
         }
       `}</style>
       <button
@@ -140,7 +137,7 @@ function BackToTopButton() {
         style={{
           position: 'fixed',
           bottom: '24px',
-          left: '32px',
+          right: '24px',
           zIndex: 50,
           display: 'flex',
           alignItems: 'center',
