@@ -101,9 +101,11 @@ function BackToTopButton() {
 
   useEffect(() => {
     let idleTimer: number | undefined;
+    const consultationEl = document.getElementById('consultation');
 
     const handler = () => {
-      setScrolled(window.scrollY >= 300);
+      const threshold = consultationEl ? consultationEl.offsetTop - 100 : Infinity;
+      setScrolled(window.scrollY >= threshold);
       setIdle(false);
       if (idleTimer !== undefined) clearTimeout(idleTimer);
       idleTimer = window.setTimeout(() => setIdle(true), 2000);
