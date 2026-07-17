@@ -89,14 +89,35 @@ function FloatingCTA() {
 
 function BackToTopButton() {
   const [hovered, setHovered] = useState(false);
-  const [visible, setVisible] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [idle, setIdle] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
 
   useEffect(() => {
-    const handler = () => setVisible(window.scrollY >= 300);
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  useEffect(() => {
+    let idleTimer: number | undefined;
+
+    const handler = () => {
+      setScrolled(window.scrollY >= 300);
+      setIdle(false);
+      if (idleTimer !== undefined) clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => setIdle(true), 2000);
+    };
+
     handler();
     window.addEventListener('scroll', handler, { passive: true });
-    return () => window.removeEventListener('scroll', handler);
+    return () => {
+      window.removeEventListener('scroll', handler);
+      if (idleTimer !== undefined) clearTimeout(idleTimer);
+    };
   }, []);
+
+  const visible = scrolled && !(isMobile && idle);
 
   return (
     <>
@@ -123,9 +144,9 @@ function BackToTopButton() {
           alignItems: 'center',
           gap: '8px',
           padding: '16px 28px',
-          backgroundColor: hovered ? '#c9a96e' : '#0a0a0a',
-          color: '#f5f0eb',
-          border: `2px solid ${hovered ? '#c9a96e' : '#f5f0eb'}`,
+          backgroundColor: hovered ? '#c9a96e' : 'transparent',
+          color: hovered ? '#f5f0eb' : '#0a0a0a',
+          border: `2px solid ${hovered ? '#c9a96e' : '#0a0a0a'}`,
           borderRadius: 0,
           boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
           fontSize: '13px',
@@ -136,7 +157,7 @@ function BackToTopButton() {
           cursor: 'pointer',
           opacity: visible ? 1 : 0,
           pointerEvents: visible ? 'auto' : 'none',
-          transition: 'opacity 0.3s ease, background-color 0.3s ease, border-color 0.3s ease',
+          transition: 'opacity 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease',
         }}
       >
         <span aria-hidden="true">↑</span> Top
