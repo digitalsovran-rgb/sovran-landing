@@ -178,8 +178,6 @@ export default function Footer() {
     return () => ctx.revert();
   }, []);
 
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-
   return (
     <>
       <style>{`
@@ -457,24 +455,6 @@ export default function Footer() {
           >
             &copy; 2026 Sovran Group Ltd. All rights reserved.
           </p>
-          <button
-            className="footer-backtop-btn footer-animate"
-            onClick={scrollToTop}
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 12 12"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M6 10V2M2 6l4-4 4 4" />
-            </svg>
-            Back to top
-          </button>
         </div>
       </footer>
     </>

@@ -87,6 +87,64 @@ function FloatingCTA() {
   );
 }
 
+function BackToTopButton() {
+  const [hovered, setHovered] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setVisible(window.scrollY >= 300);
+    handler();
+    window.addEventListener('scroll', handler, { passive: true });
+    return () => window.removeEventListener('scroll', handler);
+  }, []);
+
+  return (
+    <>
+      <style>{`
+        @media (max-width: 767px) {
+          .back-to-top-btn { left: 20px !important; }
+        }
+        @media (min-width: 768px) {
+          .back-to-top-btn { left: 32px !important; }
+        }
+      `}</style>
+      <button
+        type="button"
+        className="back-to-top-btn"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          left: '32px',
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '16px 28px',
+          backgroundColor: hovered ? '#c9a96e' : '#0a0a0a',
+          color: '#f5f0eb',
+          border: `2px solid ${hovered ? '#c9a96e' : '#f5f0eb'}`,
+          borderRadius: 0,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          fontSize: '13px',
+          fontWeight: 700,
+          fontFamily: 'Inter, sans-serif',
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em',
+          cursor: 'pointer',
+          opacity: visible ? 1 : 0,
+          pointerEvents: visible ? 'auto' : 'none',
+          transition: 'opacity 0.3s ease, background-color 0.3s ease, border-color 0.3s ease',
+        }}
+      >
+        <span aria-hidden="true">↑</span> Top
+      </button>
+    </>
+  );
+}
+
 export default function App() {
   useEffect(() => {
     if (window.location.hash) {
@@ -113,6 +171,7 @@ export default function App() {
       <ConsultationForm />
       <Footer />
       <FloatingCTA />
+      <BackToTopButton />
     </>
   );
 }
