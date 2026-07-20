@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 
 const items = [
@@ -24,22 +24,33 @@ function BlueprintCard({
   item,
   delay,
   isInView,
+  isMobile,
 }: {
   item: (typeof items)[0];
   delay: number;
   isInView: boolean;
+  isMobile: boolean;
 }) {
+  const [hovered, setHovered] = useState(false);
+  const [tapped, setTapped] = useState(false);
+  const revealed = isMobile ? tapped : hovered;
+
   return (
     <motion.div
       className="blueprint-card"
       initial={{ opacity: 0, y: 40 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
       transition={{ duration: 0.8, delay, ease: 'easeOut' }}
+      onMouseEnter={() => { if (!isMobile) setHovered(true); }}
+      onMouseLeave={() => { if (!isMobile) setHovered(false); }}
+      onClick={() => { if (isMobile) setTapped((t) => !t); }}
       style={{
+        position: 'relative',
         backgroundColor: '#ede9e3',
         border: '1px solid rgba(0,0,0,0.08)',
         borderRadius: '4px',
         padding: '32px 28px',
+        cursor: isMobile ? 'pointer' : 'default',
       }}
     >
       <span
@@ -51,37 +62,50 @@ function BlueprintCard({
           color: '#c9a96e',
           textTransform: 'uppercase',
           letterSpacing: '0.15em',
-          marginBottom: '14px',
+          margin: 0,
         }}
       >
         {item.label}
       </span>
-      <h3
-        className="blueprint-card-title"
+      <div
         style={{
-          fontSize: '18px',
-          fontWeight: 700,
-          color: '#0a0a0a',
-          letterSpacing: '-0.01em',
-          lineHeight: 1.3,
-          marginBottom: '10px',
-          fontFamily: 'Inter, sans-serif',
+          maxHeight: revealed ? '300px' : '0px',
+          opacity: revealed ? 1 : 0,
+          overflow: 'hidden',
+          transition: 'max-height 0.3s ease, opacity 0.2s ease',
         }}
       >
-        {item.label}
-      </h3>
-      <p
-        className="blueprint-card-body"
+        <p
+          className="blueprint-card-body"
+          style={{
+            fontSize: '13px',
+            fontWeight: 400,
+            color: 'rgba(0,0,0,0.55)',
+            lineHeight: 1.7,
+            letterSpacing: 'normal',
+            margin: '14px 0 0',
+          }}
+        >
+          {item.body}
+        </p>
+      </div>
+      <span
+        aria-hidden="true"
         style={{
-          fontSize: '13px',
-          fontWeight: 400,
-          color: 'rgba(0,0,0,0.55)',
-          lineHeight: 1.7,
-          letterSpacing: 'normal',
+          position: 'absolute',
+          bottom: '14px',
+          right: '18px',
+          fontSize: '20px',
+          fontWeight: 300,
+          lineHeight: 1,
+          color: '#c9a96e',
+          opacity: revealed ? 0 : 1,
+          transition: 'opacity 0.2s ease',
+          pointerEvents: 'none',
         }}
       >
-        {item.body}
-      </p>
+        +
+      </span>
     </motion.div>
   );
 }
@@ -89,9 +113,16 @@ function BlueprintCard({
 export default function BlueprintSection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
 
   return (
-    <section ref={ref} style={{ backgroundColor: '#f5f0eb', padding: '100px 0' }}>
+    <section ref={ref} style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}>
       <div className="inner">
         <div
           className="blueprint-grid"
@@ -125,7 +156,7 @@ export default function BlueprintSection() {
               style={{
                 fontSize: 'clamp(34px, 3.65vw, 50px)',
                 fontWeight: 900,
-                color: '#0a0a0a',
+                color: '#f5f0eb',
                 letterSpacing: '-0.005em',
                 lineHeight: 1.05,
                 fontFamily: 'Inter, sans-serif',
@@ -140,7 +171,7 @@ export default function BlueprintSection() {
               style={{
                 fontSize: '15px',
                 fontWeight: 400,
-                color: 'rgba(0,0,0,0.55)',
+                color: 'rgba(245,240,235,0.7)',
                 marginTop: '20px',
                 lineHeight: 1.65,
                 letterSpacing: 'normal',
@@ -162,7 +193,13 @@ export default function BlueprintSection() {
             }}
           >
             {items.map((item, i) => (
-              <BlueprintCard key={item.label} item={item} delay={i * 0.1} isInView={isInView} />
+              <BlueprintCard
+                key={item.label}
+                item={item}
+                delay={i * 0.1}
+                isInView={isInView}
+                isMobile={isMobile}
+              />
             ))}
           </div>
         </div>
