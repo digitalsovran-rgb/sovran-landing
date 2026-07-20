@@ -1,111 +1,117 @@
-import { useEffect, useRef, useState } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { useState, useRef, useEffect } from 'react';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 
 const items = [
   {
+    num: '01',
     label: 'Floor Plans',
-    body: 'Precise architectural drawings showing the full layout of your proposed extension — every dimension, door, and window positioned — so you can see exactly how your new space will live before a single wall moves.',
+    tooltip: 'Precise architectural drawings showing the full layout of your proposed extension — every dimension, door, and window positioned — so you can see exactly how your new space will live before a single wall moves.',
   },
   {
+    num: '02',
     label: 'Moodboard',
-    body: 'A curated visual reference combining materials, finishes, and textures that translate your brief into a clear aesthetic direction — something you can see, refine, and align on before design begins.',
+    tooltip: 'A curated visual reference combining materials, finishes, and textures that translate your brief into a clear aesthetic direction — something you can see, refine, and align on before design begins.',
   },
   {
+    num: '03',
     label: '3D Visuals',
-    body: 'Photorealistic renders of your completed extension, inside and out, from every angle. See your home transformed before construction begins.',
+    tooltip: 'Photorealistic renders of your completed extension, inside and out, from every angle. See your home transformed before construction begins.',
   },
   {
+    num: '04',
     label: 'Comprehensive Proposal',
-    body: 'A detailed project document covering your estimated budget, build timeline, and planning potential. The full picture, in writing, before you commit to anything.',
+    tooltip: 'A detailed project document covering your estimated budget, build timeline, and planning potential. The full picture, in writing, before you commit to anything.',
   },
 ];
 
-function BlueprintCard({
+function ItemBlock({
   item,
-  delay,
+  i,
   isInView,
-  isMobile,
 }: {
   item: (typeof items)[0];
-  delay: number;
+  i: number;
   isInView: boolean;
-  isMobile: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
-  const [tapped, setTapped] = useState(false);
-  const revealed = isMobile ? tapped : hovered;
 
   return (
     <motion.div
-      className="blueprint-card"
-      initial={{ opacity: 0, y: 40 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-      transition={{ duration: 0.8, delay, ease: 'easeOut' }}
-      onMouseEnter={() => { if (!isMobile) setHovered(true); }}
-      onMouseLeave={() => { if (!isMobile) setHovered(false); }}
-      onClick={() => { if (isMobile) setTapped((t) => !t); }}
+      initial={{ opacity: 0, scale: 0.9, y: 40 }}
+      animate={isInView ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.9, y: 40 }}
+      transition={{ duration: 0.8, delay: i * 0.1, ease: 'easeOut' }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
+        flex: 1,
+        textAlign: 'center',
         position: 'relative',
-        backgroundColor: '#ede9e3',
-        border: '1px solid rgba(0,0,0,0.08)',
-        borderRadius: '4px',
-        padding: '32px 28px',
-        cursor: isMobile ? 'pointer' : 'default',
+        zIndex: 1,
+        padding: '24px 20px',
+        backgroundColor: hovered ? '#f5f0eb' : 'transparent',
+        transition: 'background-color 0.3s ease',
+        cursor: 'default',
       }}
     >
       <span
-        className="blueprint-card-label"
         style={{
           display: 'block',
-          fontSize: '11px',
+          fontSize: '48px',
+          fontWeight: 900,
+          color: hovered ? '#0a0a0a' : 'rgba(201,169,110,0.4)',
+          letterSpacing: '-0.005em',
+          lineHeight: 1,
+          transition: 'color 0.3s ease',
+        }}
+      >
+        {item.num}
+      </span>
+
+      <span
+        style={{
+          display: 'block',
+          fontSize: '13px',
           fontWeight: 600,
-          color: '#c9a96e',
+          color: hovered ? '#0a0a0a' : '#ffffff',
           textTransform: 'uppercase',
-          letterSpacing: '0.15em',
-          margin: 0,
+          letterSpacing: '0.2em',
+          marginTop: '8px',
+          transition: 'color 0.3s ease',
         }}
       >
         {item.label}
       </span>
+
       <div
         style={{
-          maxHeight: revealed ? '300px' : '0px',
-          opacity: revealed ? 1 : 0,
-          overflow: 'hidden',
-          transition: 'max-height 0.3s ease, opacity 0.2s ease',
-        }}
-      >
-        <p
-          className="blueprint-card-body"
-          style={{
-            fontSize: '13px',
-            fontWeight: 400,
-            color: 'rgba(0,0,0,0.55)',
-            lineHeight: 1.7,
-            letterSpacing: 'normal',
-            margin: '14px 0 0',
-          }}
-        >
-          {item.body}
-        </p>
-      </div>
-      <span
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          bottom: '14px',
-          right: '18px',
-          fontSize: '20px',
-          fontWeight: 300,
-          lineHeight: 1,
-          color: '#c9a96e',
-          opacity: revealed ? 0 : 1,
-          transition: 'opacity 0.2s ease',
+          fontSize: '13px',
+          lineHeight: 1.6,
+          color: '#0a0a0a',
+          maxWidth: '220px',
+          margin: '12px auto 0',
+          opacity: hovered ? 1 : 0,
+          transition: 'opacity 0.3s ease',
           pointerEvents: 'none',
         }}
       >
-        +
-      </span>
+        {item.tooltip}
+      </div>
+
+      {i < items.length - 1 && (
+        <div
+          style={{
+            position: 'absolute',
+            right: '-1px',
+            top: '48px',
+            width: 0,
+            height: 0,
+            borderTop: '4px solid transparent',
+            borderBottom: '4px solid transparent',
+            borderLeft: '6px solid rgba(255,255,255,0.2)',
+            zIndex: 2,
+          }}
+        />
+      )}
     </motion.div>
   );
 }
@@ -114,6 +120,7 @@ export default function BlueprintSection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+  const [openItem, setOpenItem] = useState<number | null>(null);
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768);
@@ -122,87 +129,182 @@ export default function BlueprintSection() {
   }, []);
 
   return (
-    <section ref={ref} style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}>
-      <div className="inner">
-        <div
-          className="blueprint-grid"
+    <section ref={ref} style={{ backgroundColor: '#0a0a0a', padding: '48px 0' }}>
+      <div className="process-inner">
+        <motion.p
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
           style={{
-            display: 'flex',
-            gap: '80px',
-            alignItems: 'flex-start',
+            textAlign: 'center',
+            fontSize: '13px',
+            fontWeight: 500,
+            letterSpacing: '0.2em',
+            color: '#c9a96e',
+            textTransform: 'uppercase',
+            marginBottom: '16px',
           }}
         >
-          {/* Left column */}
-          <div className="blueprint-left" style={{ flex: '0 0 40%', maxWidth: '40%' }}>
-            <motion.p
-              initial={{ opacity: 0, x: -60 }}
-              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -60 }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-              style={{
-                fontSize: '13px',
-                fontWeight: 500,
-                letterSpacing: '0.2em',
-                color: '#c9a96e',
-                textTransform: 'uppercase',
-                marginBottom: '24px',
-              }}
-            >
-              Complimentary With Every Consultation
-            </motion.p>
-            <motion.h2
-              initial={{ opacity: 0, x: -60 }}
-              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -60 }}
-              transition={{ duration: 0.8, delay: 0.1, ease: 'easeOut' }}
-              style={{
-                fontSize: 'clamp(34px, 3.65vw, 50px)',
-                fontWeight: 900,
-                color: '#f5f0eb',
-                letterSpacing: '-0.005em',
-                lineHeight: 1.05,
-                fontFamily: 'Inter, sans-serif',
-              }}
-            >
-              Your Sovran Home Transformation Blueprint
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0, x: -60 }}
-              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -60 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
-              style={{
-                fontSize: '15px',
-                fontWeight: 400,
-                color: 'rgba(245,240,235,0.7)',
-                marginTop: '20px',
-                lineHeight: 1.65,
-                letterSpacing: 'normal',
-              }}
-            >
-              Before your project begins, receive a comprehensive concept design package — built
-              around your property, your brief, and your vision.
-            </motion.p>
-          </div>
+          Complimentary With Every Consultation
+        </motion.p>
 
-          {/* Right column — 2x2 item grid */}
-          <div
-            className="blueprint-items-grid"
-            style={{
-              flex: 1,
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '16px',
-            }}
-          >
+        <motion.p
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+          transition={{ duration: 0.8, delay: 0.1, ease: 'easeOut' }}
+          style={{
+            textAlign: 'center',
+            fontSize: 'clamp(36px, 4.35vw, 50px)',
+            fontWeight: 900,
+            textTransform: 'uppercase',
+            letterSpacing: '-0.005em',
+            color: '#f5f0eb',
+            marginBottom: '20px',
+            fontFamily: 'Inter, sans-serif',
+          }}
+        >
+          Your Sovran Home Transformation Blueprint
+        </motion.p>
+
+        <motion.p
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
+          style={{
+            textAlign: 'center',
+            fontSize: '15px',
+            fontWeight: 400,
+            color: 'rgba(245,240,235,0.6)',
+            lineHeight: 1.65,
+            letterSpacing: 'normal',
+            maxWidth: '620px',
+            margin: '0 auto 60px',
+          }}
+        >
+          Before your project begins, receive a comprehensive concept design package — built
+          around your property, your brief, and your vision.
+        </motion.p>
+
+        {isMobile ? (
+          /* Mobile: vertical accordion */
+          <div style={{ padding: '0 24px 16px' }}>
             {items.map((item, i) => (
-              <BlueprintCard
-                key={item.label}
-                item={item}
-                delay={i * 0.1}
-                isInView={isInView}
-                isMobile={isMobile}
-              />
+              <motion.div
+                key={item.num}
+                initial={{ opacity: 0, y: 30 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                transition={{ duration: 0.6, delay: i * 0.08, ease: 'easeOut' }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenItem(openItem === i ? null : i)}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '20px 0',
+                    background: 'none',
+                    border: 'none',
+                    borderBottom: `1px solid rgba(255,255,255,${openItem === i ? '0.12' : '0.08'})`,
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <span
+                      style={{
+                        fontSize: '24px',
+                        fontWeight: 900,
+                        color: openItem === i ? '#c9a96e' : 'rgba(201,169,110,0.4)',
+                        letterSpacing: '-0.005em',
+                        lineHeight: 1,
+                        minWidth: '36px',
+                        transition: 'color 0.25s ease',
+                      }}
+                    >
+                      {item.num}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        color: '#ffffff',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.15em',
+                      }}
+                    >
+                      {item.label}
+                    </span>
+                  </div>
+                  <span
+                    style={{
+                      color: '#c9a96e',
+                      fontSize: '20px',
+                      lineHeight: 1,
+                      flexShrink: 0,
+                      marginLeft: '12px',
+                      display: 'inline-block',
+                      transform: openItem === i ? 'rotate(45deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.25s ease',
+                    }}
+                  >
+                    +
+                  </span>
+                </button>
+                <AnimatePresence>
+                  {openItem === i && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                      style={{
+                        fontSize: '14px',
+                        color: 'rgba(255,255,255,0.55)',
+                        lineHeight: 1.65,
+                        letterSpacing: 'normal',
+                        margin: 0,
+                        paddingTop: '16px',
+                        paddingBottom: '24px',
+                        paddingLeft: '52px',
+                        paddingRight: '0',
+                      }}
+                    >
+                      {item.tooltip}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             ))}
           </div>
-        </div>
+        ) : (
+          /* Desktop: horizontal strip */
+          <div
+            className="process-row"
+            style={{
+              display: 'flex',
+              position: 'relative',
+              width: '100%',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                top: '48px',
+                left: '10%',
+                right: '10%',
+                height: '1px',
+                backgroundColor: 'rgba(255,255,255,0.15)',
+                zIndex: 0,
+              }}
+            />
+
+            {items.map((item, i) => (
+              <ItemBlock key={item.num} item={item} i={i} isInView={isInView} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

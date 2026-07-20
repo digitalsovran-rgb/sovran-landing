@@ -93,25 +93,6 @@ img {
     text-align: center !important;
   }
 
-  /* Blueprint section — stack, then compact 2-column item grid */
-  .blueprint-grid {
-    flex-direction: column !important;
-    gap: 40px !important;
-  }
-  .blueprint-left {
-    flex: 1 1 100% !important;
-    max-width: 100% !important;
-  }
-  .blueprint-items-grid {
-    gap: 12px !important;
-  }
-  .blueprint-card {
-    padding: 20px 16px !important;
-  }
-  .blueprint-card-body {
-    font-size: 12px !important;
-  }
-
   /* Pain points */
   .pain-grid {
     flex-direction: column !important;
