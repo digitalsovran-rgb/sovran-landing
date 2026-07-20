@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 
 const extensions = [
   {
@@ -49,12 +49,34 @@ const extensions = [
   },
 ];
 
-function ExtRow({ ext, isMobile }: { ext: (typeof extensions)[0]; isMobile: boolean }) {
+function ExtRow({
+  ext,
+  isMobile,
+  expandedOverride,
+  onExpandedChange,
+  disableEntranceMotion,
+}: {
+  ext: (typeof extensions)[0];
+  isMobile: boolean;
+  expandedOverride?: boolean;
+  onExpandedChange?: (expanded: boolean) => void;
+  disableEntranceMotion?: boolean;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
   const [imgHovered, setImgHovered] = useState(false);
   const [hoverActive, setHoverActive] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [expandedState, setExpandedState] = useState(false);
+
+  // Controlled when a parent passes expandedOverride (the mobile rotating single-card view
+  // needs to know when a description is open so it can pause auto-rotation); uncontrolled
+  // everywhere else (desktop hover, the mobile "see all" stack) — unchanged from before.
+  const expanded = expandedOverride !== undefined ? expandedOverride : expandedState;
+  const setExpanded = (updater: boolean | ((e: boolean) => boolean)) => {
+    const next = typeof updater === 'function' ? (updater as (e: boolean) => boolean)(expanded) : updater;
+    if (onExpandedChange) onExpandedChange(next);
+    else setExpandedState(next);
+  };
 
   const textHovered = isMobile ? expanded : hoverActive;
 
@@ -74,8 +96,8 @@ function ExtRow({ ext, isMobile }: { ext: (typeof extensions)[0]; isMobile: bool
     >
       {/* Image block */}
       <motion.div
-        initial={{ opacity: 0, x: imgFromX }}
-        animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: imgFromX }}
+        initial={disableEntranceMotion ? false : { opacity: 0, x: imgFromX }}
+        animate={disableEntranceMotion ? undefined : (isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: imgFromX })}
         transition={{ duration: 0.8, ease: 'easeOut' }}
         className="ext-img-block"
         style={{
@@ -119,8 +141,8 @@ function ExtRow({ ext, isMobile }: { ext: (typeof extensions)[0]; isMobile: bool
 
       {/* Text block */}
       <motion.div
-        initial={{ opacity: 0, x: textFromX }}
-        animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: textFromX }}
+        initial={disableEntranceMotion ? false : { opacity: 0, x: textFromX }}
+        animate={disableEntranceMotion ? undefined : (isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: textFromX })}
         transition={{ duration: 0.8, ease: 'easeOut' }}
         className="ext-text-block"
         onMouseEnter={() => { if (!isMobile) setHoverActive(true); }}
@@ -276,16 +298,51 @@ function ExtRow({ ext, isMobile }: { ext: (typeof extensions)[0]; isMobile: bool
   );
 }
 
+const outlinedBtnStyle: React.CSSProperties = {
+  display: 'block',
+  width: '100%',
+  backgroundColor: 'transparent',
+  color: '#0a0a0a',
+  border: '1px solid #0a0a0a',
+  fontSize: '13px',
+  fontWeight: 500,
+  letterSpacing: '0.1em',
+  textTransform: 'uppercase',
+  padding: '16px 40px',
+  cursor: 'pointer',
+  transition: 'background-color 0.2s ease, color 0.2s ease',
+};
+
 export default function ExtensionTypes() {
   const headingRef = useRef<HTMLDivElement>(null);
   const isHeadingInView = useInView(headingRef, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [cardExpanded, setCardExpanded] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
+
+  // Auto-rotate the mobile single-card view every 4s — paused while expanded to "see all"
+  // or while the current card's description has been tapped open. Restarts on every index
+  // change (including manual dot taps) so a manual jump always gets a fresh 4s before the
+  // next auto-advance, rather than inheriting whatever was left on the previous timer.
+  useEffect(() => {
+    if (!isMobile || showAll || cardExpanded) return;
+    const id = setInterval(() => {
+      setActiveIndex((i) => (i + 1) % extensions.length);
+    }, 4000);
+    return () => clearInterval(id);
+  }, [isMobile, showAll, cardExpanded, activeIndex]);
+
+  const goToIndex = (i: number) => {
+    setActiveIndex(i);
+    setCardExpanded(false);
+  };
 
   return (
     <section id="projects" style={{ backgroundColor: '#f5f0eb' }}>
@@ -311,9 +368,104 @@ export default function ExtensionTypes() {
           RECENT EXTENSION PROJECTS
         </motion.h2>
       </div>
-      {extensions.map((ext) => (
-        <ExtRow key={ext.title} ext={ext} isMobile={isMobile} />
-      ))}
+
+      {isMobile ? (
+        <AnimatePresence mode="wait" initial={false}>
+          {showAll ? (
+            <motion.div
+              key="all"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.35, ease: 'easeOut' }}
+            >
+              {extensions.map((ext) => (
+                <ExtRow key={ext.title} ext={ext} isMobile={isMobile} />
+              ))}
+              <div style={{ padding: '32px 24px 48px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowAll(false)}
+                  style={outlinedBtnStyle}
+                >
+                  See Less
+                </button>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="single"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.35, ease: 'easeOut' }}
+              style={{ padding: '0 0 48px' }}
+            >
+              <div style={{ minHeight: '460px' }}>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={extensions[activeIndex].title}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5, ease: 'easeInOut' }}
+                  >
+                    <ExtRow
+                      ext={extensions[activeIndex]}
+                      isMobile={isMobile}
+                      expandedOverride={cardExpanded}
+                      onExpandedChange={setCardExpanded}
+                      disableEntranceMotion
+                    />
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              {/* Pagination dots */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '10px',
+                  marginTop: '20px',
+                }}
+              >
+                {extensions.map((ext, i) => (
+                  <button
+                    key={ext.title}
+                    type="button"
+                    onClick={() => goToIndex(i)}
+                    aria-label={`Go to ${ext.title}`}
+                    style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      border: 'none',
+                      padding: 0,
+                      cursor: 'pointer',
+                      backgroundColor: i === activeIndex ? '#c9a96e' : 'rgba(0,0,0,0.18)',
+                      transition: 'background-color 0.25s ease',
+                    }}
+                  />
+                ))}
+              </div>
+
+              <div style={{ padding: '24px 24px 0' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowAll(true)}
+                  style={outlinedBtnStyle}
+                >
+                  See All Projects
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      ) : (
+        extensions.map((ext) => <ExtRow key={ext.title} ext={ext} isMobile={isMobile} />)
+      )}
     </section>
   );
 }

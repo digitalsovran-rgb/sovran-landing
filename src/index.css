@@ -72,25 +72,15 @@ img {
     background-image: url('/media/heroepicel.png?v=3') !important;
   }
 
-  /* Hero — trim ~15% of the original 100vh to remove excess grass, keep content comfortable */
+  /* Hero — trimmed to remove excess grass/dead space before the gradient hits the section below */
   #hero {
-    height: 85vh !important;
+    height: 78vh !important;
     min-height: 480px !important;
   }
 
   /* Hero content */
   .hero-content {
     padding-top: 60px !important;
-  }
-  .hero-btns {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    padding: 0 !important;
-    margin-top: 40px !important;
-  }
-  .hero-btn {
-    width: 100% !important;
-    text-align: center !important;
   }
 
   /* Pain points */

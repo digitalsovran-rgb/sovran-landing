@@ -639,7 +639,7 @@ export default function ConsultationForm() {
   const getStepHeading = () => {
     if (step === 5 && postcodeSubStep === 'loading') return 'Checking Our Availability';
     if (step === 5 && postcodeSubStep === 'result')
-      return 'Good news, one of our project managers is available to discuss your enquiry.';
+      return 'Good news, one of our project managers is available to discuss your project.';
     return stepHeadings[step];
   };
 
@@ -664,7 +664,7 @@ export default function ConsultationForm() {
             marginBottom: '60px',
           }}
         >
-          Tell Us About Your Project.
+          Get Your Design Package.
         </h2>
         
 
