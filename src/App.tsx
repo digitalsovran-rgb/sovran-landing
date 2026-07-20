@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Hero from './components/Hero';
-import StatsBar from './components/StatsBar';
+import BlueprintSection from './components/BlueprintSection';
 import BeforeAfter from './components/BeforeAfter';
 import PainPoints from './components/PainPoints';
 import ValueProps from './components/ValueProps';
@@ -181,7 +181,7 @@ export default function App() {
   return (
     <>
       <Hero />
-      <StatsBar />
+      <BlueprintSection />
       <BeforeAfter />
       <PainPoints />
       <ValueProps />

@@ -93,23 +93,26 @@ img {
     text-align: center !important;
   }
 
-  /* Stats tiles — 2×2 grid on mobile */
-  .stats-tiles {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
+  /* Blueprint section — stack, then compact 2-column item grid */
+  .blueprint-grid {
+    flex-direction: column !important;
+    gap: 40px !important;
   }
-  .stats-tile {
-    flex: unset !important;
-    border-right: none !important;
-    border-bottom: none !important;
+  .blueprint-left {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
   }
-  /* Horizontal divider: bottom border on the top-row tiles */
-  .stats-tile:nth-child(-n+2) {
-    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+  .blueprint-items-grid {
+    gap: 12px !important;
   }
-  /* Vertical divider: right border on the left-column tiles */
-  .stats-tile:nth-child(odd) {
-    border-right: 1px solid rgba(255,255,255,0.08) !important;
+  .blueprint-card {
+    padding: 20px 16px !important;
+  }
+  .blueprint-card-title {
+    font-size: 15px !important;
+  }
+  .blueprint-card-body {
+    font-size: 12px !important;
   }
 
   /* Pain points */
