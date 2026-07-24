@@ -1,156 +1,156 @@
-import { useState, useRef, useEffect } from 'react';
-import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { useState, useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 import { Ruler, PenTool, Video, ClipboardCheck } from 'lucide-react';
 
-const steps = [
+const rows = [
   {
     num: '01',
     icon: Ruler,
     label: 'Site Survey',
-    tooltip: 'A measured survey of your property, carried out by our team.',
+    image: '/media/heroepic.png',
+    imageLeft: true,
+    desc: 'A measured survey of your property, carried out in person by our team, so every drawing that follows starts from real dimensions, not assumptions.',
   },
   {
     num: '02',
     icon: PenTool,
     label: 'Architectural Drawings',
-    tooltip: 'Floor plans developed around your brief and your home.',
+    image: '/media/before1.png',
+    imageLeft: false,
+    desc: "Floor plans developed around your brief and your home, already accounting for the energy and comfort standards taking effect from March 2027, so what's drawn today still holds up tomorrow.",
   },
   {
     num: '03',
     icon: Video,
     label: '3D Render & Walkthrough',
-    tooltip: 'See the finished extension before a single brick is laid.',
+    image: '/media/after1.png',
+    imageLeft: true,
+    desc: 'See the finished extension before a single brick is laid, rendered and walked through in full.',
   },
   {
     num: '04',
     icon: ClipboardCheck,
     label: 'Planning Assessment',
-    tooltip: 'A clear read on planning potential, budget and timeline.',
+    image: '/media/humantouch.png',
+    imageLeft: false,
+    desc: 'A clear read on planning potential, budget and timeline, including how the finished extension performs against the standards coming into force in 2027.',
   },
 ];
 
-function StepItem({
-  step,
-  i,
+function Row({
+  row,
+  delay,
   isInView,
 }: {
-  step: (typeof steps)[0];
-  i: number;
+  row: (typeof rows)[0];
+  delay: number;
   isInView: boolean;
 }) {
-  const [hovered, setHovered] = useState(false);
-  const Icon = step.icon;
+  const Icon = row.icon;
+  const imgFromX = row.imageLeft ? -50 : 50;
+  const textFromX = row.imageLeft ? 50 : -50;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9, y: 40 }}
-      animate={isInView ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.9, y: 40 }}
-      transition={{ duration: 0.8, delay: i * 0.1, ease: 'easeOut' }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+    <div
+      className="hiw-row"
       style={{
-        flex: 1,
-        textAlign: 'center',
-        position: 'relative',
-        zIndex: 1,
-        padding: '24px 20px',
-        backgroundColor: hovered ? '#f5f0eb' : 'transparent',
-        transition: 'background-color 0.3s ease',
-        cursor: 'default',
+        display: 'flex',
+        flexDirection: row.imageLeft ? 'row' : 'row-reverse',
+        alignItems: 'stretch',
+        minHeight: '420px',
       }}
     >
-      <span
-        style={{
-          display: 'block',
-          fontSize: '48px',
-          fontWeight: 900,
-          color: hovered ? '#0a0a0a' : 'rgba(201,169,110,0.4)',
-          letterSpacing: '-0.005em',
-          lineHeight: 1,
-          transition: 'color 0.3s ease',
-        }}
+      <motion.div
+        initial={{ opacity: 0, x: imgFromX }}
+        animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: imgFromX }}
+        transition={{ duration: 0.8, delay, ease: 'easeOut' }}
+        className="hiw-img-block"
+        style={{ flex: '0 0 50%', position: 'relative', overflow: 'hidden' }}
       >
-        {step.num}
-      </span>
+        <img
+          src={row.image}
+          alt={row.label}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center',
+            display: 'block',
+          }}
+        />
+      </motion.div>
 
-      <div
+      <motion.div
+        initial={{ opacity: 0, x: textFromX }}
+        animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: textFromX }}
+        transition={{ duration: 0.8, delay, ease: 'easeOut' }}
+        className="hiw-text-block"
         style={{
+          flex: '0 0 50%',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-          marginTop: '8px',
+          padding: '48px 56px',
         }}
       >
-        <Icon
-          size={18}
-          color={hovered ? '#0a0a0a' : '#f5f0eb'}
-          strokeWidth={1.75}
-          style={{ transition: 'color 0.3s ease', flexShrink: 0 }}
-        />
-        <span
-          style={{
-            fontSize: '13px',
-            fontWeight: 700,
-            color: hovered ? '#0a0a0a' : '#ffffff',
-            textTransform: 'uppercase',
-            letterSpacing: '0.15em',
-            transition: 'color 0.3s ease',
-          }}
-        >
-          {step.label}
-        </span>
-      </div>
-
-      <div
-        style={{
-          fontSize: '13px',
-          lineHeight: 1.6,
-          color: '#0a0a0a',
-          maxWidth: '220px',
-          margin: '12px auto 0',
-          opacity: hovered ? 1 : 0,
-          transition: 'opacity 0.3s ease',
-          pointerEvents: 'none',
-        }}
-      >
-        {step.tooltip}
-      </div>
-
-      {i < steps.length - 1 && (
-        <div
-          style={{
-            position: 'absolute',
-            right: '-1px',
-            top: '48px',
-            width: 0,
-            height: 0,
-            borderTop: '4px solid transparent',
-            borderBottom: '4px solid transparent',
-            borderLeft: '6px solid rgba(255,255,255,0.2)',
-            zIndex: 2,
-          }}
-        />
-      )}
-    </motion.div>
+        <div>
+          <span
+            style={{
+              display: 'block',
+              fontSize: '40px',
+              fontWeight: 900,
+              color: '#c9a96e',
+              letterSpacing: '-0.005em',
+              lineHeight: 1,
+              marginBottom: '14px',
+            }}
+          >
+            {row.num}
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+            <Icon size={18} color="#f5f0eb" strokeWidth={1.75} style={{ flexShrink: 0 }} />
+            <span
+              style={{
+                fontSize: '13px',
+                fontWeight: 700,
+                color: '#f5f0eb',
+                textTransform: 'uppercase',
+                letterSpacing: '0.15em',
+              }}
+            >
+              {row.label}
+            </span>
+          </div>
+          <p
+            className="hiw-desc"
+            style={{
+              fontSize: '14px',
+              fontWeight: 400,
+              color: 'rgba(245,240,235,0.65)',
+              lineHeight: 1.65,
+              letterSpacing: 'normal',
+              maxWidth: '450px',
+            }}
+          >
+            {row.desc}
+          </p>
+        </div>
+      </motion.div>
+    </div>
   );
 }
 
 export default function HowItWorks() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
-  const [openStep, setOpenStep] = useState<number | null>(null);
+  const [ctaHovered, setCtaHovered] = useState(false);
 
-  useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
-  }, []);
+  const scrollToForm = () => {
+    document.getElementById('consultation')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
-    <section ref={ref} style={{ backgroundColor: '#0a0a0a', padding: '100px 0 48px' }}>
-      <div className="process-inner">
+    <section ref={ref} style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}>
+      <div className="inner" style={{ maxWidth: '900px' }}>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
@@ -165,150 +165,105 @@ export default function HowItWorks() {
             marginBottom: '20px',
           }}
         >
-          From Enquiry To Design Package
+          Designed For What&apos;s Next
         </motion.p>
 
-        <motion.p
-          initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8, delay: 0.1, ease: 'easeOut' }}
           style={{
             textAlign: 'center',
-            fontSize: 'clamp(32px, 3.85vw, 46px)',
+            fontSize: 'clamp(30px, 3.5vw, 44px)',
             fontWeight: 900,
-            letterSpacing: '-0.005em',
             color: '#f5f0eb',
-            marginBottom: '60px',
-            fontFamily: 'Inter, sans-serif',
+            letterSpacing: '-0.005em',
+            lineHeight: 1.15,
           }}
         >
-          Four Steps. No Cost. No Obligation.
+          A Design Pack Built For Where Home Standards Are Heading.
+        </motion.h2>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
+          style={{
+            textAlign: 'center',
+            fontSize: '16px',
+            fontWeight: 400,
+            color: '#f5f0eb',
+            lineHeight: 1.7,
+            letterSpacing: 'normal',
+            maxWidth: '650px',
+            margin: '20px auto 0',
+          }}
+        >
+          From March 2027, new standards will judge homes on how they perform, not just how they
+          look: warmer, more efficient to run, filled with natural light, and built to hold their
+          value for years. We&apos;re already designing this way, and every design pack you
+          receive reflects it.
+        </motion.p>
+      </div>
+
+      <div style={{ maxWidth: '1200px', margin: '64px auto 0', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        {rows.map((row, i) => (
+          <Row key={row.num} row={row} delay={i * 0.05} isInView={isInView} />
+        ))}
+      </div>
+
+      <div className="inner" style={{ maxWidth: '900px' }}>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, delay: 0.3, ease: 'easeOut' }}
+          style={{
+            textAlign: 'center',
+            fontSize: '17px',
+            fontWeight: 500,
+            color: '#c9a96e',
+            lineHeight: 1.6,
+            letterSpacing: 'normal',
+            maxWidth: '600px',
+            margin: '64px auto 0',
+          }}
+        >
+          Homes built to last aren&apos;t created by reacting to new rules once they arrive.
+          They&apos;re created by planning for them in advance.
         </motion.p>
 
-        {isMobile ? (
-          /* Mobile: vertical accordion */
-          <div style={{ padding: '0 24px 16px' }}>
-            {steps.map((step, i) => {
-              const Icon = step.icon;
-              return (
-                <motion.div
-                  key={step.num}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                  transition={{ duration: 0.6, delay: i * 0.08, ease: 'easeOut' }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setOpenStep(openStep === i ? null : i)}
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '20px 0',
-                      background: 'none',
-                      border: 'none',
-                      borderBottom: `1px solid rgba(255,255,255,${openStep === i ? '0.12' : '0.08'})`,
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                      <span
-                        style={{
-                          fontSize: '24px',
-                          fontWeight: 900,
-                          color: openStep === i ? '#c9a96e' : 'rgba(201,169,110,0.4)',
-                          letterSpacing: '-0.005em',
-                          lineHeight: 1,
-                          minWidth: '36px',
-                          transition: 'color 0.25s ease',
-                        }}
-                      >
-                        {step.num}
-                      </span>
-                      <Icon size={16} color="#f5f0eb" strokeWidth={1.75} style={{ flexShrink: 0 }} />
-                      <span
-                        style={{
-                          fontSize: '13px',
-                          fontWeight: 700,
-                          color: '#ffffff',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.15em',
-                        }}
-                      >
-                        {step.label}
-                      </span>
-                    </div>
-                    <span
-                      style={{
-                        color: '#c9a96e',
-                        fontSize: '20px',
-                        lineHeight: 1,
-                        flexShrink: 0,
-                        marginLeft: '12px',
-                        display: 'inline-block',
-                        transform: openStep === i ? 'rotate(45deg)' : 'rotate(0deg)',
-                        transition: 'transform 0.25s ease',
-                      }}
-                    >
-                      +
-                    </span>
-                  </button>
-                  <AnimatePresence>
-                    {openStep === i && (
-                      <motion.p
-                        initial={{ opacity: 0, y: -6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={{ duration: 0.2, ease: 'easeOut' }}
-                        style={{
-                          fontSize: '14px',
-                          color: 'rgba(255,255,255,0.55)',
-                          lineHeight: 1.65,
-                          letterSpacing: 'normal',
-                          margin: 0,
-                          paddingTop: '16px',
-                          paddingBottom: '24px',
-                          paddingLeft: '52px',
-                          paddingRight: '0',
-                        }}
-                      >
-                        {step.tooltip}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              );
-            })}
-          </div>
-        ) : (
-          /* Desktop: horizontal strip */
-          <div
-            className="process-row"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
+          style={{ marginTop: '40px', textAlign: 'center' }}
+        >
+          <button
+            type="button"
+            onClick={scrollToForm}
+            onMouseEnter={() => setCtaHovered(true)}
+            onMouseLeave={() => setCtaHovered(false)}
             style={{
-              display: 'flex',
-              position: 'relative',
+              display: 'block',
               width: '100%',
+              maxWidth: '400px',
+              margin: '0 auto',
+              backgroundColor: ctaHovered ? '#e1dcd8' : '#f5f0eb',
+              color: '#0a0a0a',
+              fontSize: '13px',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              padding: '16px 32px',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              transition: 'background-color 0.3s ease',
             }}
           >
-            <div
-              style={{
-                position: 'absolute',
-                top: '48px',
-                left: '10%',
-                right: '10%',
-                height: '1px',
-                backgroundColor: 'rgba(255,255,255,0.15)',
-                zIndex: 0,
-              }}
-            />
-
-            {steps.map((step, i) => (
-              <StepItem key={step.num} step={step} i={i} isInView={isInView} />
-            ))}
-          </div>
-        )}
+            Claim Your Design Package
+          </button>
+        </motion.div>
       </div>
     </section>
   );

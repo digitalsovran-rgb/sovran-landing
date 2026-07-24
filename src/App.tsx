@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import Hero from './components/Hero';
 import WhatYouGet from './components/WhatYouGet';
 import WhatYouDiscover from './components/WhatYouDiscover';
-import BuiltForTomorrow from './components/BuiltForTomorrow';
 import HowItWorks from './components/HowItWorks';
 import BeforeAfter from './components/BeforeAfter';
 import ExtensionTypes from './components/ExtensionTypes';
@@ -110,7 +109,6 @@ export default function App() {
       <Hero />
       <WhatYouGet />
       <WhatYouDiscover />
-      <BuiltForTomorrow />
       <HowItWorks />
       <BeforeAfter />
       <ExtensionTypes />

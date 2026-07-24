@@ -106,7 +106,7 @@ export default function WhatYouDiscover() {
             marginBottom: '20px',
           }}
         >
-          Before You Spend A Penny
+          Before You Start
         </motion.p>
 
         <motion.h2
@@ -122,7 +122,7 @@ export default function WhatYouDiscover() {
             lineHeight: 1.1,
           }}
         >
-          Know Exactly What&apos;s Possible, Before You Decide Anything.
+          Know Exactly What&apos;s Possible.
         </motion.h2>
 
         <motion.p

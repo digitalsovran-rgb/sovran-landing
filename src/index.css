@@ -95,6 +95,24 @@ img {
     row-gap: 32px !important;
   }
 
+  /* How It Works — stack image over text, full width */
+  .hiw-row {
+    flex-direction: column !important;
+    min-height: 0 !important;
+  }
+  .hiw-img-block {
+    flex: 0 0 220px !important;
+    width: 100% !important;
+  }
+  .hiw-text-block {
+    flex: auto !important;
+    width: 100% !important;
+    padding: 32px 24px !important;
+  }
+  .hiw-desc {
+    max-width: none !important;
+  }
+
   /* Extension types — stack rows, tap to reveal */
   .ext-row {
     flex-direction: column !important;

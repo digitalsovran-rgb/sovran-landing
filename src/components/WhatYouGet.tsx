@@ -96,7 +96,7 @@ export default function WhatYouGet() {
             marginBottom: '20px',
           }}
         >
-          The Concept Design Package
+          An Architectural Design Pack
         </motion.p>
 
         <motion.h2
@@ -112,7 +112,7 @@ export default function WhatYouGet() {
             lineHeight: 1.1,
           }}
         >
-          Everything You Need Before You Commit To A Single Brick.
+          Everything You Need To Know For Your Extension.
         </motion.h2>
 
         <motion.p
@@ -130,7 +130,8 @@ export default function WhatYouGet() {
             margin: '20px auto 0',
           }}
         >
-          A complete architectural package, built around your home, at no cost to you — worth £2,500.
+          A complete architectural package, built around your home, complimentary when you begin
+          your project with Sovran, worth <strong style={{ fontWeight: 700 }}>£2,500</strong>.
         </motion.p>
 
         <div
@@ -153,15 +154,18 @@ export default function WhatYouGet() {
           transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
           style={{
             textAlign: 'center',
-            fontSize: '12px',
+            fontSize: '13px',
             fontWeight: 600,
             color: '#c9a96e',
-            textTransform: 'uppercase',
-            letterSpacing: '0.12em',
-            marginTop: '48px',
+            letterSpacing: '0.02em',
+            lineHeight: 1.6,
+            maxWidth: '500px',
+            margin: '48px auto 0',
           }}
         >
-          Measured Site Survey Included: No Estimates, No Guesswork.
+          Every measurement in your design pack comes from an in-person site survey carried out by
+          our own team, using the same process and standard of accuracy we carry through into
+          construction. What&apos;s drawn during your design pack is what actually gets built.
         </motion.p>
       </div>
     </section>
