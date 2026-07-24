@@ -83,50 +83,16 @@ img {
     padding-top: 60px !important;
   }
 
-  /* Pain points */
-  .pain-grid {
-    flex-direction: column !important;
-    gap: 40px !important;
-  }
-  .pain-left {
-    flex: 1 1 100% !important;
-    max-width: 100% !important;
+  /* What You Get — single column stacked on mobile */
+  .wyg-grid {
+    grid-template-columns: 1fr !important;
   }
 
-  /* Value props — compact 2-column grid on mobile */
-  .value-heading {
-    margin-bottom: 32px !important;
-  }
-  .value-content {
-    padding: 60px 16px 40px !important;
-  }
-  .value-grid {
+  /* What You Discover — 2-column grid on mobile (desktop is 3x2) */
+  .wyd-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
-  }
-  .value-grid > *:nth-child(3) {
-    grid-column: 1 / -1;
-  }
-  .value-bottom-row {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
-    flex-direction: unset !important;
-    align-items: unset !important;
-  }
-  .value-bottom-card {
-    max-width: 100% !important;
-    flex: unset !important;
-  }
-  .value-card {
-    padding: 20px 16px !important;
-    background-color: rgba(245,240,235,0.88) !important;
-  }
-  .value-card-title {
-    font-size: 15px !important;
-  }
-  .value-card-body {
-    font-size: 12px !important;
+    column-gap: 16px !important;
+    row-gap: 32px !important;
   }
 
   /* Extension types — stack rows, tap to reveal */
@@ -143,11 +109,6 @@ img {
     width: 100% !important;
     padding: 32px 24px !important;
     cursor: pointer !important;
-  }
-
-  /* Testimonials */
-  .testimonials-grid {
-    flex-direction: column !important;
   }
 
   /* Form */
