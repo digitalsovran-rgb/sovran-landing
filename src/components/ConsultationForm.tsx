@@ -651,6 +651,7 @@ export default function ConsultationForm() {
       <style>{`.wheel-scroll::-webkit-scrollbar { display: none; }`}</style>
       <section
         id="consultation"
+        data-bg="light"
         style={{ backgroundColor: '#f5f0eb', padding: '100px 0' }}
       >
       <div className="inner">

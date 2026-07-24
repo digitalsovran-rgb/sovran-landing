@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Ruler, PenTool, Video, ClipboardCheck } from 'lucide-react';
 
@@ -7,7 +7,7 @@ const rows = [
     num: '01',
     icon: Ruler,
     label: 'Site Survey',
-    image: '/media/heroepic.png',
+    image: '/media/sites.png',
     imageLeft: true,
     desc: 'A measured survey of your property, carried out in person by our team, so every drawing that follows starts from real dimensions, not assumptions.',
   },
@@ -15,7 +15,7 @@ const rows = [
     num: '02',
     icon: PenTool,
     label: 'Architectural Drawings',
-    image: '/media/before1.png',
+    image: '/media/archdraw.png',
     imageLeft: false,
     desc: "Floor plans developed around your brief and your home, already accounting for the energy and comfort standards taking effect from March 2027, so what's drawn today still holds up tomorrow.",
   },
@@ -23,7 +23,7 @@ const rows = [
     num: '03',
     icon: Video,
     label: '3D Render & Walkthrough',
-    image: '/media/after1.png',
+    image: '/media/renderw.png',
     imageLeft: true,
     desc: 'See the finished extension before a single brick is laid, rendered and walked through in full.',
   },
@@ -31,27 +31,27 @@ const rows = [
     num: '04',
     icon: ClipboardCheck,
     label: 'Planning Assessment',
-    image: '/media/humantouch.png',
+    image: '/media/plann.png',
     imageLeft: false,
     desc: 'A clear read on planning potential, budget and timeline, including how the finished extension performs against the standards coming into force in 2027.',
   },
 ];
 
-function Row({
-  row,
-  delay,
-  isInView,
-}: {
-  row: (typeof rows)[0];
-  delay: number;
-  isInView: boolean;
-}) {
+function Row({ row, i }: { row: (typeof rows)[0]; i: number }) {
+  // Each row observes its own (comparatively short) container rather than sharing a single
+  // isInView tied to the whole section. On mobile the rows stack, making the full section
+  // very tall relative to viewport height — an `amount: 0.2` threshold measured against that
+  // entire height almost never satisfied, which left every row (and the header) permanently
+  // stuck at opacity: 0, rendering as a blank page even though the layout height was correct.
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: '0px 0px -100px 0px', amount: 0.2 });
   const Icon = row.icon;
   const imgFromX = row.imageLeft ? -50 : 50;
   const textFromX = row.imageLeft ? 50 : -50;
 
   return (
     <div
+      ref={ref}
       className="hiw-row"
       style={{
         display: 'flex',
@@ -63,7 +63,7 @@ function Row({
       <motion.div
         initial={{ opacity: 0, x: imgFromX }}
         animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: imgFromX }}
-        transition={{ duration: 0.8, delay, ease: 'easeOut' }}
+        transition={{ duration: 0.8, delay: i * 0.05, ease: 'easeOut' }}
         className="hiw-img-block"
         style={{ flex: '0 0 50%', position: 'relative', overflow: 'hidden' }}
       >
@@ -83,7 +83,7 @@ function Row({
       <motion.div
         initial={{ opacity: 0, x: textFromX }}
         animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: textFromX }}
-        transition={{ duration: 0.8, delay, ease: 'easeOut' }}
+        transition={{ duration: 0.8, delay: i * 0.05, ease: 'easeOut' }}
         className="hiw-text-block"
         style={{
           flex: '0 0 50%',
@@ -140,20 +140,17 @@ function Row({
 }
 
 export default function HowItWorks() {
-  const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
-  const [ctaHovered, setCtaHovered] = useState(false);
-
-  const scrollToForm = () => {
-    document.getElementById('consultation')?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const headingRef = useRef<HTMLDivElement>(null);
+  const isHeadingInView = useInView(headingRef, { once: true, margin: '0px 0px -100px 0px', amount: 0.2 });
+  const closingRef = useRef<HTMLParagraphElement>(null);
+  const isClosingInView = useInView(closingRef, { once: true, margin: '0px 0px -100px 0px', amount: 0.2 });
 
   return (
-    <section ref={ref} style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}>
-      <div className="inner" style={{ maxWidth: '900px' }}>
+    <section data-bg="dark" style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}>
+      <div ref={headingRef} className="inner" style={{ maxWidth: '900px' }}>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          animate={isHeadingInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
           style={{
             textAlign: 'center',
@@ -165,12 +162,12 @@ export default function HowItWorks() {
             marginBottom: '20px',
           }}
         >
-          Designed For What&apos;s Next
+          The Process
         </motion.p>
 
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          animate={isHeadingInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8, delay: 0.1, ease: 'easeOut' }}
           style={{
             textAlign: 'center',
@@ -181,12 +178,12 @@ export default function HowItWorks() {
             lineHeight: 1.15,
           }}
         >
-          A Design Pack Built For Where Home Standards Are Heading.
+          How Your Design Pack Comes Together.
         </motion.h2>
 
         <motion.p
           initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          animate={isHeadingInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
           style={{
             textAlign: 'center',
@@ -199,24 +196,24 @@ export default function HowItWorks() {
             margin: '20px auto 0',
           }}
         >
-          From March 2027, new standards will judge homes on how they perform, not just how they
-          look: warmer, more efficient to run, filled with natural light, and built to hold their
-          value for years. We&apos;re already designing this way, and every design pack you
-          receive reflects it.
+          Your design pack is built in four stages, each one accounting for the standards your
+          home will need to meet from March 2027, so what&apos;s designed today still performs
+          tomorrow.
         </motion.p>
       </div>
 
       <div style={{ maxWidth: '1200px', margin: '64px auto 0', display: 'flex', flexDirection: 'column', gap: '4px' }}>
         {rows.map((row, i) => (
-          <Row key={row.num} row={row} delay={i * 0.05} isInView={isInView} />
+          <Row key={row.num} row={row} i={i} />
         ))}
       </div>
 
       <div className="inner" style={{ maxWidth: '900px' }}>
         <motion.p
+          ref={closingRef}
           initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.3, ease: 'easeOut' }}
+          animate={isClosingInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
           style={{
             textAlign: 'center',
             fontSize: '17px',
@@ -231,39 +228,6 @@ export default function HowItWorks() {
           Homes built to last aren&apos;t created by reacting to new rules once they arrive.
           They&apos;re created by planning for them in advance.
         </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
-          style={{ marginTop: '40px', textAlign: 'center' }}
-        >
-          <button
-            type="button"
-            onClick={scrollToForm}
-            onMouseEnter={() => setCtaHovered(true)}
-            onMouseLeave={() => setCtaHovered(false)}
-            style={{
-              display: 'block',
-              width: '100%',
-              maxWidth: '400px',
-              margin: '0 auto',
-              backgroundColor: ctaHovered ? '#e1dcd8' : '#f5f0eb',
-              color: '#0a0a0a',
-              fontSize: '13px',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              padding: '16px 32px',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              transition: 'background-color 0.3s ease',
-            }}
-          >
-            Claim Your Design Package
-          </button>
-        </motion.div>
       </div>
     </section>
   );

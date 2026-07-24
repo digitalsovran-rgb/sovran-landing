@@ -136,6 +136,7 @@ export default function BeforeAfter() {
   return (
     <section
       ref={sectionRef}
+      data-bg="light"
       style={{ backgroundColor: '#f5f0eb', padding: '100px 0' }}
     >
       <div className="inner" style={{ textAlign: 'center', marginBottom: '60px' }}>

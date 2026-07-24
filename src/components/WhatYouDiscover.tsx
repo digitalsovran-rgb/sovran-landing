@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Home, TrendingUp, ClipboardCheck, Wallet, LayoutGrid, ShieldAlert } from 'lucide-react';
 
@@ -83,14 +83,9 @@ function Tile({
 export default function WhatYouDiscover() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
-  const [ctaHovered, setCtaHovered] = useState(false);
-
-  const scrollToForm = () => {
-    document.getElementById('consultation')?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   return (
-    <section ref={ref} style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}>
+    <section ref={ref} data-bg="dark" style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}>
       <div className="inner" style={{ maxWidth: '1000px' }}>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -158,39 +153,6 @@ export default function WhatYouDiscover() {
             <Tile key={tile.label} tile={tile} delay={i * 0.08} isInView={isInView} />
           ))}
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
-          style={{ marginTop: '56px', textAlign: 'center' }}
-        >
-          <button
-            type="button"
-            onClick={scrollToForm}
-            onMouseEnter={() => setCtaHovered(true)}
-            onMouseLeave={() => setCtaHovered(false)}
-            style={{
-              display: 'block',
-              width: '100%',
-              maxWidth: '400px',
-              margin: '0 auto',
-              backgroundColor: ctaHovered ? '#e1dcd8' : '#f5f0eb',
-              color: '#0a0a0a',
-              fontSize: '13px',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              padding: '16px 32px',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              transition: 'background-color 0.3s ease',
-            }}
-          >
-            Claim Your Design Package
-          </button>
-        </motion.div>
       </div>
     </section>
   );

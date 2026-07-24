@@ -22,6 +22,28 @@ const testimonials = [
   },
 ];
 
+const ethosCards = [
+  {
+    label: 'One Team',
+    desc: 'Architects, planners and builders working as one, so nothing gets lost between drawing and delivery.',
+  },
+  {
+    label: 'Planning Expertise',
+    desc: 'Led by former planning officers, with a 95% planning success rate across London boroughs.',
+  },
+  {
+    label: 'Protected Investment',
+    desc: 'Fixed-price contracts and milestone-based payments, so your budget is protected from start to finish.',
+  },
+];
+
+const stats = [
+  { value: '15+', label: 'Years' },
+  { value: '1,000+', label: 'Projects Delivered' },
+  { value: '95%', label: 'Planning Success' },
+  { value: '4.9', label: 'Google Rating' },
+];
+
 function TestimonialCard({ t }: { t: (typeof testimonials)[0] }) {
   return (
     <div
@@ -146,7 +168,7 @@ export default function AboutSovran() {
   const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
 
   return (
-    <section ref={ref} style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}>
+    <section ref={ref} data-bg="dark" style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}>
       <div className="inner" style={{ maxWidth: '900px' }}>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -178,7 +200,7 @@ export default function AboutSovran() {
             lineHeight: 1.1,
           }}
         >
-          One Team, From First Drawing To Finished Home.
+          Design And Build. One Team, One Roof.
         </motion.h2>
 
         <motion.p
@@ -196,32 +218,110 @@ export default function AboutSovran() {
             margin: '20px auto 0',
           }}
         >
-          Sovran designs, plans and builds extensions across London and the Home Counties — one
-          team accountable for every stage, with a dedicated project manager and payment
-          protection built into every contract.
+          Behind every project is a family, a vision, and a home worth building properly. Founded
+          in 2011, Sovran brings architects, planners and construction specialists together as one
+          team, delivering extensions and renovations across London and the Home Counties, so the
+          people who design your project are the same people accountable for building it.
         </motion.p>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.3, ease: 'easeOut' }}
+        <div
+          className="about-ethos-grid"
           style={{
-            textAlign: 'center',
-            fontSize: '13px',
-            fontWeight: 500,
-            color: 'rgba(245,240,235,0.6)',
-            letterSpacing: '0.02em',
-            marginTop: '24px',
+            marginTop: '56px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            columnGap: '32px',
+            rowGap: '32px',
           }}
         >
-          15+ years experience · 1,000+ properties transformed · Rated 4.9 on Google
-        </motion.p>
+          {ethosCards.map((card, i) => (
+            <motion.div
+              key={card.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.6, delay: 0.3 + i * 0.1, ease: 'easeOut' }}
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.03)',
+                padding: '4px 4px 0',
+              }}
+            >
+              <div style={{ width: '40px', height: '2px', backgroundColor: '#c9a96e', marginBottom: '14px' }} />
+              <h3
+                style={{
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  color: '#f5f0eb',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  marginBottom: '8px',
+                }}
+              >
+                {card.label}
+              </h3>
+              <p
+                style={{
+                  fontSize: '13px',
+                  fontWeight: 400,
+                  color: 'rgba(245,240,235,0.65)',
+                  lineHeight: 1.6,
+                  letterSpacing: 'normal',
+                }}
+              >
+                {card.desc}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+
+        <div
+          className="about-stats-grid"
+          style={{
+            marginTop: '56px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '24px',
+          }}
+        >
+          {stats.map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.6, delay: 0.5 + i * 0.08, ease: 'easeOut' }}
+              style={{ textAlign: 'center' }}
+            >
+              <div
+                style={{
+                  fontSize: 'clamp(24px, 2.6vw, 28px)',
+                  fontWeight: 900,
+                  color: '#f5f0eb',
+                  letterSpacing: '-0.005em',
+                  lineHeight: 1,
+                  marginBottom: '6px',
+                }}
+              >
+                {stat.value}
+              </div>
+              <div
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  color: 'rgba(245,240,235,0.6)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                }}
+              >
+                {stat.label}
+              </div>
+            </motion.div>
+          ))}
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
-          style={{ marginTop: '48px' }}
+          style={{ marginTop: '56px' }}
         >
           <TestimonialRow />
         </motion.div>

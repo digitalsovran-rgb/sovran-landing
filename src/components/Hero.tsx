@@ -1,14 +1,44 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const desktopImages = ['/media/heroepic.png', '/media/heroepic1.png', '/media/heroepic2.png'];
+const mobileImages = ['/media/heroepicel.png', '/media/heroepicel1.png', '/media/heroepicel2.png'];
+
+const HOLD_MS = 6000;
+const CROSSFADE_S = 1.5;
 
 export default function Hero() {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+  const [index, setIndex] = useState(0);
+  const [ctaHovered, setCtaHovered] = useState(false);
+  const images = isMobile ? mobileImages : desktopImages;
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
+
+  // Preload every frame for the current viewport up front, so the browser already has each
+  // image cached by the time its turn in the rotation arrives — no flash or load delay.
+  useEffect(() => {
+    images.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, [images]);
+
+  useEffect(() => {
+    setIndex(0);
+    const id = setInterval(() => {
+      setIndex((i) => (i + 1) % images.length);
+    }, HOLD_MS);
+    return () => clearInterval(id);
+  }, [images]);
+
+  const scrollToForm = () => {
+    document.getElementById('consultation')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <>
@@ -24,6 +54,7 @@ export default function Hero() {
       `}</style>
       <section
         id="hero"
+        data-bg="dark"
         style={{
           position: 'relative',
           height: '90vh',
@@ -35,21 +66,30 @@ export default function Hero() {
           backgroundColor: '#0a0a0a',
         }}
       >
-        {/* Background */}
-        <motion.div
-          className="hero-bg"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.5, ease: 'easeOut' }}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: 'url(/media/heroepic.png?v=3)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundAttachment: 'fixed',
-          }}
-        />
+        {/* Background — rotating 3-image sequence, each held with a slow Ken Burns zoom and
+            crossfaded into the next so the hero reads as continuous motion, not a slideshow. */}
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+          <AnimatePresence>
+            <motion.div
+              key={images[index]}
+              initial={{ opacity: 0, scale: 1 }}
+              animate={{ opacity: 1, scale: 1.04 }}
+              exit={{ opacity: 0 }}
+              transition={{
+                opacity: { duration: CROSSFADE_S, ease: 'easeInOut' },
+                scale: { duration: (HOLD_MS + CROSSFADE_S * 1000) / 1000, ease: 'linear' },
+              }}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                backgroundImage: `url(${images[index]})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
+            />
+          </AnimatePresence>
+        </div>
+
         {/* Overlay */}
         <div
           style={{
@@ -183,6 +223,35 @@ export default function Hero() {
           >
             Sovran is offering a complimentary Home Transformation Blueprint — floor plans, 3D visuals, moodboard, and a full project proposal, built around your home.
           </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.35 }}
+            style={{ marginTop: '40px' }}
+          >
+            <button
+              type="button"
+              onClick={scrollToForm}
+              onMouseEnter={() => setCtaHovered(true)}
+              onMouseLeave={() => setCtaHovered(false)}
+              style={{
+                backgroundColor: ctaHovered ? 'rgba(255,255,255,0.15)' : 'transparent',
+                color: ctaHovered ? 'rgba(255,255,255,0.85)' : '#ffffff',
+                border: '1.5px solid #ffffff',
+                fontSize: '13px',
+                fontWeight: 600,
+                fontFamily: 'Inter, sans-serif',
+                textTransform: 'uppercase',
+                letterSpacing: '0.12em',
+                padding: '16px 40px',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s ease, color 0.3s ease',
+              }}
+            >
+              Claim Offer
+            </button>
+          </motion.div>
         </div>
       </section>
     </>

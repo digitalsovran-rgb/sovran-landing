@@ -345,7 +345,7 @@ export default function ExtensionTypes() {
   };
 
   return (
-    <section id="projects" style={{ backgroundColor: '#f5f0eb' }}>
+    <section id="projects" data-bg="light" style={{ backgroundColor: '#f5f0eb' }}>
       <div
         ref={headingRef}
         style={{

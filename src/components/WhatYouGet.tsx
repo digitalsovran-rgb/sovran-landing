@@ -1,6 +1,13 @@
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { Ruler, Palette, Video, FileText } from 'lucide-react';
+import { Ruler, Palette, Video, FileText, CheckCircle } from 'lucide-react';
+
+const checklist = [
+  'Every measurement is real, taken on-site by our own team',
+  'Every drawing reflects what will actually be built',
+  'Every visual shows your finished extension before it exists',
+  'Every figure comes from a full assessment, not a guess',
+];
 
 const tiles = [
   {
@@ -80,7 +87,7 @@ export default function WhatYouGet() {
   const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
 
   return (
-    <section ref={ref} style={{ backgroundColor: '#f5f0eb', padding: '100px 0' }}>
+    <section ref={ref} data-bg="light" style={{ backgroundColor: '#f5f0eb', padding: '100px 0' }}>
       <div className="inner" style={{ maxWidth: '1000px' }}>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -148,25 +155,39 @@ export default function WhatYouGet() {
           ))}
         </div>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
+        <div
+          className="wyg-checklist"
           style={{
-            textAlign: 'center',
-            fontSize: '13px',
-            fontWeight: 600,
-            color: '#c9a96e',
-            letterSpacing: '0.02em',
-            lineHeight: 1.6,
-            maxWidth: '500px',
-            margin: '48px auto 0',
+            marginTop: '40px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            columnGap: '32px',
+            rowGap: '16px',
           }}
         >
-          Every measurement in your design pack comes from an in-person site survey carried out by
-          our own team, using the same process and standard of accuracy we carry through into
-          construction. What&apos;s drawn during your design pack is what actually gets built.
-        </motion.p>
+          {checklist.map((item, i) => (
+            <motion.div
+              key={item}
+              initial={{ opacity: 0, y: 12 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+              transition={{ duration: 0.5, delay: 0.4 + i * 0.06, ease: 'easeOut' }}
+              style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}
+            >
+              <CheckCircle size={18} color="#c9a96e" strokeWidth={1.75} style={{ flexShrink: 0, marginTop: '1px' }} />
+              <span
+                style={{
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  color: '#0a0a0a',
+                  lineHeight: 1.5,
+                  letterSpacing: 'normal',
+                }}
+              >
+                {item}
+              </span>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );

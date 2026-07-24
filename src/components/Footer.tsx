@@ -247,6 +247,8 @@ export default function Footer() {
 
       <footer
         ref={footerRef}
+        id="site-footer"
+        data-bg="dark"
         style={{
           backgroundColor: '#0a0a0a',
           position: 'relative',

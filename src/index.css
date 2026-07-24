@@ -67,11 +67,6 @@ img {
     padding: 0 24px;
   }
 
-  .hero-bg {
-    background-attachment: scroll !important;
-    background-image: url('/media/heroepicel.png?v=3') !important;
-  }
-
   /* Hero — trimmed to remove excess grass/dead space before the gradient hits the section below */
   #hero {
     height: 78vh !important;
@@ -86,6 +81,19 @@ img {
   /* What You Get — single column stacked on mobile */
   .wyg-grid {
     grid-template-columns: 1fr !important;
+  }
+  .wyg-checklist {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* About Sovran — ethos cards stack, stats become a 2x2 grid */
+  .about-ethos-grid {
+    grid-template-columns: 1fr !important;
+    row-gap: 24px !important;
+  }
+  .about-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    row-gap: 24px !important;
   }
 
   /* What You Discover — 2-column grid on mobile (desktop is 3x2) */
