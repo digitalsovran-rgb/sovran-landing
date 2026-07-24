@@ -131,7 +131,7 @@ export default function StickyOfferBar() {
             border: 'none',
             color: dark ? '#f5f0eb' : '#0a0a0a',
             fontSize: '13px',
-            fontWeight: 700,
+            fontWeight: 500,
             fontFamily: 'Inter, sans-serif',
             textTransform: 'uppercase',
             letterSpacing: '0.15em',

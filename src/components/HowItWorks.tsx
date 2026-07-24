@@ -71,13 +71,13 @@ function Row({ row, i }: { row: (typeof rows)[0]; i: number }) {
           width: '40px',
           height: '40px',
           borderRadius: '50%',
-          backgroundColor: '#c9a96e',
+          backgroundColor: '#0a0a0a',
           display: 'none',
           alignItems: 'center',
           justifyContent: 'center',
           fontSize: '16px',
           fontWeight: 900,
-          color: '#0a0a0a',
+          color: '#f5f0eb',
           letterSpacing: '-0.02em',
           zIndex: 2,
           boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
@@ -119,19 +119,6 @@ function Row({ row, i }: { row: (typeof rows)[0]; i: number }) {
         }}
       >
         <div>
-          <span
-            style={{
-              display: 'block',
-              fontSize: '40px',
-              fontWeight: 900,
-              color: '#c9a96e',
-              letterSpacing: '-0.005em',
-              lineHeight: 1,
-              marginBottom: '14px',
-            }}
-          >
-            {row.num}
-          </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
             <Icon size={18} color="#0a0a0a" strokeWidth={1.75} style={{ flexShrink: 0 }} />
             <span

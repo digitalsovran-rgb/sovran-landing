@@ -38,11 +38,59 @@ const ethosCards = [
 ];
 
 const stats = [
-  { value: '15+', label: 'Years' },
-  { value: '1,000+', label: 'Projects Delivered' },
-  { value: '95%', label: 'Planning Success' },
-  { value: '4.9', label: 'Google Rating' },
+  { target: 15, decimals: 0, suffix: '+', label: 'Years' },
+  { target: 1000, decimals: 0, suffix: '+', label: 'Projects Delivered' },
+  { target: 95, decimals: 0, suffix: '%', label: 'Planning Success' },
+  { target: 4.9, decimals: 1, suffix: '', label: 'Google Rating' },
 ];
+
+const COUNT_UP_MS = 1500;
+const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
+
+// Counts from 0 up to `target` once `active` becomes true, and stays latched (never restarts
+// on later re-triggers). `done` flips true only once the animation finishes, so callers can
+// hold off appending a suffix (e.g. "+", "%") until the final value is reached.
+function useCountUp(target: number, decimals: number, active: boolean) {
+  const [value, setValue] = useState(0);
+  const [done, setDone] = useState(false);
+  const startedRef = useRef(false);
+
+  useEffect(() => {
+    if (!active || startedRef.current) return;
+    startedRef.current = true;
+
+    let rafId: number;
+    const startTime = performance.now();
+
+    const tick = (now: number) => {
+      const progress = Math.min((now - startTime) / COUNT_UP_MS, 1);
+      const eased = easeOutCubic(progress);
+      setValue(target * eased);
+      if (progress < 1) {
+        rafId = requestAnimationFrame(tick);
+      } else {
+        setValue(target);
+        setDone(true);
+      }
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [active, target]);
+
+  const display = decimals > 0 ? value.toFixed(decimals) : Math.round(value).toLocaleString('en-US');
+  return { display, done };
+}
+
+function StatValue({ stat, active }: { stat: (typeof stats)[0]; active: boolean }) {
+  const { display, done } = useCountUp(stat.target, stat.decimals, active);
+  return (
+    <>
+      {display}
+      {done ? stat.suffix : ''}
+    </>
+  );
+}
 
 function TestimonialCard({ t }: { t: (typeof testimonials)[0] }) {
   return (
@@ -167,6 +215,27 @@ export default function AboutSovran() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
 
+  // Separate from `isInView` above (which drives the entrance fade for the whole section) —
+  // this fires once, specifically when the stats grid itself scrolls into view, and never
+  // resets, so the count-up plays exactly one time regardless of later scrolling in and out.
+  const statsRef = useRef<HTMLDivElement>(null);
+  const [statsTriggered, setStatsTriggered] = useState(false);
+  useEffect(() => {
+    const el = statsRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setStatsTriggered(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section ref={ref} data-bg="dark" style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}>
       <div className="inner" style={{ maxWidth: '900px' }}>
@@ -273,6 +342,7 @@ export default function AboutSovran() {
         </div>
 
         <div
+          ref={statsRef}
           className="about-stats-grid"
           style={{
             marginTop: '56px',
@@ -299,7 +369,7 @@ export default function AboutSovran() {
                   marginBottom: '6px',
                 }}
               >
-                {stat.value}
+                <StatValue stat={stat} active={statsTriggered} />
               </div>
               <div
                 style={{
