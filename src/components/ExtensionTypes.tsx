@@ -351,6 +351,7 @@ export default function ExtensionTypes() {
         style={{
           textAlign: 'center',
           padding: '100px 24px 60px',
+          backgroundColor: '#0a0a0a',
         }}
       >
         <motion.h2
@@ -360,7 +361,7 @@ export default function ExtensionTypes() {
           style={{
             fontSize: 'clamp(32px, 3.85vw, 46px)',
             fontWeight: 900,
-            color: '#0a0a0a',
+            color: '#f5f0eb',
             letterSpacing: '-0.005em',
             fontFamily: 'Inter, sans-serif',
           }}

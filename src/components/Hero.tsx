@@ -236,9 +236,9 @@ export default function Hero() {
               onMouseEnter={() => setCtaHovered(true)}
               onMouseLeave={() => setCtaHovered(false)}
               style={{
-                backgroundColor: ctaHovered ? 'rgba(255,255,255,0.15)' : 'transparent',
-                color: ctaHovered ? 'rgba(255,255,255,0.85)' : '#ffffff',
-                border: '1.5px solid #ffffff',
+                backgroundColor: ctaHovered ? '#f5f0eb' : '#ffffff',
+                color: '#0a0a0a',
+                border: 'none',
                 fontSize: '13px',
                 fontWeight: 600,
                 fontFamily: 'Inter, sans-serif',
@@ -246,7 +246,7 @@ export default function Hero() {
                 letterSpacing: '0.12em',
                 padding: '16px 40px',
                 cursor: 'pointer',
-                transition: 'background-color 0.3s ease, color 0.3s ease',
+                transition: 'background-color 0.3s ease',
               }}
             >
               Claim Offer

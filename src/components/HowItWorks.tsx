@@ -39,10 +39,9 @@ const rows = [
 
 function Row({ row, i }: { row: (typeof rows)[0]; i: number }) {
   // Each row observes its own (comparatively short) container rather than sharing a single
-  // isInView tied to the whole section. On mobile the rows stack, making the full section
-  // very tall relative to viewport height — an `amount: 0.2` threshold measured against that
-  // entire height almost never satisfied, which left every row (and the header) permanently
-  // stuck at opacity: 0, rendering as a blank page even though the layout height was correct.
+  // isInView tied to the whole section — see the note in git history: a shared isInView over
+  // the whole (very tall, stacked-on-mobile) section could never reach its visibility
+  // threshold and left everything stuck at opacity 0.
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px -100px 0px', amount: 0.2 });
   const Icon = row.icon;
@@ -54,12 +53,39 @@ function Row({ row, i }: { row: (typeof rows)[0]; i: number }) {
       ref={ref}
       className="hiw-row"
       style={{
+        position: 'relative',
         display: 'flex',
         flexDirection: row.imageLeft ? 'row' : 'row-reverse',
         alignItems: 'stretch',
         minHeight: '420px',
       }}
     >
+      {/* Mobile-only numbered badge, overlapping the image's top-left corner so the number
+          stays visibly tied to its image once rows stack vertically. */}
+      <div
+        className="hiw-badge"
+        style={{
+          position: 'absolute',
+          top: '-20px',
+          left: '20px',
+          width: '40px',
+          height: '40px',
+          borderRadius: '50%',
+          backgroundColor: '#c9a96e',
+          display: 'none',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '16px',
+          fontWeight: 900,
+          color: '#0a0a0a',
+          letterSpacing: '-0.02em',
+          zIndex: 2,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+        }}
+      >
+        {row.num}
+      </div>
+
       <motion.div
         initial={{ opacity: 0, x: imgFromX }}
         animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: imgFromX }}
@@ -107,12 +133,12 @@ function Row({ row, i }: { row: (typeof rows)[0]; i: number }) {
             {row.num}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-            <Icon size={18} color="#f5f0eb" strokeWidth={1.75} style={{ flexShrink: 0 }} />
+            <Icon size={18} color="#0a0a0a" strokeWidth={1.75} style={{ flexShrink: 0 }} />
             <span
               style={{
                 fontSize: '13px',
                 fontWeight: 700,
-                color: '#f5f0eb',
+                color: '#0a0a0a',
                 textTransform: 'uppercase',
                 letterSpacing: '0.15em',
               }}
@@ -125,7 +151,7 @@ function Row({ row, i }: { row: (typeof rows)[0]; i: number }) {
             style={{
               fontSize: '14px',
               fontWeight: 400,
-              color: 'rgba(245,240,235,0.65)',
+              color: 'rgba(10,10,10,0.65)',
               lineHeight: 1.65,
               letterSpacing: 'normal',
               maxWidth: '450px',
@@ -142,11 +168,9 @@ function Row({ row, i }: { row: (typeof rows)[0]; i: number }) {
 export default function HowItWorks() {
   const headingRef = useRef<HTMLDivElement>(null);
   const isHeadingInView = useInView(headingRef, { once: true, margin: '0px 0px -100px 0px', amount: 0.2 });
-  const closingRef = useRef<HTMLParagraphElement>(null);
-  const isClosingInView = useInView(closingRef, { once: true, margin: '0px 0px -100px 0px', amount: 0.2 });
 
   return (
-    <section data-bg="dark" style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}>
+    <section data-bg="light" style={{ backgroundColor: '#f5f0eb', padding: '100px 0' }}>
       <div ref={headingRef} className="inner" style={{ maxWidth: '900px' }}>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -173,61 +197,19 @@ export default function HowItWorks() {
             textAlign: 'center',
             fontSize: 'clamp(30px, 3.5vw, 44px)',
             fontWeight: 900,
-            color: '#f5f0eb',
+            color: '#0a0a0a',
             letterSpacing: '-0.005em',
             lineHeight: 1.15,
           }}
         >
           How Your Design Pack Comes Together.
         </motion.h2>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={isHeadingInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
-          style={{
-            textAlign: 'center',
-            fontSize: '16px',
-            fontWeight: 400,
-            color: '#f5f0eb',
-            lineHeight: 1.7,
-            letterSpacing: 'normal',
-            maxWidth: '650px',
-            margin: '20px auto 0',
-          }}
-        >
-          Your design pack is built in four stages, each one accounting for the standards your
-          home will need to meet from March 2027, so what&apos;s designed today still performs
-          tomorrow.
-        </motion.p>
       </div>
 
-      <div style={{ maxWidth: '1200px', margin: '64px auto 0', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <div className="hiw-rows-wrapper" style={{ maxWidth: '1200px', margin: '64px auto 0', display: 'flex', flexDirection: 'column', gap: '4px' }}>
         {rows.map((row, i) => (
           <Row key={row.num} row={row} i={i} />
         ))}
-      </div>
-
-      <div className="inner" style={{ maxWidth: '900px' }}>
-        <motion.p
-          ref={closingRef}
-          initial={{ opacity: 0, y: 20 }}
-          animate={isClosingInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          style={{
-            textAlign: 'center',
-            fontSize: '17px',
-            fontWeight: 500,
-            color: '#c9a96e',
-            lineHeight: 1.6,
-            letterSpacing: 'normal',
-            maxWidth: '600px',
-            margin: '64px auto 0',
-          }}
-        >
-          Homes built to last aren&apos;t created by reacting to new rules once they arrive.
-          They&apos;re created by planning for them in advance.
-        </motion.p>
       </div>
     </section>
   );

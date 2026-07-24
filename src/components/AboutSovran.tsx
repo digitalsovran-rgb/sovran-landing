@@ -200,7 +200,7 @@ export default function AboutSovran() {
             lineHeight: 1.1,
           }}
         >
-          Design And Build. One Team, One Roof.
+          Design And Build Studio.
         </motion.h2>
 
         <motion.p
@@ -220,8 +220,7 @@ export default function AboutSovran() {
         >
           Behind every project is a family, a vision, and a home worth building properly. Founded
           in 2011, Sovran brings architects, planners and construction specialists together as one
-          team, delivering extensions and renovations across London and the Home Counties, so the
-          people who design your project are the same people accountable for building it.
+          team, delivering extensions and renovations across London and UK.
         </motion.p>
 
         <div

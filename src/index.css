@@ -104,9 +104,19 @@ img {
   }
 
   /* How It Works — stack image over text, full width */
+  .hiw-rows-wrapper {
+    gap: 0 !important;
+  }
   .hiw-row {
     flex-direction: column !important;
     min-height: 0 !important;
+  }
+  .hiw-row:not(:first-of-type) {
+    border-top: 1px solid rgba(10,10,10,0.1) !important;
+    margin-top: 40px !important;
+  }
+  .hiw-badge {
+    display: flex !important;
   }
   .hiw-img-block {
     flex: 0 0 220px !important;

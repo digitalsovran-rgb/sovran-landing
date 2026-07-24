@@ -58,13 +58,15 @@ export default function StickyOfferBar() {
     };
   }, []);
 
-  // Bug B fix: visibility is recomputed from live isIntersecting values on every callback —
-  // never latched. Hidden only while #consultation or the footer is actually in view, so
-  // scrolling back up past them always brings the bar back.
+  // Visibility is recomputed from live isIntersecting values on every callback — never
+  // latched. Hidden while #hero, #consultation, or the footer is actually in view (Hero has
+  // its own "Claim Offer" button already, so the persistent bar is redundant there), so
+  // scrolling back up past any of them always brings the bar back.
   useEffect(() => {
+    const hero = document.getElementById('hero');
     const consultation = document.getElementById('consultation');
     const footer = document.getElementById('site-footer');
-    const targets = [consultation, footer].filter((el): el is HTMLElement => el !== null);
+    const targets = [hero, consultation, footer].filter((el): el is HTMLElement => el !== null);
     if (targets.length === 0) return;
 
     const state = new Map<Element, boolean>();
@@ -85,20 +87,32 @@ export default function StickyOfferBar() {
   return (
     <>
       <style>{`
-        .sticky-offer-bar { height: 60px; }
+        .sticky-offer-bar {
+          height: 60px;
+          bottom: 16px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: min(700px, calc(100% - 32px));
+        }
         @media (max-width: 767px) {
-          .sticky-offer-bar { height: 56px !important; font-size: 12px !important; }
+          .sticky-offer-bar {
+            height: 56px !important;
+            font-size: 12px !important;
+            left: 16px !important;
+            right: 16px !important;
+            width: auto !important;
+            transform: none !important;
+          }
         }
       `}</style>
       <div
         className="sticky-offer-bar"
         style={{
           position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          width: '100%',
           zIndex: 55,
+          borderRadius: '12px',
+          overflow: 'hidden',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
           backgroundColor: dark ? '#0a0a0a' : '#f5f0eb',
           opacity: visible ? 1 : 0,
           pointerEvents: visible ? 'auto' : 'none',
