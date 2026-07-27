@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getSlotCount } from '../utils/slotCount';
 
 type FormData = {
   name: string;
@@ -655,6 +656,42 @@ export default function ConsultationForm() {
         style={{ backgroundColor: '#f5f0eb', padding: '100px 0' }}
       >
       <div className="inner">
+        <p
+          style={{
+            fontSize: '13px',
+            fontWeight: 600,
+            color: '#c9a96e',
+            textTransform: 'uppercase',
+            letterSpacing: '0.15em',
+            textAlign: 'center',
+            marginBottom: '10px',
+          }}
+        >
+          Limited Availability This Month
+        </p>
+        <p
+          style={{
+            fontSize: '22px',
+            fontWeight: 700,
+            color: '#0a0a0a',
+            textAlign: 'center',
+            letterSpacing: '-0.01em',
+            marginBottom: '8px',
+          }}
+        >
+          Only {getSlotCount()} design package slots remain.
+        </p>
+        <p
+          style={{
+            fontSize: '14px',
+            fontWeight: 400,
+            color: 'rgba(10,10,10,0.6)',
+            textAlign: 'center',
+            marginBottom: '32px',
+          }}
+        >
+          Booked on a first-come basis, resets monthly.
+        </p>
         <h2
           style={{
             fontSize: 'clamp(34px, 4vw, 52px)',
@@ -667,7 +704,7 @@ export default function ConsultationForm() {
         >
           Get Your Design Package.
         </h2>
-        
+
 
         <div
           className="form-inner"
