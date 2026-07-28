@@ -45,6 +45,7 @@ export default function Hero() {
       <style>{`
         .hero-desc-mobile { display: none; }
         @media (max-width: 767px) {
+          .hero-content { padding-bottom: 60px !important; }
           .hero-h1 { font-size: clamp(26px, 7.1vw, 35px) !important; font-weight: 900 !important; }
           .hero-label { font-size: 10px !important; margin-bottom: 24px !important; font-weight: 600 !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
           .hero-desc { font-size: 13px !important; font-weight: 500 !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
@@ -144,7 +145,10 @@ export default function Hero() {
             spacers above/below it always claim equal leftover space, so the headline's own
             center lands at the section's true vertical center regardless of how tall the
             eyebrow or the subhead+button cluster are; each spacer's inner justifyContent
-            keeps its content flush against the headline, preserving the existing margins. */}
+            keeps its content flush against the headline, preserving the existing margins.
+            The bottom padding is a hard reservation (not space left over from flex-grow), so
+            it guarantees the button-to-section-edge gap at any hero/viewport height — a fixed
+            translateY nudge would only have held at the one height it was tuned against. */}
         <div
           className="hero-content"
           style={{
@@ -152,6 +156,7 @@ export default function Hero() {
             zIndex: 2,
             textAlign: 'center',
             padding: '0 24px',
+            paddingBottom: '80px',
             width: '100%',
             maxWidth: '1000px',
             display: 'flex',
