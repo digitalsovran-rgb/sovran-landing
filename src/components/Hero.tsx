@@ -60,7 +60,7 @@ export default function Hero() {
           height: '90vh',
           minHeight: '600px',
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'stretch',
           justifyContent: 'center',
           overflow: 'hidden',
           backgroundColor: '#0a0a0a',
@@ -140,7 +140,11 @@ export default function Hero() {
           />
         </div>
 
-        {/* Content */}
+        {/* Content — the headline is the vertical anchor, not the group. The two flex:1
+            spacers above/below it always claim equal leftover space, so the headline's own
+            center lands at the section's true vertical center regardless of how tall the
+            eyebrow or the subhead+button cluster are; each spacer's inner justifyContent
+            keeps its content flush against the headline, preserving the existing margins. */}
         <div
           className="hero-content"
           style={{
@@ -150,24 +154,29 @@ export default function Hero() {
             padding: '0 24px',
             width: '100%',
             maxWidth: '1000px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
           }}
         >
-          <motion.p
-            className="hero-label"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            style={{
-              fontSize: '12px',
-              fontWeight: 500,
-              letterSpacing: '0.2em',
-              color: '#c9a96e',
-              textTransform: 'uppercase',
-              marginBottom: '40px',
-            }}
-          >
-            Complimentary Concept Design Package
-          </motion.p>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', width: '100%' }}>
+            <motion.p
+              className="hero-label"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              style={{
+                fontSize: '12px',
+                fontWeight: 500,
+                letterSpacing: '0.2em',
+                color: '#c9a96e',
+                textTransform: 'uppercase',
+                marginBottom: '40px',
+              }}
+            >
+              Complimentary Concept Design Package
+            </motion.p>
+          </div>
 
           <motion.h1
             className="hero-h1"
@@ -188,6 +197,7 @@ export default function Hero() {
             A Complete Design Package To Support Your Extension.
           </motion.h1>
 
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', width: '100%' }}>
           <motion.p
             className="hero-desc hero-desc-desktop"
             initial={{ opacity: 0, y: 30 }}
@@ -252,6 +262,7 @@ export default function Hero() {
               Claim Offer
             </button>
           </motion.div>
+          </div>
         </div>
       </section>
     </>
