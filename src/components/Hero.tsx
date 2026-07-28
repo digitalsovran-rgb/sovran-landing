@@ -45,7 +45,7 @@ export default function Hero() {
       <style>{`
         .hero-desc-mobile { display: none; }
         @media (max-width: 767px) {
-          .hero-h1 { font-size: clamp(24px, 6.5vw, 32px) !important; font-weight: 800 !important; }
+          .hero-h1 { font-size: clamp(26px, 7.1vw, 35px) !important; font-weight: 900 !important; }
           .hero-label { font-size: 10px !important; margin-bottom: 24px !important; font-weight: 600 !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
           .hero-desc { font-size: 13px !important; font-weight: 500 !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
           .hero-desc-desktop { display: none !important; }
@@ -147,7 +147,7 @@ export default function Hero() {
             position: 'relative',
             zIndex: 2,
             textAlign: 'center',
-            padding: '120px 24px 0',
+            padding: '0 24px',
             width: '100%',
             maxWidth: '1000px',
           }}
@@ -175,12 +175,12 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
             style={{
-              fontSize: 'clamp(36px, 5.8vw, 73px)',
+              fontSize: 'clamp(39px, 6.3vw, 80px)',
               fontWeight: 900,
               color: '#ffffff',
               margin: '0 auto',
               lineHeight: 1.05,
-              letterSpacing: '-0.005em',
+              letterSpacing: '-0.015em',
               textTransform: 'uppercase',
               fontFamily: 'Inter, sans-serif',
             }}

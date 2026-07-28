@@ -160,7 +160,7 @@ export default function StickyOfferBar() {
               letterSpacing: '0.05em',
             }}
           >
-            Only {slotCount} slots left this month.
+            {slotCount} slots left.
           </span>
         </button>
       </div>
