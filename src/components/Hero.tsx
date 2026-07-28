@@ -44,6 +44,12 @@ export default function Hero() {
     <>
       <style>{`
         .hero-desc-mobile { display: none; }
+        @media (min-width: 768px) {
+          /* Reserved (not flex-computed) space between the fixed logo and the eyebrow, so
+             the gap holds even at short desktop viewport heights (e.g. 1280x720 laptop
+             windows) where the top flex spacer would otherwise collapse toward zero. */
+          .hero-content { padding-top: 110px !important; }
+        }
         @media (max-width: 767px) {
           .hero-content { padding-bottom: 60px !important; }
           .hero-h1 { font-size: clamp(26px, 7.1vw, 35px) !important; font-weight: 900 !important; }
