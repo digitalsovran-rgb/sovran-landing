@@ -58,7 +58,13 @@ export default function Hero() {
           .hero-desc-desktop { display: none !important; }
           .hero-desc-mobile { display: block !important; }
           .hero-cta-wrap { width: calc(100% + 16px) !important; margin-left: -8px !important; margin-right: -8px !important; }
-          .hero-cta-btn { width: 100% !important; }
+          .hero-cta-btn {
+            width: 100% !important;
+            min-height: 48px !important;
+            padding: 12px 32px !important;
+            font-size: 13px !important;
+            letter-spacing: 0.12em !important;
+          }
         }
       `}</style>
       <section
@@ -266,16 +272,16 @@ export default function Hero() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '48px',
+                minHeight: '60px',
                 backgroundColor: ctaHovered ? '#f5f0eb' : '#ffffff',
                 color: '#0a0a0a',
                 border: 'none',
-                fontSize: '13px',
+                fontSize: '15px',
                 fontWeight: 600,
                 fontFamily: 'Inter, sans-serif',
                 textTransform: 'uppercase',
-                letterSpacing: '0.12em',
-                padding: '12px 32px',
+                letterSpacing: '0.14em',
+                padding: '18px 56px',
                 cursor: 'pointer',
                 transition: 'background-color 0.3s ease',
               }}
