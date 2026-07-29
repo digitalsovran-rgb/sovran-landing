@@ -679,7 +679,7 @@ export default function ConsultationForm() {
             marginBottom: '8px',
           }}
         >
-          Only {getSlotCount()} design package slots remain.
+          Only {getSlotCount()} slots remain.
         </p>
         <p
           style={{

@@ -1,15 +1,15 @@
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { Ruler, PenTool, Video, ClipboardCheck } from 'lucide-react';
+import { FileSearch, PenTool, Video, ClipboardCheck } from 'lucide-react';
 
 const rows = [
   {
     num: '01',
-    icon: Ruler,
-    label: 'Site Survey',
+    icon: FileSearch,
+    label: 'Your Existing Drawings',
     image: '/media/sites.png',
     imageLeft: true,
-    desc: 'A measured survey of your property, carried out in person by our team, so every drawing that follows starts from real dimensions, not assumptions.',
+    desc: "Wherever possible, we work from your existing architectural drawings and design on top of what's already there. Where a site survey is needed, it's included as part of your design pack, subject to availability.",
   },
   {
     num: '02',

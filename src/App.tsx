@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import Hero from './components/Hero';
-import WhatYouGet from './components/WhatYouGet';
 import WhatYouDiscover from './components/WhatYouDiscover';
 import HowItWorks from './components/HowItWorks';
 import ExtensionTypes from './components/ExtensionTypes';
@@ -25,7 +24,6 @@ export default function App() {
   return (
     <>
       <Hero />
-      <WhatYouGet />
       <WhatYouDiscover />
       <HowItWorks />
       <ExtensionTypes />

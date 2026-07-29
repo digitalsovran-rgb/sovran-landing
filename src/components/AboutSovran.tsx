@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { Star } from 'lucide-react';
 
 const testimonials = [
   {
@@ -25,15 +26,15 @@ const testimonials = [
 const ethosCards = [
   {
     label: 'One Team',
-    desc: 'Architects, planners and builders working as one, so nothing gets lost between drawing and delivery.',
+    desc: 'You speak to the same people from your first conversation to the day we hand over the keys.',
   },
   {
     label: 'Planning Expertise',
-    desc: 'Led by former planning officers, with a 95% planning success rate across London boroughs.',
+    desc: 'Our team includes former planning officers, so we know what a council needs to see before you even apply.',
   },
   {
     label: 'Protected Investment',
-    desc: 'Fixed-price contracts and milestone-based payments, so your budget is protected from start to finish.',
+    desc: 'A fixed price, agreed upfront, so there are no surprises waiting for you halfway through your project.',
   },
 ];
 
@@ -129,6 +130,11 @@ function TestimonialCard({ t }: { t: (typeof testimonials)[0] }) {
         >
           {t.name}
         </p>
+        <div style={{ display: 'flex', gap: '2px', margin: '0 0 6px' }}>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star key={i} size={16} color="#c9a96e" fill="#c9a96e" />
+          ))}
+        </div>
         <p
           style={{
             fontSize: '13px',
@@ -287,9 +293,10 @@ export default function AboutSovran() {
             margin: '20px auto 0',
           }}
         >
-          Behind every project is a family, a vision, and a home worth building properly. Founded
-          in 2011, Sovran brings architects, planners and construction specialists together as one
-          team, delivering extensions and renovations across London and UK.
+          Behind every extension is a family working out how they actually want to live, not just
+          how much space they need. Founded in 2011, Sovran brings architects, planners and
+          builders together as one team, so the people who listen to your ideas are the same
+          people who see them through to completion, across London and the Home Counties.
         </motion.p>
 
         <div
@@ -386,11 +393,44 @@ export default function AboutSovran() {
           ))}
         </div>
 
-        <motion.div
+        <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
-          style={{ marginTop: '56px' }}
+          style={{
+            textAlign: 'center',
+            fontSize: '13px',
+            fontWeight: 600,
+            letterSpacing: '0.2em',
+            color: '#c9a96e',
+            textTransform: 'uppercase',
+            marginTop: '56px',
+            marginBottom: '16px',
+          }}
+        >
+          Client Stories
+        </motion.p>
+
+        <motion.h3
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.8, delay: 0.45, ease: 'easeOut' }}
+          style={{
+            textAlign: 'center',
+            fontSize: 'clamp(22px, 2.6vw, 30px)',
+            fontWeight: 900,
+            color: '#f5f0eb',
+            letterSpacing: '-0.005em',
+            marginBottom: '40px',
+          }}
+        >
+          What Our Clients Say About Us.
+        </motion.h3>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.8, delay: 0.5, ease: 'easeOut' }}
         >
           <TestimonialRow />
         </motion.div>

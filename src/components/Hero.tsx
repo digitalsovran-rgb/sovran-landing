@@ -54,9 +54,10 @@ export default function Hero() {
           .hero-content { padding-bottom: 60px !important; }
           .hero-h1 { font-size: clamp(26px, 7.1vw, 35px) !important; font-weight: 900 !important; }
           .hero-label { font-size: 10px !important; margin-bottom: 24px !important; font-weight: 600 !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
-          .hero-desc { font-size: 13px !important; font-weight: 500 !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
+          .hero-desc { font-size: 14.3px !important; font-weight: 500 !important; text-shadow: 0 2px 8px rgba(0,0,0,0.5) !important; }
           .hero-desc-desktop { display: none !important; }
           .hero-desc-mobile { display: block !important; }
+          .hero-cta-wrap { width: calc(100% + 16px) !important; margin-left: -8px !important; margin-right: -8px !important; }
         }
       `}</style>
       <section
@@ -215,16 +216,17 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
             style={{
-              fontSize: '16px',
+              fontSize: '17.6px',
               fontWeight: 400,
               color: 'rgba(255,255,255,0.7)',
               maxWidth: '560px',
               margin: '40px auto 0',
               lineHeight: 1.75,
               letterSpacing: 'normal',
+              textShadow: '0 2px 8px rgba(0,0,0,0.5)',
             }}
           >
-            Sovran is offering a complimentary Home Transformation Blueprint — floor plans, 3D visuals, moodboard, and a full project proposal, built around your home.
+            Sovran is offering a complimentary Home Transformation Blueprint for a limited period — floor plans, 3D visuals, moodboard, and a full project proposal, built around your home extension project.
           </motion.p>
 
           <motion.p
@@ -233,19 +235,21 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
             style={{
-              fontSize: '16px',
+              fontSize: '17.6px',
               fontWeight: 400,
               color: 'rgba(255,255,255,0.7)',
               maxWidth: '560px',
               margin: '40px auto 0',
               lineHeight: 1.75,
               letterSpacing: 'normal',
+              textShadow: '0 2px 8px rgba(0,0,0,0.5)',
             }}
           >
-            Sovran is offering a complimentary Home Transformation Blueprint — floor plans, 3D visuals, moodboard, and a full project proposal, built around your home.
+            Sovran is offering a complimentary Home Transformation Blueprint for a limited period — floor plans, 3D visuals, moodboard, and a full project proposal, built around your home extension project.
           </motion.p>
 
           <motion.div
+            className="hero-cta-wrap"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.35 }}
@@ -257,6 +261,7 @@ export default function Hero() {
               onMouseEnter={() => setCtaHovered(true)}
               onMouseLeave={() => setCtaHovered(false)}
               style={{
+                width: '100%',
                 backgroundColor: ctaHovered ? '#f5f0eb' : '#ffffff',
                 color: '#0a0a0a',
                 border: 'none',

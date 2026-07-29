@@ -6,7 +6,7 @@ const tiles = [
   {
     icon: Home,
     label: 'Suitability',
-    desc: 'Whether your home and site genuinely support the extension you have in mind.',
+    desc: 'Which extension ideas suit your home best, based on your plot, surroundings and existing architecture.',
   },
   {
     icon: TrendingUp,
@@ -21,7 +21,7 @@ const tiles = [
   {
     icon: Wallet,
     label: 'Budget & Timeline',
-    desc: 'Realistic figures, not a placeholder range.',
+    desc: 'Realistic figures from the current market prices.',
   },
   {
     icon: LayoutGrid,
