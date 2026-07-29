@@ -58,6 +58,7 @@ export default function Hero() {
           .hero-desc-desktop { display: none !important; }
           .hero-desc-mobile { display: block !important; }
           .hero-cta-wrap { width: calc(100% + 16px) !important; margin-left: -8px !important; margin-right: -8px !important; }
+          .hero-cta-btn { width: 100% !important; }
         }
       `}</style>
       <section
@@ -257,11 +258,11 @@ export default function Hero() {
           >
             <button
               type="button"
+              className="hero-cta-btn"
               onClick={scrollToForm}
               onMouseEnter={() => setCtaHovered(true)}
               onMouseLeave={() => setCtaHovered(false)}
               style={{
-                width: '100%',
                 backgroundColor: ctaHovered ? '#f5f0eb' : '#ffffff',
                 color: '#0a0a0a',
                 border: 'none',
