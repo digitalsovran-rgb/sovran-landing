@@ -263,6 +263,10 @@ export default function Hero() {
               onMouseEnter={() => setCtaHovered(true)}
               onMouseLeave={() => setCtaHovered(false)}
               style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '48px',
                 backgroundColor: ctaHovered ? '#f5f0eb' : '#ffffff',
                 color: '#0a0a0a',
                 border: 'none',
@@ -271,7 +275,7 @@ export default function Hero() {
                 fontFamily: 'Inter, sans-serif',
                 textTransform: 'uppercase',
                 letterSpacing: '0.12em',
-                padding: '16px 40px',
+                padding: '12px 32px',
                 cursor: 'pointer',
                 transition: 'background-color 0.3s ease',
               }}
