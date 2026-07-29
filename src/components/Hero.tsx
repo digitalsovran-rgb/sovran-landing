@@ -72,12 +72,10 @@ export default function Hero() {
         data-bg="dark"
         style={{
           position: 'relative',
-          height: '90vh',
-          minHeight: '600px',
+          minHeight: 'max(90vh, 600px)',
           display: 'flex',
           alignItems: 'stretch',
           justifyContent: 'center',
-          overflow: 'hidden',
           backgroundColor: '#0a0a0a',
         }}
       >

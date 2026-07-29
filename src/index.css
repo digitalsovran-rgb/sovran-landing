@@ -67,10 +67,11 @@ img {
     padding: 0 24px;
   }
 
-  /* Hero — trimmed to remove excess grass/dead space before the gradient hits the section below */
+  /* Hero — trimmed to remove excess grass/dead space before the gradient hits the section below.
+     min-height (not height) so the section can still grow past this floor if real content
+     (label/headline/subhead/button) ever needs more room than 78vh provides. */
   #hero {
-    height: 78vh !important;
-    min-height: 480px !important;
+    min-height: max(78vh, 480px) !important;
   }
 
   /* What You Get — single column stacked on mobile */
