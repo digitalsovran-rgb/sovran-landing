@@ -676,21 +676,10 @@ export default function ConsultationForm() {
             color: '#0a0a0a',
             textAlign: 'center',
             letterSpacing: '-0.01em',
-            marginBottom: '8px',
-          }}
-        >
-          Only {getSlotCount()} slots remain.
-        </p>
-        <p
-          style={{
-            fontSize: '14px',
-            fontWeight: 400,
-            color: 'rgba(10,10,10,0.6)',
-            textAlign: 'center',
             marginBottom: '32px',
           }}
         >
-          Booked on a first-come basis, resets monthly.
+          Only {getSlotCount()} slots remain.
         </p>
         <h2
           style={{
