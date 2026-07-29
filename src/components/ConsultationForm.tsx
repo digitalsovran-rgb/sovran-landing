@@ -64,36 +64,72 @@ const stepHeadings: Record<number, string> = {
 const ukPostcodeRegex = /^[A-Za-z]{1,2}[0-9Rr][0-9A-Za-z]?\s?[0-9][A-Za-z]{2}$/;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/;
 
-type GHLSubmission = {
+type MondaySubmission = {
   name: string;
   email: string;
   phone: string;
   extension: string;
   budget: string;
+  services: string[];
   timeline: string;
   postcode: string;
 };
 
-async function submitToGHL(data: GHLSubmission): Promise<void> {
-  const response = await fetch('/api/ghl-submit', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      firstName: data.name,
-      email: data.email,
-      phone: data.phone,
-      budget: data.budget,
-      timeline: data.timeline,
-      extensionType: data.extension,
-      postcode: data.postcode,
-    }),
-  });
+type MondaySubmitResult = { ok: true } | { ok: false; error: string };
 
-  if (!response.ok) {
-    throw new Error(`GHL contact upsert failed with status ${response.status}`);
+const SUBMIT_ATTEMPTS = 3;
+const SUBMIT_TIMEOUT_MS = 10000;
+const SUBMIT_RETRY_DELAY_MS = 500;
+
+// Retries against our own /api/monday-submit endpoint (which itself retries against Monday's
+// API server-side) — this client-side layer exists because mobile browsers can kill an
+// in-flight request outright when a tab backgrounds or the screen locks, which a server-side
+// retry alone can't recover from.
+async function submitToMonday(data: MondaySubmission): Promise<MondaySubmitResult> {
+  let lastError = 'Unknown error';
+
+  for (let attempt = 1; attempt <= SUBMIT_ATTEMPTS; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), SUBMIT_TIMEOUT_MS);
+
+    try {
+      const response = await fetch('/api/monday-submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        keepalive: true,
+        signal: controller.signal,
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          extensionType: data.extension,
+          budget: data.budget,
+          services: data.services,
+          timeline: data.timeline,
+          postcode: data.postcode,
+        }),
+      });
+      window.clearTimeout(timeoutId);
+
+      const result = await response.json().catch(() => null);
+      if (response.ok && result?.ok) {
+        return { ok: true };
+      }
+      lastError = result?.error || `Monday submission failed with status ${response.status}`;
+    } catch (err) {
+      window.clearTimeout(timeoutId);
+      lastError = err instanceof Error ? err.message : 'Unknown submission error';
+    }
+
+    if (attempt < SUBMIT_ATTEMPTS) {
+      await new Promise((resolve) => setTimeout(resolve, SUBMIT_RETRY_DELAY_MS));
+    }
   }
+
+  console.error('Monday form submission failed after retries:', lastError);
+  return { ok: false, error: lastError };
 }
 
 function validatePostcode(value: string): boolean {
@@ -539,6 +575,8 @@ export default function ConsultationForm() {
   const [emailBlurred, setEmailBlurred] = useState(false);
   const [phoneBlurred, setPhoneBlurred] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
 
   useEffect(() => {
@@ -601,19 +639,30 @@ export default function ConsultationForm() {
     return false;
   };
 
-  const goNext = () => {
+  const goNext = async () => {
     if (step === 7) {
-      submitToGHL({
+      setSubmitting(true);
+      setSubmitError('');
+
+      const result = await submitToMonday({
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         extension: selectedExtension,
         budget: selectedBudget,
+        services: selectedServices,
         timeline: selectedTimeline,
         postcode,
-      }).catch((err) => {
-        console.error('GHL form submission failed:', err);
       });
+
+      setSubmitting(false);
+
+      if (!result.ok) {
+        setSubmitError(
+          'Something went wrong submitting your enquiry. Please try again, or contact us directly if the problem continues.'
+        );
+        return;
+      }
 
       setSubmitted(true);
       if (typeof window !== 'undefined' && (window as any).dataLayer) {
@@ -772,6 +821,7 @@ export default function ConsultationForm() {
                   setFormData({ name: '', email: '', phone: '' });
                   setEmailBlurred(false);
                   setPhoneBlurred(false);
+                  setSubmitError('');
                 }}
                 style={{
                   backgroundColor: '#ffffff',
@@ -1212,6 +1262,21 @@ export default function ConsultationForm() {
                 </motion.div>
               </AnimatePresence>
 
+              {/* Submission error — step 7 only, shown after a failed Monday submission */}
+              {step === 7 && submitError && (
+                <p
+                  style={{
+                    fontSize: '13px',
+                    color: '#c0392b',
+                    marginBottom: '16px',
+                    letterSpacing: 'normal',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {submitError}
+                </p>
+              )}
+
               {/* Navigation */}
               <div
                 style={{
@@ -1252,14 +1317,14 @@ export default function ConsultationForm() {
                   <button
                     type="button"
                     onClick={goNext}
-                    disabled={!canNext()}
+                    disabled={!canNext() || submitting}
                     style={{
                       ...navBtnBase,
-                      cursor: canNext() ? 'pointer' : 'not-allowed',
-                      opacity: canNext() ? 1 : 0.3,
+                      cursor: canNext() && !submitting ? 'pointer' : 'not-allowed',
+                      opacity: canNext() && !submitting ? 1 : 0.3,
                     }}
                     onMouseEnter={(e) => {
-                      if (canNext()) {
+                      if (canNext() && !submitting) {
                         e.currentTarget.style.backgroundColor = '#c9a96e';
                         e.currentTarget.style.borderColor = '#c9a96e';
                       }
@@ -1269,7 +1334,11 @@ export default function ConsultationForm() {
                       e.currentTarget.style.borderColor = '#0a0a0a';
                     }}
                   >
-                    {step === 7 ? 'Book Your Design Consultation' : 'Next →'}
+                    {step === 7
+                      ? submitting
+                        ? 'Submitting…'
+                        : 'Book Your Design Consultation'
+                      : 'Next →'}
                   </button>
                 )}
               </div>
