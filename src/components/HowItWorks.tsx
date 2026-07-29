@@ -6,7 +6,7 @@ const rows = [
   {
     num: '01',
     icon: FileSearch,
-    label: 'Your Existing Drawings',
+    label: 'Brief Assessment',
     image: '/media/sites.png',
     imageLeft: true,
     desc: "Wherever possible, we work from your existing architectural drawings and design on top of what's already there. Where a site survey is needed, it's included as part of your design pack, subject to availability.",
