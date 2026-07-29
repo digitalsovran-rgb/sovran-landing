@@ -293,10 +293,10 @@ export default function AboutSovran() {
             margin: '20px auto 0',
           }}
         >
-          Behind every extension is a family working out how they actually want to live, not just
-          how much space they need. Founded in 2011, Sovran brings architects, planners and
-          builders together as one team, so the people who listen to your ideas are the same
-          people who see them through to completion, across London and the Home Counties.
+          Sovran is a design and build studio: architects, planners and construction specialists
+          working as one team, under one roof. Founded in 2011, we&apos;ve delivered over 1,000
+          projects across London and the Home Counties, spanning architecture, construction and
+          interiors, each one carried by the same team from first drawing to completion.
         </motion.p>
 
         <div
