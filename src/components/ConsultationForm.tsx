@@ -61,7 +61,6 @@ const stepHeadings: Record<number, string> = {
   7: 'Enter your details and we will reach you shortly.',
 };
 
-const ukPostcodeRegex = /^[A-Za-z]{1,2}[0-9Rr][0-9A-Za-z]?\s?[0-9][A-Za-z]{2}$/;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/;
 
 type MondaySubmission = {
@@ -130,10 +129,6 @@ async function submitToMonday(data: MondaySubmission): Promise<MondaySubmitResul
 
   console.error('Monday form submission failed after retries:', lastError);
   return { ok: false, error: lastError };
-}
-
-function validatePostcode(value: string): boolean {
-  return ukPostcodeRegex.test(value.trim());
 }
 
 function validateEmail(value: string): boolean {
@@ -568,8 +563,6 @@ export default function ConsultationForm() {
   const [selectedBudget, setSelectedBudget] = useState('');
   const [selectedTimeline, setSelectedTimeline] = useState('');
   const [postcode, setPostcode] = useState('');
-  const [postcodeBlurred, setPostcodeBlurred] = useState(false);
-  const [postcodeError, setPostcodeError] = useState('');
   const [postcodeSubStep, setPostcodeSubStep] = useState<PostcodeSubStep>('input');
   const [formData, setFormData] = useState<FormData>({ name: '', email: '', phone: '' });
   const [emailBlurred, setEmailBlurred] = useState(false);
@@ -597,34 +590,13 @@ export default function ConsultationForm() {
   const emailValid = validateEmail(formData.email);
   const phoneValid = validatePhone(formData.phone);
 
-  const postcodeBasicValid =
-    postcode.trim().length >= 5 && postcode.trim().length <= 8;
-
   const toggleService = (label: string) => {
     setSelectedServices((prev) =>
       prev.includes(label) ? prev.filter((s) => s !== label) : [...prev, label]
     );
   };
 
-  const handlePostcodeBlur = () => {
-    setPostcodeBlurred(true);
-    if (postcode.trim() !== '' && !validatePostcode(postcode)) {
-      setPostcodeError(
-        "Please check your postcode — it looks like there might be a typo or extra spaces."
-      );
-    } else {
-      setPostcodeError('');
-    }
-  };
-
   const handleCheckAvailability = () => {
-    if (!validatePostcode(postcode)) {
-      setPostcodeError(
-        "Please check your postcode — it looks like there might be a typo or extra spaces."
-      );
-      return;
-    }
-    setPostcodeError('');
     setPostcodeSubStep('loading');
   };
 
@@ -815,8 +787,6 @@ export default function ConsultationForm() {
                   setSelectedBudget('');
                   setSelectedTimeline('');
                   setPostcode('');
-                  setPostcodeBlurred(false);
-                  setPostcodeError('');
                   setPostcodeSubStep('input');
                   setFormData({ name: '', email: '', phone: '' });
                   setEmailBlurred(false);
@@ -1092,32 +1062,18 @@ export default function ConsultationForm() {
                                 onChange={(v) => {
                                   const filtered = v.replace(/[^A-Za-z0-9 ]/g, '');
                                   setPostcode(filtered);
-                                  if (postcodeBlurred && filtered.trim() !== '') {
-                                    setPostcodeError(
-                                      validatePostcode(filtered)
-                                        ? ''
-                                        : "Please check your postcode — it looks like there might be a typo or extra spaces."
-                                    );
-                                  }
                                 }}
-                                onBlur={handlePostcodeBlur}
-                                error={postcodeError}
                               />
                               <button
                                 type="button"
                                 onClick={handleCheckAvailability}
-                                disabled={!postcodeBasicValid}
                                 style={{
                                   ...navBtnBase,
                                   marginTop: '32px',
-                                  opacity: postcodeBasicValid ? 1 : 0.3,
-                                  cursor: postcodeBasicValid ? 'pointer' : 'not-allowed',
                                 }}
                                 onMouseEnter={(e) => {
-                                  if (postcodeBasicValid) {
-                                    e.currentTarget.style.backgroundColor = '#c9a96e';
-                                    e.currentTarget.style.borderColor = '#c9a96e';
-                                  }
+                                  e.currentTarget.style.backgroundColor = '#c9a96e';
+                                  e.currentTarget.style.borderColor = '#c9a96e';
                                 }}
                                 onMouseLeave={(e) => {
                                   e.currentTarget.style.backgroundColor = '#0a0a0a';
