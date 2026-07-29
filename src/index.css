@@ -87,6 +87,9 @@ img {
     grid-template-columns: 1fr !important;
     row-gap: 24px !important;
   }
+  .about-ethos-desc {
+    text-align: left !important;
+  }
   .about-stats-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     row-gap: 24px !important;
@@ -125,6 +128,7 @@ img {
   }
   .hiw-desc {
     max-width: none !important;
+    text-align: left !important;
   }
 
   /* Extension types — stack rows, tap to reveal */

@@ -334,12 +334,14 @@ export default function AboutSovran() {
                 {card.label}
               </h3>
               <p
+                className="about-ethos-desc"
                 style={{
                   fontSize: '13px',
                   fontWeight: 400,
                   color: 'rgba(245,240,235,0.65)',
                   lineHeight: 1.6,
                   letterSpacing: 'normal',
+                  textAlign: 'justify',
                 }}
               >
                 {card.desc}

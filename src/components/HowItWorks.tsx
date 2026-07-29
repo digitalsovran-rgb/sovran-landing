@@ -142,6 +142,7 @@ function Row({ row, i }: { row: (typeof rows)[0]; i: number }) {
               lineHeight: 1.65,
               letterSpacing: 'normal',
               maxWidth: '450px',
+              textAlign: 'justify',
             }}
           >
             {row.desc}

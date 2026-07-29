@@ -192,6 +192,7 @@ function ExtRow({
                     color: 'rgba(0,0,0,0.6)',
                     lineHeight: 1.65,
                     letterSpacing: 'normal',
+                    textAlign: 'left',
                   }}
                 >
                   {ext.desc}
@@ -226,6 +227,7 @@ function ExtRow({
                     color: 'rgba(255,255,255,0.72)',
                     lineHeight: 1.65,
                     letterSpacing: 'normal',
+                    textAlign: 'left',
                   }}
                 >
                   {ext.longDesc}
@@ -254,6 +256,7 @@ function ExtRow({
                     color: 'rgba(0,0,0,0.6)',
                     lineHeight: 1.65,
                     letterSpacing: 'normal',
+                    textAlign: 'justify',
                   }}
                 >
                   {ext.desc}
@@ -284,6 +287,7 @@ function ExtRow({
                   color: 'rgba(255,255,255,0.72)',
                   lineHeight: 1.65,
                   letterSpacing: 'normal',
+                  textAlign: 'justify',
                   opacity: textHovered ? 1 : 0,
                   transition: 'opacity 0.3s ease',
                 }}
