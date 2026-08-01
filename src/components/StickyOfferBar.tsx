@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { getSlotCount } from '../utils/slotCount';
 
 export default function StickyOfferBar() {
   const [visible, setVisible] = useState(true);
@@ -130,16 +131,36 @@ export default function StickyOfferBar() {
             background: 'transparent',
             border: 'none',
             color: dark ? '#f5f0eb' : '#0a0a0a',
-            fontSize: '13px',
-            fontWeight: 500,
             fontFamily: 'Inter, sans-serif',
-            textTransform: 'uppercase',
-            letterSpacing: '0.15em',
             cursor: 'pointer',
             transition: 'color 0.2s ease',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          Claim Your Design Package
+          <span
+            style={{
+              fontSize: '13px',
+              fontWeight: 500,
+              textTransform: 'uppercase',
+              letterSpacing: '0.15em',
+            }}
+          >
+            Claim Your Design Package
+          </span>
+          <span
+            style={{
+              fontSize: '8px',
+              fontWeight: 500,
+              opacity: 0.8,
+              marginTop: '5px',
+              letterSpacing: '0.05em',
+            }}
+          >
+            {getSlotCount()} slots left.
+          </span>
         </button>
       </div>
     </>
