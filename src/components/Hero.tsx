@@ -244,11 +244,10 @@ export default function Hero() {
           </motion.h1>
 
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', width: '100%' }}>
-          <motion.p
+          {/* Not Framer Motion-animated (unlike its siblings): this paragraph is the confirmed
+              LCP element on mobile, and animating it delays the "final" paint LCP measures. */}
+          <p
             className="hero-desc hero-desc-desktop"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
             style={{
               fontSize: '17.6px',
               fontWeight: 400,
@@ -261,13 +260,12 @@ export default function Hero() {
             }}
           >
             Sovran is offering a complimentary Home Transformation Blueprint for a limited period — floor plans, 3D visuals, moodboard, and a full project proposal, built around your home extension project.
-          </motion.p>
+          </p>
 
-          <motion.p
+          {/* Not Framer Motion-animated (unlike its siblings): this paragraph is the confirmed
+              LCP element on mobile, and animating it delays the "final" paint LCP measures. */}
+          <p
             className="hero-desc hero-desc-mobile"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
             style={{
               fontSize: '17.6px',
               fontWeight: 400,
@@ -280,7 +278,7 @@ export default function Hero() {
             }}
           >
             Sovran is offering a complimentary Home Transformation Blueprint for a limited period — floor plans, 3D visuals, moodboard, and a full project proposal, built around your home extension project.
-          </motion.p>
+          </p>
 
           <motion.div
             className="hero-cta-wrap"
