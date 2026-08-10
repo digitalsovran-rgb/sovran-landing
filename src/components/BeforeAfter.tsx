@@ -2,9 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 
 const cards = [
-  { before: '/media/before1.png', after: '/media/after1.png' },
-  { before: '/media/before2.png', after: '/media/after2.png' },
-  { before: '/media/before3.png?v=3', after: '/media/after3.png?v=2' },
+  { before: '/media/before1.webp', after: '/media/after1.webp' },
+  { before: '/media/before2.webp', after: '/media/after2.webp' },
+  { before: '/media/before3.webp?v=3', after: '/media/after3.webp?v=2' },
 ];
 
 const baSlideVariants = {

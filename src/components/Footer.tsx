@@ -258,7 +258,7 @@ export default function Footer() {
         {/* S monogram background */}
         <img
           ref={sMonogramRef}
-          src="/media/logo-s-white.png"
+          src="/media/logo-s-white.webp"
           alt=""
           aria-hidden="true"
           style={{
@@ -300,7 +300,7 @@ export default function Footer() {
         >
           <img
             ref={logoRef}
-            src="/media/logo-sovran-white.png"
+            src="/media/logo-sovran-white.webp"
             alt="Sovran"
             style={{
               height: 'clamp(40px, 5vw, 90px)',

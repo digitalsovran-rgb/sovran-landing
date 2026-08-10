@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const desktopImages = ['/media/heroepic.png', '/media/heroepic1.png', '/media/heroepic2.png'];
-const mobileImages = ['/media/heroepicel.png', '/media/heroepicel1.png', '/media/heroepicel2.png'];
+const desktopImages = ['/media/heroepic.webp', '/media/heroepic1.webp', '/media/heroepic2.webp'];
+const mobileImages = ['/media/heroepicel.webp', '/media/heroepicel1.webp', '/media/heroepicel2.webp'];
 
 const HOLD_MS = 6000;
 const CROSSFADE_S = 1.5;
@@ -19,13 +19,26 @@ export default function Hero() {
     return () => window.removeEventListener('resize', handler);
   }, []);
 
-  // Preload every frame for the current viewport up front, so the browser already has each
-  // image cached by the time its turn in the rotation arrives — no flash or load delay.
+  // Only the first frame is requested eagerly (via the <img>'s fetchPriority/loading
+  // attributes below) — it's the LCP candidate, so it must not compete for bandwidth with
+  // anything else. The other frames for this viewport aren't needed until their turn in the
+  // rotation, seconds away, so they're fetched in the background only after the page has
+  // finished loading (or shortly after, if 'load' already fired by the time this runs).
   useEffect(() => {
-    images.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-    });
+    const preloadRest = () => {
+      images.slice(1).forEach((src) => {
+        const img = new Image();
+        img.src = src;
+      });
+    };
+
+    if (document.readyState === 'complete') {
+      const t = window.setTimeout(preloadRest, 1500);
+      return () => window.clearTimeout(t);
+    }
+
+    window.addEventListener('load', preloadRest, { once: true });
+    return () => window.removeEventListener('load', preloadRest);
   }, [images]);
 
   useEffect(() => {
@@ -83,8 +96,13 @@ export default function Hero() {
             crossfaded into the next so the hero reads as continuous motion, not a slideshow. */}
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
           <AnimatePresence>
-            <motion.div
+            <motion.img
               key={images[index]}
+              src={images[index]}
+              alt=""
+              aria-hidden="true"
+              fetchPriority={index === 0 ? 'high' : 'auto'}
+              loading={index === 0 ? 'eager' : 'lazy'}
               initial={{ opacity: 0, scale: 1 }}
               animate={{ opacity: 1, scale: 1.04 }}
               exit={{ opacity: 0 }}
@@ -95,9 +113,10 @@ export default function Hero() {
               style={{
                 position: 'absolute',
                 inset: 0,
-                backgroundImage: `url(${images[index]})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center',
               }}
             />
           </AnimatePresence>
@@ -140,7 +159,7 @@ export default function Hero() {
           }}
         >
           <motion.img
-            src="/media/logo-sovran-white.png"
+            src="/media/logo-sovran-white.webp"
             alt="Sovran"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

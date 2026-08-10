@@ -7,19 +7,19 @@ const testimonials = [
     quote:
       "We've worked with Sovran for over five years on multiple developments. Their consistency and reliability keep us coming back.",
     name: "Marcus O'Neill",
-    image: '/media/marcus.png',
+    image: '/media/marcus.webp',
   },
   {
     quote:
       'Military-level precision on every project. Sovran understood our vision from day one and delivered on time.',
     name: 'Shiv Patel',
-    image: '/media/shiv.png',
+    image: '/media/shiv.webp',
   },
   {
     quote:
       'They went beyond our expectations. The communication throughout, and the final result, exceeded what we thought was possible.',
     name: 'Nyla Idrissi',
-    image: '/media/nyla.png',
+    image: '/media/nyla.webp',
   },
 ];
 

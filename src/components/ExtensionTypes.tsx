@@ -7,7 +7,7 @@ const extensions = [
     desc: 'Open the back of your home to the garden.',
     longDesc:
       'This Georgian property gained a full-width glass extension across the rear, opening the kitchen, dining and living areas into a single uninterrupted space. Slim black-framed sliding doors run the entire width of the new structure, folding the garden into the room on warmer days. A paved terrace was laid directly outside the doors, with steps leading down to the lawn, keeping the new space and garden feeling like one continuous area. Inside, oak flooring carries through from the original house into the extension, with no visible step or threshold between old and new.',
-    image: '/media/rearext.png',
+    image: '/media/rearext.webp',
     imageLeft: true,
     location: 'Richmond, TW9',
   },
@@ -16,7 +16,7 @@ const extensions = [
     desc: 'Turn unused space into the room you need.',
     longDesc:
       "The loft of this Victorian terrace was converted into a full bedroom suite, with a slate-grey dormer extending the roofline to create proper standing height across the new floor. Large dormer windows were positioned to catch the rooftop views over the surrounding terraces, a detail the homeowners specifically asked for during early design conversations. Downstairs, the original sash windows and brick façade were left completely untouched, so the addition reads as a natural extension of the roofline rather than an obvious addition. The result added a full extra floor of usable space without altering the character of the street-facing elevation.",
-    image: '/media/loftconver.png?v=3',
+    image: '/media/loftconver.webp?v=3',
     imageLeft: false,
     location: 'Wimbledon, SW19',
   },
@@ -25,7 +25,7 @@ const extensions = [
     desc: 'Reclaim the narrow gap beside your property.',
     longDesc:
       "The narrow side return of this terraced house was reclaimed and turned into the heart of the home, with a glass roof lantern installed to flood the new kitchen and dining space with daylight throughout the day. The original exposed brick wall was kept and cleaned back, giving the new extension a warmth that plastered walls wouldn't have achieved. A long kitchen island anchors the space, with bi-fold doors at the far end opening directly onto the garden. Open shelving and a built-in bookcase were added along the brick wall, making use of a space that was previously just a dead-end passage beside the house.",
-    image: '/media/sideret.png',
+    image: '/media/sideret.webp',
     imageLeft: true,
     location: 'Chiswick, W4',
   },
@@ -34,7 +34,7 @@ const extensions = [
     desc: 'Two floors of new space. One build.',
     longDesc:
       'A red brick double-storey addition was built across the rear of this terraced home, matching the existing brickwork so closely the join is barely visible from the garden. The ground floor opens entirely through black-framed glazing into a new kitchen and dining space, while the bedroom above takes full advantage of the extra floor with a wall of glass overlooking the garden. Internally, the ceiling height was raised on both levels to avoid the boxed-in feeling many double-storey extensions create. The planting beneath the new windows was left untouched during construction, softening the new structure within weeks of completion.',
-    image: '/media/doublstor.png?v=3',
+    image: '/media/doublstor.webp?v=3',
     imageLeft: false,
     location: 'Hampstead, NW3',
   },
@@ -43,7 +43,7 @@ const extensions = [
     desc: 'Change the entire feel of your home.',
     longDesc:
       "This period property's rear and side were both extended in a single wrap-around build, fully glazed at the corner to maximise light from two directions at once. The flat roof was finished in a dark anthracite frame, contrasting deliberately against the white render of the original façade. Inside, the kitchen, dining and living spaces flow continuously around the wrapped corner, with the garden visible from almost every point in the new structure. Lavender and hydrangea beds were planted along the new terrace edge, softening the glass line and giving the extension a settled, established feel from the moment it was finished.",
-    image: '/media/wraparound.png',
+    image: '/media/wraparound.webp',
     imageLeft: true,
     location: 'Notting Hill, W11',
   },
