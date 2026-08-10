@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const desktopImages = ['/media/heroepic.webp', '/media/heroepic1.webp', '/media/heroepic2.webp'];
@@ -12,6 +12,16 @@ export default function Hero() {
   const [index, setIndex] = useState(0);
   const [ctaHovered, setCtaHovered] = useState(false);
   const images = isMobile ? mobileImages : desktopImages;
+
+  // The very first frame is requested eagerly/high-priority (below) since it's the LCP
+  // candidate. Once the component has painted for the first time, this flips permanently so
+  // the Ken Burns rotation cycling back to index 0 every ~18s never re-issues a wasteful
+  // duplicate high-priority fetch of the same already-cached image.
+  const hasPaintedFirstFrameRef = useRef(false);
+  useEffect(() => {
+    hasPaintedFirstFrameRef.current = true;
+  }, []);
+  const isEagerFirstFrame = index === 0 && !hasPaintedFirstFrameRef.current;
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768);
@@ -101,8 +111,8 @@ export default function Hero() {
               src={images[index]}
               alt=""
               aria-hidden="true"
-              fetchPriority={index === 0 ? 'high' : 'auto'}
-              loading={index === 0 ? 'eager' : 'lazy'}
+              fetchPriority={isEagerFirstFrame ? 'high' : 'auto'}
+              loading={isEagerFirstFrame ? 'eager' : 'lazy'}
               initial={{ opacity: 0, scale: 1 }}
               animate={{ opacity: 1, scale: 1.04 }}
               exit={{ opacity: 0 }}

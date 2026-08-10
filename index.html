@@ -1,18 +1,43 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-NDK94NFS');</script>
+    <!-- Google Tag Manager — dataLayer is initialized synchronously so dataLayer.push() calls
+         from the app queue correctly even before gtm.js has loaded (standard GTM behavior).
+         The actual gtm.js fetch (and everything it injects: GA4, Clarity, Meta Pixel) is
+         deferred to browser-idle time so it doesn't compete with the hero image / core bundle
+         for bandwidth in the first critical seconds — capped at a 2s fallback so it still loads
+         promptly even if the browser never reports idle. -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+
+      function loadTrackingScripts() {
+        var gtmScript = document.createElement('script');
+        gtmScript.async = true;
+        gtmScript.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-NDK94NFS';
+        document.head.appendChild(gtmScript);
+      }
+
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadTrackingScripts, { timeout: 2000 });
+      } else {
+        setTimeout(loadTrackingScripts, 2000);
+      }
+    </script>
     <!-- End Google Tag Manager -->
     <meta charset="UTF-8" />
     <link rel="icon" type="image/webp" href="/media/logo-s-white.webp">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="robots" content="noindex, nofollow">
     <title>Sovran Group — London's Luxury Extension Specialists</title>
+
+    <!-- Preload the first-frame hero image so the browser's HTML parser can start fetching it
+         immediately from raw HTML — this SPA has no SSR, so without this hint the <img> tag
+         (and its fetchPriority/loading attributes) doesn't exist until the JS bundle has
+         downloaded, parsed, executed, and React has mounted <Hero>. -->
+    <link rel="preload" as="image" href="/media/heroepicel.webp" media="(max-width: 767px)" fetchpriority="high" />
+    <link rel="preload" as="image" href="/media/heroepic.webp" media="(min-width: 768px)" fetchpriority="high" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;900&display=swap" rel="stylesheet">
