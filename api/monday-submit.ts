@@ -43,8 +43,8 @@ function extractBudgetNumber(budgetText: string): number {
   return followedByK ? num * 1000 : num;
 }
 
-function buildNotes(services: string[], timeline: string, postcode: string): string {
-  return `Services: ${services.join(', ')} | Timeline: ${timeline} | Postcode: ${postcode}`;
+function buildNotes(timeline: string): string {
+  return `Timeline: ${timeline}`;
 }
 
 function sleep(ms: number): Promise<void> {
@@ -134,17 +134,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  const { name, email, phone, extensionType, budget, services, timeline, postcode } =
-    req.body ?? {};
+  const { name, email, phone, extensionType, budget, timeline } = req.body ?? {};
 
   const fullName = typeof name === 'string' ? name : '';
   const firstName = extractFirstName(fullName);
   const budgetNumber = extractBudgetNumber(typeof budget === 'string' ? budget : '');
-  const notes = buildNotes(
-    Array.isArray(services) ? services : [],
-    typeof timeline === 'string' ? timeline : '',
-    typeof postcode === 'string' ? postcode : ''
-  );
+  const notes = buildNotes(typeof timeline === 'string' ? timeline : '');
   const phoneDigits = typeof phone === 'string' ? phone.replace(/[^\d]/g, '') : '';
 
   const columnValues: Record<string, unknown> = {

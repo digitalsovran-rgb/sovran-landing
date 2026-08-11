@@ -154,6 +154,9 @@ img {
   .form-options-grid {
     grid-template-columns: 1fr !important;
   }
+  .form-two-col-grid {
+    gap: 16px !important;
+  }
   .form-inner {
     padding: 40px 24px !important;
   }

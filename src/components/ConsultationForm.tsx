@@ -8,7 +8,7 @@ type FormData = {
   phone: string;
 };
 
-type PostcodeSubStep = 'input' | 'loading' | 'result';
+type QualifyingSubStep = 'input' | 'loading' | 'result';
 
 const extensionOptions = [
   'Rear Extension',
@@ -17,19 +17,6 @@ const extensionOptions = [
   'Double Storey',
   'Wrap Around',
   'Multiple Projects',
-];
-
-const serviceOptions = [
-  {
-    label: 'Design',
-    tooltip:
-      'Full architectural drawings, 3D renders, planning submissions, and material selections tailored to your home.',
-  },
-  {
-    label: 'Build',
-    tooltip:
-      'Construction delivered by our in-house team, with contract-backed milestones and a dedicated project manager throughout.',
-  },
 ];
 
 const budgetOptions = ['Under £150K', '£150K – £500K', '£500K – £1M', '£1M+'];
@@ -41,24 +28,15 @@ const timelineOptions = [
   'Next Year',
 ];
 
-const TOTAL_STEPS = 5;
-
 const progressMap: Record<number, string> = {
-  1: '20%',
-  2: '40%',
-  3: '60%',
-  4: '80%',
-  5: '100%',
+  1: '50%',
+  2: '100%',
 };
 
 const stepHeadings: Record<number, string> = {
   1: 'Select your extension type',
-  2: 'What services do you need?',
-  3: 'Investment goals',
-  4: 'When are you looking to start your project?',
-  5: 'Location of Your Project',
-  6: "What's your name?",
-  7: 'Enter your details and we will reach you shortly.',
+  2: 'Select your investment range and timeline',
+  3: 'Enter your details and we will reach you shortly.',
 };
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/;
@@ -69,9 +47,7 @@ type MondaySubmission = {
   phone: string;
   extension: string;
   budget: string;
-  services: string[];
   timeline: string;
-  postcode: string;
 };
 
 type MondaySubmitResult = { ok: true } | { ok: false; error: string };
@@ -105,9 +81,7 @@ async function submitToMonday(data: MondaySubmission): Promise<MondaySubmitResul
           phone: data.phone,
           extensionType: data.extension,
           budget: data.budget,
-          services: data.services,
           timeline: data.timeline,
-          postcode: data.postcode,
         }),
       });
       window.clearTimeout(timeoutId);
@@ -138,56 +112,6 @@ function validateEmail(value: string): boolean {
 function validatePhone(value: string): boolean {
   const digits = value.replace(/[\s\-]/g, '');
   return /^\d{10,11}$/.test(digits);
-}
-
-function InfoTooltip({ text }: { text: string }) {
-  const [visible, setVisible] = useState(false);
-
-  return (
-    <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', marginLeft: '8px' }}>
-      <span
-        onMouseEnter={() => setVisible(true)}
-        onMouseLeave={() => setVisible(false)}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '16px',
-          height: '16px',
-          borderRadius: '50%',
-          border: '1px solid rgba(0,0,0,0.35)',
-          fontSize: '10px',
-          fontWeight: 700,
-          color: 'rgba(0,0,0,0.45)',
-          cursor: 'default',
-          lineHeight: 1,
-          flexShrink: 0,
-        }}
-      >
-        i
-      </span>
-      {visible && (
-        <span
-          style={{
-            position: 'absolute',
-            bottom: 'calc(100% + 8px)',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            backgroundColor: '#0a0a0a',
-            color: '#ffffff',
-            fontSize: '12px',
-            lineHeight: 1.55,
-            padding: '10px 14px',
-            width: '240px',
-            pointerEvents: 'none',
-            zIndex: 10,
-          }}
-        >
-          {text}
-        </span>
-      )}
-    </span>
-  );
 }
 
 function SelectCard({
@@ -311,6 +235,15 @@ const fadeVariants = {
   exit: { opacity: 0, y: -10 },
 };
 
+const columnLabelStyle: React.CSSProperties = {
+  fontSize: '11px',
+  fontWeight: 500,
+  textTransform: 'uppercase',
+  letterSpacing: '0.15em',
+  color: 'rgba(0,0,0,0.45)',
+  marginBottom: '12px',
+};
+
 const navBtnBase: React.CSSProperties = {
   backgroundColor: '#0a0a0a',
   color: '#ffffff',
@@ -329,11 +262,16 @@ function WheelPicker({
   value,
   onChange,
   defaultIndex = 0,
+  compact = false,
 }: {
   options: string[];
   value: string;
   onChange: (v: string) => void;
   defaultIndex?: number;
+  // Same scroll/select interaction, smaller footprint — for use when two pickers sit
+  // side-by-side in a narrow column (e.g. the merged Investment/Timeline step) rather than
+  // this component's usual near-full-width single-column placement.
+  compact?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<number | null>(null);
@@ -343,9 +281,15 @@ function WheelPicker({
   const ITEM_HEIGHT = 56;
   const CONTAINER_HEIGHT = ITEM_HEIGHT * 3;
   const PADDING = ITEM_HEIGHT;
+  const PILL_LEFT = compact ? 30 : 54;
+  const ARROW_LEFT = compact ? 6 : 14;
+  const SELECTED_FONT_SIZE = compact ? 13 : 17;
+  const UNSELECTED_FONT_SIZE = compact ? 12 : 16;
 
   const longestOption = options.reduce((a, b) => a.length > b.length ? a : b, '');
-  const PILL_WIDTH = Math.max(150, longestOption.length * 8 + 60);
+  const PILL_WIDTH = compact
+    ? Math.max(90, longestOption.length * 5.5 + 20)
+    : Math.max(150, longestOption.length * 8 + 60);
 
   const initIdx = value
     ? (options.indexOf(value) === -1 ? defaultIndex : options.indexOf(value))
@@ -370,7 +314,7 @@ function WheelPicker({
       if (prevDiv) prevDiv.style.opacity = '0.75';
       if (prevSpan) {
         prevSpan.style.color = '#0a0a0a';
-        prevSpan.style.fontSize = '16px';
+        prevSpan.style.fontSize = `${UNSELECTED_FONT_SIZE}px`;
         prevSpan.style.fontWeight = '400';
         prevSpan.style.letterSpacing = 'normal';
       }
@@ -381,7 +325,7 @@ function WheelPicker({
     if (newDiv) newDiv.style.opacity = '1';
     if (newSpan) {
       newSpan.style.color = '#0a0a0a';
-      newSpan.style.fontSize = '17px';
+      newSpan.style.fontSize = `${SELECTED_FONT_SIZE}px`;
       newSpan.style.fontWeight = '700';
       newSpan.style.letterSpacing = '-0.01em';
     }
@@ -457,10 +401,10 @@ function WheelPicker({
       }} />
       {/* Static chevron arrow */}
       <svg
-        width="32" height="32" viewBox="0 0 24 24"
+        width={compact ? 20 : 32} height={compact ? 20 : 32} viewBox="0 0 24 24"
         style={{
           position: 'absolute',
-          left: '14px',
+          left: `${ARROW_LEFT}px`,
           top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 4,
@@ -475,9 +419,9 @@ function WheelPicker({
       <div style={{
         position: 'absolute',
         top: `${PADDING}px`,
-        left: '54px',
+        left: `${PILL_LEFT}px`,
         width: `${PILL_WIDTH}px`,
-        maxWidth: 'calc(100% - 58px)',
+        maxWidth: `calc(100% - ${PILL_LEFT + 4}px)`,
         height: `${ITEM_HEIGHT}px`,
         backgroundColor: 'rgba(10,10,10,0.08)',
         border: '2px solid #0a0a0a',
@@ -516,7 +460,7 @@ function WheelPicker({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'flex-start',
-                paddingLeft: '54px',
+                paddingLeft: `${PILL_LEFT}px`,
                 scrollSnapAlign: 'center',
                 opacity: isInitial ? 1 : 0.75,
                 transition: 'opacity 0.15s ease',
@@ -536,7 +480,7 @@ function WheelPicker({
                   width: `${PILL_WIDTH}px`,
                   maxWidth: 'calc(100% - 4px)',
                   textAlign: 'center',
-                  fontSize: isInitial ? '17px' : '16px',
+                  fontSize: isInitial ? `${SELECTED_FONT_SIZE}px` : `${UNSELECTED_FONT_SIZE}px`,
                   fontWeight: isInitial ? 700 : 400,
                   color: '#0a0a0a',
                   letterSpacing: isInitial ? '-0.01em' : 'normal',
@@ -559,11 +503,9 @@ export default function ConsultationForm() {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
   const [selectedExtension, setSelectedExtension] = useState('');
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedBudget, setSelectedBudget] = useState('');
   const [selectedTimeline, setSelectedTimeline] = useState('');
-  const [postcode, setPostcode] = useState('');
-  const [postcodeSubStep, setPostcodeSubStep] = useState<PostcodeSubStep>('input');
+  const [qualifyingSubStep, setQualifyingSubStep] = useState<QualifyingSubStep>('input');
   const [formData, setFormData] = useState<FormData>({ name: '', email: '', phone: '' });
   const [emailBlurred, setEmailBlurred] = useState(false);
   const [phoneBlurred, setPhoneBlurred] = useState(false);
@@ -581,38 +523,29 @@ export default function ConsultationForm() {
   const progress = progressMap[step] ?? '14%';
 
   useEffect(() => {
-    if (postcodeSubStep === 'loading') {
-      const t = setTimeout(() => setPostcodeSubStep('result'), 4000);
+    if (qualifyingSubStep === 'loading') {
+      const t = setTimeout(() => setQualifyingSubStep('result'), 4000);
       return () => clearTimeout(t);
     }
-  }, [postcodeSubStep]);
+  }, [qualifyingSubStep]);
 
   const emailValid = validateEmail(formData.email);
   const phoneValid = validatePhone(formData.phone);
 
-  const toggleService = (label: string) => {
-    setSelectedServices((prev) =>
-      prev.includes(label) ? prev.filter((s) => s !== label) : [...prev, label]
-    );
-  };
-
   const handleCheckAvailability = () => {
-    setPostcodeSubStep('loading');
+    setQualifyingSubStep('loading');
   };
 
   const canNext = () => {
     if (step === 1) return selectedExtension !== '';
-    if (step === 2) return selectedServices.length > 0;
-    if (step === 3) return selectedBudget !== '';
-    if (step === 4) return selectedTimeline !== '';
-    if (step === 5) return false;
-    if (step === 6) return formData.name.trim() !== '';
-    if (step === 7) return emailValid && phoneValid && formData.email.trim() !== '' && formData.phone.trim() !== '';
+    if (step === 2 && qualifyingSubStep === 'input') return selectedBudget !== '' && selectedTimeline !== '';
+    if (step === 2 && qualifyingSubStep === 'result') return formData.name.trim() !== '';
+    if (step === 3) return emailValid && phoneValid && formData.email.trim() !== '' && formData.phone.trim() !== '';
     return false;
   };
 
   const goNext = async () => {
-    if (step === 7) {
+    if (step === 3) {
       setSubmitting(true);
       setSubmitError('');
 
@@ -622,9 +555,7 @@ export default function ConsultationForm() {
         phone: formData.phone,
         extension: selectedExtension,
         budget: selectedBudget,
-        services: selectedServices,
         timeline: selectedTimeline,
-        postcode,
       });
 
       setSubmitting(false);
@@ -650,8 +581,8 @@ export default function ConsultationForm() {
   };
 
   const goBack = () => {
-    if (step === 5 && postcodeSubStep !== 'input') {
-      setPostcodeSubStep('input');
+    if (step === 2 && qualifyingSubStep !== 'input') {
+      setQualifyingSubStep('input');
       return;
     }
     setDirection(-1);
@@ -659,14 +590,14 @@ export default function ConsultationForm() {
   };
 
   const getStepHeading = () => {
-    if (step === 5 && postcodeSubStep === 'loading') return 'Checking Our Availability';
-    if (step === 5 && postcodeSubStep === 'result')
-      return 'Good news, one of our project managers is available to discuss your project.';
+    if (step === 2 && qualifyingSubStep === 'loading') return 'Checking Our Availability';
+    if (step === 2 && qualifyingSubStep === 'result')
+      return 'Good News — Your Architectural Design Package Is Available.';
     return stepHeadings[step];
   };
 
-  const showBack = step > 1 && !(step === 5 && postcodeSubStep === 'loading');
-  const showNext = step !== 5;
+  const showBack = step > 1 && !(step === 2 && qualifyingSubStep === 'loading');
+  const showNext = step !== 2;
 
   return (
     <>
@@ -783,11 +714,9 @@ export default function ConsultationForm() {
                   setStep(1);
                   setDirection(1);
                   setSelectedExtension('');
-                  setSelectedServices([]);
                   setSelectedBudget('');
                   setSelectedTimeline('');
-                  setPostcode('');
-                  setPostcodeSubStep('input');
+                  setQualifyingSubStep('input');
                   setFormData({ name: '', email: '', phone: '' });
                   setEmailBlurred(false);
                   setPhoneBlurred(false);
@@ -819,8 +748,8 @@ export default function ConsultationForm() {
             </motion.div>
           ) : (
             <>
-              {/* Progress bar — only shown on steps 1–5 */}
-              {step <= 5 && (
+              {/* Progress bar — only shown on steps 1–2 */}
+              {step <= 2 && (
                 <div
                   style={{
                     height: '2px',
@@ -841,22 +770,6 @@ export default function ConsultationForm() {
                     }}
                   />
                 </div>
-              )}
-
-              {/* Step indicator — only shown on steps 1–5 */}
-              {step <= 5 && (
-                <p
-                  style={{
-                    fontSize: '12px',
-                    fontWeight: 500,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.15em',
-                    color: 'rgba(0,0,0,0.4)',
-                    marginBottom: '8px',
-                  }}
-                >
-                  Step {step} of {TOTAL_STEPS}
-                </p>
               )}
 
               {/* Heading */}
@@ -916,164 +829,103 @@ export default function ConsultationForm() {
                     )
                   )}
 
-                  {/* STEP 2 — Services needed */}
+                  {/* STEP 2 — Investment + Timeline (merged), then Check Availability →
+                      loading → success message + Name field */}
                   {step === 2 && (
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '20px',
-                        marginBottom: '40px',
-                      }}
-                    >
-                      {serviceOptions.map((opt) => (
-                        <label
-                          key={opt.label}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedServices.includes(opt.label)}
-                            onChange={() => toggleService(opt.label)}
-                            style={{
-                              width: '18px',
-                              height: '18px',
-                              accentColor: '#c9a96e',
-                              cursor: 'pointer',
-                              flexShrink: 0,
-                            }}
-                          />
-                          <span
-                            style={{
-                              fontSize: '14px',
-                              fontWeight: 600,
-                              color: '#0a0a0a',
-                              letterSpacing: '0.08em',
-                              textTransform: 'uppercase',
-                            }}
-                          >
-                            {opt.label}
-                          </span>
-                          <InfoTooltip text={opt.tooltip} />
-                        </label>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* STEP 3 — Investment range */}
-                  {step === 3 && (
-                    isMobile ? (
-                      <div style={{ marginBottom: '40px' }}>
-                        <WheelPicker
-                          options={budgetOptions}
-                          value={selectedBudget}
-                          onChange={setSelectedBudget}
-                          defaultIndex={budgetOptions.indexOf('£150K – £500K')}
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        className="form-options-grid"
-                        style={{
-                          display: 'grid',
-                          gridTemplateColumns: 'repeat(2, 1fr)',
-                          gap: '12px',
-                          marginBottom: '40px',
-                        }}
-                      >
-                        {budgetOptions.map((opt) => (
-                          <SelectCard
-                            key={opt}
-                            label={opt}
-                            selected={selectedBudget === opt}
-                            onClick={() => setSelectedBudget(opt)}
-                          />
-                        ))}
-                      </div>
-                    )
-                  )}
-
-                  {/* STEP 4 — Timeline */}
-                  {step === 4 && (
-                    isMobile ? (
-                      <div style={{ marginBottom: '40px' }}>
-                        <WheelPicker
-                          options={timelineOptions}
-                          value={selectedTimeline}
-                          onChange={setSelectedTimeline}
-                          defaultIndex={timelineOptions.indexOf('Within 1 Month')}
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        className="form-options-grid"
-                        style={{
-                          display: 'grid',
-                          gridTemplateColumns: 'repeat(2, 1fr)',
-                          gap: '12px',
-                          marginBottom: '40px',
-                        }}
-                      >
-                        {timelineOptions.map((opt) => (
-                          <SelectCard
-                            key={opt}
-                            label={opt}
-                            selected={selectedTimeline === opt}
-                            onClick={() => setSelectedTimeline(opt)}
-                          />
-                        ))}
-                      </div>
-                    )
-                  )}
-
-                  {/* STEP 5 — Postcode */}
-                  {step === 5 && (
                     <div style={{ marginBottom: '40px' }}>
                       <AnimatePresence mode="wait">
                         <motion.div
-                          key={postcodeSubStep}
+                          key={qualifyingSubStep}
                           variants={fadeVariants}
                           initial="enter"
                           animate="center"
                           exit="exit"
                           transition={{ duration: 0.3 }}
                         >
-                          {postcodeSubStep === 'input' && (
+                          {qualifyingSubStep === 'input' && (
                             <div>
-                              <p
+                              <div
+                                className="form-two-col-grid"
                                 style={{
-                                  fontSize: '14px',
-                                  color: 'rgba(0,0,0,0.55)',
-                                  lineHeight: 1.65,
-                                  marginBottom: '32px',
-                                  letterSpacing: 'normal',
+                                  display: 'grid',
+                                  gridTemplateColumns: '1fr 1fr',
+                                  gap: '32px',
                                 }}
                               >
-                                Enter your postcode to check our availability.
-                              </p>
-                              <TextInput
-                                label="Postcode"
-                                value={postcode}
-                                onChange={(v) => {
-                                  const filtered = v.replace(/[^A-Za-z0-9 ]/g, '');
-                                  setPostcode(filtered);
-                                }}
-                              />
+                                <div style={{ minWidth: 0 }}>
+                                  <p style={columnLabelStyle}>Investment</p>
+                                  {isMobile ? (
+                                    <WheelPicker
+                                      options={budgetOptions}
+                                      value={selectedBudget}
+                                      onChange={setSelectedBudget}
+                                      defaultIndex={budgetOptions.indexOf('£150K – £500K')}
+                                      compact
+                                    />
+                                  ) : (
+                                    <div
+                                      style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(2, 1fr)',
+                                        gap: '10px',
+                                      }}
+                                    >
+                                      {budgetOptions.map((opt) => (
+                                        <SelectCard
+                                          key={opt}
+                                          label={opt}
+                                          selected={selectedBudget === opt}
+                                          onClick={() => setSelectedBudget(opt)}
+                                        />
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                                <div style={{ minWidth: 0 }}>
+                                  <p style={columnLabelStyle}>Ideal Start</p>
+                                  {isMobile ? (
+                                    <WheelPicker
+                                      options={timelineOptions}
+                                      value={selectedTimeline}
+                                      onChange={setSelectedTimeline}
+                                      defaultIndex={timelineOptions.indexOf('Within 1 Month')}
+                                      compact
+                                    />
+                                  ) : (
+                                    <div
+                                      style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(2, 1fr)',
+                                        gap: '10px',
+                                      }}
+                                    >
+                                      {timelineOptions.map((opt) => (
+                                        <SelectCard
+                                          key={opt}
+                                          label={opt}
+                                          selected={selectedTimeline === opt}
+                                          onClick={() => setSelectedTimeline(opt)}
+                                        />
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
                               <button
                                 type="button"
                                 onClick={handleCheckAvailability}
+                                disabled={!canNext()}
                                 style={{
                                   ...navBtnBase,
                                   marginTop: '32px',
+                                  opacity: canNext() ? 1 : 0.3,
+                                  cursor: canNext() ? 'pointer' : 'not-allowed',
                                 }}
                                 onMouseEnter={(e) => {
-                                  e.currentTarget.style.backgroundColor = '#c9a96e';
-                                  e.currentTarget.style.borderColor = '#c9a96e';
+                                  if (canNext()) {
+                                    e.currentTarget.style.backgroundColor = '#c9a96e';
+                                    e.currentTarget.style.borderColor = '#c9a96e';
+                                  }
                                 }}
                                 onMouseLeave={(e) => {
                                   e.currentTarget.style.backgroundColor = '#0a0a0a';
@@ -1085,7 +937,7 @@ export default function ConsultationForm() {
                             </div>
                           )}
 
-                          {postcodeSubStep === 'loading' && (
+                          {qualifyingSubStep === 'loading' && (
                             <div style={{ paddingTop: '16px' }}>
                               <div
                                 style={{
@@ -1117,12 +969,12 @@ export default function ConsultationForm() {
                                   letterSpacing: 'normal',
                                 }}
                               >
-                                Checking project manager availability...
+                                Checking availability for your architectural design package...
                               </p>
                             </div>
                           )}
 
-                          {postcodeSubStep === 'result' && (
+                          {qualifyingSubStep === 'result' && (
                             <div style={{ paddingTop: '8px' }}>
                               <p
                                 style={{
@@ -1133,15 +985,28 @@ export default function ConsultationForm() {
                                   letterSpacing: 'normal',
                                 }}
                               >
-                                Let&apos;s get your consultation booked.
+                                One of our team will be in touch to begin your design package — floor plans, 3D visuals and a full proposal, built around your home.
                               </p>
+                              <TextInput
+                                label="Name"
+                                value={formData.name}
+                                onChange={(v) => setFormData((f) => ({ ...f, name: v }))}
+                              />
                               <button
                                 type="button"
                                 onClick={goNext}
-                                style={{ ...navBtnBase }}
+                                disabled={!canNext()}
+                                style={{
+                                  ...navBtnBase,
+                                  marginTop: '32px',
+                                  opacity: canNext() ? 1 : 0.3,
+                                  cursor: canNext() ? 'pointer' : 'not-allowed',
+                                }}
                                 onMouseEnter={(e) => {
-                                  e.currentTarget.style.backgroundColor = '#c9a96e';
-                                  e.currentTarget.style.borderColor = '#c9a96e';
+                                  if (canNext()) {
+                                    e.currentTarget.style.backgroundColor = '#c9a96e';
+                                    e.currentTarget.style.borderColor = '#c9a96e';
+                                  }
                                 }}
                                 onMouseLeave={(e) => {
                                   e.currentTarget.style.backgroundColor = '#0a0a0a';
@@ -1157,26 +1022,8 @@ export default function ConsultationForm() {
                     </div>
                   )}
 
-                  {/* STEP 6 — Name */}
-                  {step === 6 && (
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '32px',
-                        marginBottom: '40px',
-                      }}
-                    >
-                      <TextInput
-                        label="Name"
-                        value={formData.name}
-                        onChange={(v) => setFormData((f) => ({ ...f, name: v }))}
-                      />
-                    </div>
-                  )}
-
-                  {/* STEP 7 — Contact details */}
-                  {step === 7 && (
+                  {/* STEP 3 — Contact details */}
+                  {step === 3 && (
                     <div
                       style={{
                         display: 'flex',
@@ -1218,8 +1065,8 @@ export default function ConsultationForm() {
                 </motion.div>
               </AnimatePresence>
 
-              {/* Submission error — step 7 only, shown after a failed Monday submission */}
-              {step === 7 && submitError && (
+              {/* Submission error — step 3 only, shown after a failed Monday submission */}
+              {step === 3 && submitError && (
                 <p
                   style={{
                     fontSize: '13px',
@@ -1290,7 +1137,7 @@ export default function ConsultationForm() {
                       e.currentTarget.style.borderColor = '#0a0a0a';
                     }}
                   >
-                    {step === 7
+                    {step === 3
                       ? submitting
                         ? 'Submitting…'
                         : 'Book Your Design Consultation'
