@@ -6,10 +6,10 @@ const desktopPosters = ['/media/vidher1-poster.webp', '/media/vidher2-poster.web
 const mobileVideos = ['/media/vidher1mob.mp4', '/media/vidher2mob.mp4', '/media/vidher3mob.mp4'];
 const mobilePosters = ['/media/vidher1mob-poster.webp', '/media/vidher2mob-poster.webp', '/media/vidher3mob-poster.webp'];
 
-const FADE_MS = 400;
-const REVEAL_FALLBACK_MS = 200;
-const END_FALLBACK_MS = 3300;
-const WARM_DELAY_MS = 1500;
+const CLIP_COUNT = 3;
+const TRIGGER_S = 2.5;
+const FADE_MS = 500;
+const CLEANUP_MS = 600;
 
 // Reduced motion and data saver users get the first poster as a still image, no video at all.
 function shouldSkipVideo(): boolean {
@@ -30,8 +30,6 @@ const coverStyle: React.CSSProperties = {
 
 export default function Hero() {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
-  const [active, setActive] = useState(0);
-  const [blackVisible, setBlackVisible] = useState(false);
   const [failed, setFailed] = useState(false);
   const [ctaHovered, setCtaHovered] = useState(false);
   const [skipVideo] = useState(shouldSkipVideo);
@@ -42,11 +40,12 @@ export default function Hero() {
 
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([null, null, null]);
   const activeRef = useRef(0);
-  const lockRef = useRef(false);
   const stoppedRef = useRef(false);
+  const warmedRef = useRef(false);
+  // One flag per clip so its crossfade can only start once per play-through.
+  const guardRef = useRef<boolean[]>([false, false, false]);
   const timersRef = useRef<number[]>([]);
-  const fallbackRef = useRef<number | null>(null);
-  const pendingRevealRef = useRef<(() => void) | null>(null);
+  const cleanupsRef = useRef<(() => void)[]>([]);
 
   // Crossing the breakpoint swaps the clip set, so the sequence restarts from clip 1.
   useEffect(() => {
@@ -56,123 +55,141 @@ export default function Hero() {
       if (nowMobile === wasMobile) return;
       wasMobile = nowMobile;
       setIsMobile(nowMobile);
-      setActive(0);
-      setBlackVisible(false);
     };
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
 
   const later = (fn: () => void, ms: number) => {
-    const id = window.setTimeout(fn, ms);
-    timersRef.current.push(id);
-    return id;
+    timersRef.current.push(window.setTimeout(fn, ms));
   };
 
-  const clearFallback = () => {
-    if (fallbackRef.current !== null) {
-      window.clearTimeout(fallbackRef.current);
-      fallbackRef.current = null;
-    }
+  // One-shot listener that is also removed if the component unmounts or restarts first.
+  const listenOnce = (el: HTMLVideoElement, type: string, fn: () => void) => {
+    const handler = () => {
+      el.removeEventListener(type, handler);
+      fn();
+    };
+    el.addEventListener(type, handler);
+    cleanupsRef.current.push(() => el.removeEventListener(type, handler));
   };
 
-  const clearAllTimers = () => {
+  const clearAll = () => {
     timersRef.current.forEach((id) => window.clearTimeout(id));
     timersRef.current = [];
-    clearFallback();
+    cleanupsRef.current.forEach((fn) => fn());
+    cleanupsRef.current = [];
   };
 
-  // A rejected play() (autoplay blocked, low power mode) ends the rotation and leaves the
-  // first poster on screen.
+  // The first clip could not start (autoplay blocked, low power mode): fall back to the poster.
   const stopRotation = () => {
     stoppedRef.current = true;
-    pendingRevealRef.current = null;
-    clearAllTimers();
-    setBlackVisible(false);
+    clearAll();
     setFailed(true);
   };
 
-  const startTransition = (from: number) => {
-    if (stoppedRef.current || lockRef.current || activeRef.current !== from) return;
-    lockRef.current = true;
-    clearFallback();
-    setBlackVisible(true);
+  // A later clip could not start: freeze the rotation and leave the current clip on screen.
+  const haltRotation = () => {
+    stoppedRef.current = true;
+    clearAll();
+  };
 
-    later(() => {
+  // Clips 2 and 3 stay at metadata only until clip 1 is actually playing, so they never
+  // compete with the first poster and clip for bandwidth.
+  const warmOtherClips = () => {
+    if (warmedRef.current) return;
+    warmedRef.current = true;
+    for (let i = 1; i < CLIP_COUNT; i++) {
+      const el = videoRefs.current[i];
+      if (!el) continue;
+      el.preload = 'auto';
+      el.load();
+    }
+  };
+
+  const crossfade = (from: number) => {
+    if (stoppedRef.current || activeRef.current !== from || guardRef.current[from]) return;
+    guardRef.current[from] = true;
+
+    const to = (from + 1) % CLIP_COUNT;
+    const current = videoRefs.current[from];
+    const next = videoRefs.current[to];
+    if (!current || !next) return;
+
+    const startFade = () => {
       if (stoppedRef.current) return;
-      videoRefs.current[from]?.pause();
-
-      const to = (from + 1) % 3;
-      const next = videoRefs.current[to];
       activeRef.current = to;
-      setActive(to);
+      const transition = `opacity ${FADE_MS}ms ease`;
+      current.style.transition = transition;
+      next.style.transition = transition;
+      next.style.zIndex = '2';
+      current.style.zIndex = '1';
+      next.style.opacity = '1';
+      current.style.opacity = '0';
 
-      let revealed = false;
-      const reveal = () => {
-        if (revealed) return;
-        revealed = true;
-        pendingRevealRef.current = null;
-        setBlackVisible(false);
-        lockRef.current = false;
-      };
-      pendingRevealRef.current = reveal;
-      later(reveal, REVEAL_FALLBACK_MS);
+      later(() => {
+        current.pause();
+        current.currentTime = 0;
+        current.style.transition = 'none';
+        current.style.opacity = '0';
+        current.style.zIndex = '0';
+        guardRef.current[from] = false;
+      }, CLEANUP_MS);
+    };
 
-      if (next) {
-        next.currentTime = 0;
-        next.play()?.catch(stopRotation);
-      }
-    }, FADE_MS);
+    const begin = () => {
+      if (stoppedRef.current) return;
+      next.currentTime = 0;
+      const started = next.play();
+      if (!started) return;
+      started
+        .then(() => {
+          if (stoppedRef.current) return;
+          if ('requestVideoFrameCallback' in next) {
+            const handle = next.requestVideoFrameCallback(() => startFade());
+            cleanupsRef.current.push(() => next.cancelVideoFrameCallback(handle));
+          } else {
+            listenOnce(next, 'playing', startFade);
+          }
+        })
+        .catch(haltRotation);
+    };
+
+    // The incoming clip must be able to play through before the fade starts. Until then the
+    // current clip stays on screen, holding its last frame if it has already finished.
+    if (next.readyState < 3) {
+      listenOnce(next, 'canplay', begin);
+    } else {
+      begin();
+    }
+  };
+
+  const handleTimeUpdate = (index: number) => {
+    if (index !== activeRef.current) return;
+    const el = videoRefs.current[index];
+    if (el && el.currentTime >= TRIGGER_S) crossfade(index);
   };
 
   const handlePlaying = (index: number) => {
-    if (index !== activeRef.current || stoppedRef.current) return;
-    pendingRevealRef.current?.();
-    clearFallback();
-    fallbackRef.current = window.setTimeout(() => startTransition(index), END_FALLBACK_MS);
+    if (index === 0) warmOtherClips();
   };
 
   // (Re)start the sequence from clip 1 on mount and whenever the breakpoint flips.
   useEffect(() => {
     if (showStatic) return;
     activeRef.current = 0;
-    lockRef.current = false;
     stoppedRef.current = false;
-    pendingRevealRef.current = null;
+    warmedRef.current = false;
+    guardRef.current = [false, false, false];
 
     const first = videoRefs.current[0];
     if (first) {
       first.muted = true;
       first.play()?.catch(stopRotation);
     }
-    return clearAllTimers;
-    // stopRotation and clearAllTimers only touch refs and stable setters
+    return clearAll;
+    // stopRotation and clearAll only touch refs and stable setters
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobile, showStatic]);
-
-  // Clips 2 and 3 only load metadata until the page has finished loading, so they never
-  // compete with the first poster and clip for bandwidth.
-  useEffect(() => {
-    if (showStatic) return;
-    let timer: number | undefined;
-    const warm = () => {
-      timer = window.setTimeout(() => {
-        [1, 2].forEach((i) => {
-          const el = videoRefs.current[i];
-          if (el) el.preload = 'auto';
-        });
-      }, WARM_DELAY_MS);
-    };
-
-    if (document.readyState === 'complete') {
-      warm();
-    } else {
-      window.addEventListener('load', warm, { once: true });
-    }
-    return () => {
-      window.removeEventListener('load', warm);
-      if (timer !== undefined) window.clearTimeout(timer);
-    };
   }, [isMobile, showStatic]);
 
   const scrollToForm = () => {
@@ -183,14 +200,15 @@ export default function Hero() {
     <>
       <style>{`
         .hero-desc-mobile { display: none; }
-        @media (min-width: 768px) {
-          /* Reserved (not flex-computed) space between the fixed logo and the eyebrow, so
-             the gap holds even at short desktop viewport heights (e.g. 1280x720 laptop
-             windows) where the top flex spacer would otherwise collapse toward zero. */
-          .hero-content { padding-top: 110px !important; padding-bottom: 110px !important; }
+        /* Full-screen hero. The !important on min-height beats the older mobile rule in
+           index.css (#hero min-height: max(78vh, 480px) !important), which this style block
+           follows in the cascade. */
+        #hero {
+          height: 100vh;
+          height: 100svh;
+          min-height: 100svh !important;
         }
         @media (max-width: 767px) {
-          .hero-content { padding-bottom: 60px !important; }
           .hero-h1 { font-size: clamp(26px, 7.1vw, 35px) !important; font-weight: 900 !important; }
           .hero-label { font-size: 10px !important; margin-bottom: 24px !important; font-weight: 600 !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
           .hero-desc { font-size: 14.3px !important; font-weight: 500 !important; text-shadow: 0 2px 8px rgba(0,0,0,0.5) !important; }
@@ -211,16 +229,20 @@ export default function Hero() {
         data-bg="dark"
         style={{
           position: 'relative',
-          minHeight: 'max(90vh, 600px)',
+          overflow: 'hidden',
           display: 'flex',
-          alignItems: 'stretch',
+          flexDirection: 'column',
+          alignItems: 'center',
           justifyContent: 'center',
+          paddingTop: '96px',
+          paddingBottom: '72px',
+          boxSizing: 'border-box',
           backgroundColor: '#0a0a0a',
         }}
       >
-        {/* Background: three short clips stacked, one visible at a time. A black layer fades
-            in between clips so the cut reads as a dip to black rather than a hard swap. */}
-        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+        {/* Background: three short clips stacked, one visible at a time. The next clip fades in
+            over the current one, so there is no dip between clips. */}
+        <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'hidden' }}>
           {showStatic ? (
             <img
               src={posters[0]}
@@ -248,24 +270,19 @@ export default function Hero() {
                 tabIndex={-1}
                 disablePictureInPicture
                 onPlaying={() => handlePlaying(i)}
-                onEnded={() => startTransition(i)}
-                style={{ ...coverStyle, opacity: active === i ? 1 : 0 }}
+                onTimeUpdate={() => handleTimeUpdate(i)}
+                onEnded={() => crossfade(i)}
+                style={{
+                  ...coverStyle,
+                  opacity: i === 0 ? 1 : 0,
+                  zIndex: i === 0 ? 1 : 0,
+                  willChange: 'opacity',
+                  transform: 'translateZ(0)',
+                }}
               />
             ))
           )}
         </div>
-
-        {/* Black layer used for the dip between clips */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundColor: '#000000',
-            opacity: blackVisible ? 1 : 0,
-            transition: `opacity ${FADE_MS}ms ease`,
-            pointerEvents: 'none',
-          }}
-        />
 
         {/* Overlay */}
         <div
@@ -284,7 +301,7 @@ export default function Hero() {
             left: 0,
             right: 0,
             width: '100%',
-            height: '30%',
+            height: isMobile ? '12%' : '30%',
             background: 'linear-gradient(to bottom, rgba(10,10,10,0) 0%, rgba(10,10,10,0.28) 55%, #0A0A0A 100%)',
             zIndex: 1,
             pointerEvents: 'none',
@@ -317,13 +334,9 @@ export default function Hero() {
           />
         </div>
 
-        {/* Content: the headline is the vertical anchor, not the group. The two flex:1
-            spacers above and below it always claim equal leftover space, so the headline's
-            own center lands at the section's true vertical center regardless of how tall the
-            eyebrow or the subhead and button cluster are; each spacer's inner justifyContent
-            keeps its content flush against the headline, preserving the existing margins.
-            The bottom padding is a hard reservation (not space left over from flex-grow), so
-            it guarantees the button-to-section-edge gap at any hero or viewport height. */}
+        {/* Content: the section is a centered flex column with its own top and bottom padding
+            (room for the logo above, breathing space below), so this block sits in the
+            vertical middle of the full-height hero. */}
         <div
           className="hero-content"
           style={{
@@ -331,7 +344,6 @@ export default function Hero() {
             zIndex: 2,
             textAlign: 'center',
             padding: '0 24px',
-            paddingBottom: '80px',
             width: '100%',
             maxWidth: '1000px',
             display: 'flex',
