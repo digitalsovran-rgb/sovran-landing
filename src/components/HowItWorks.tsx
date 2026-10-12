@@ -1,6 +1,7 @@
-import { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { FileSearch, PenTool, Video, ClipboardCheck } from 'lucide-react';
+import PulseRing from './PulseRing';
 
 const rows = [
   {
@@ -37,16 +38,24 @@ const rows = [
   },
 ];
 
-function Row({ row, i }: { row: (typeof rows)[0]; i: number }) {
+function Row({ row, i, isMobile }: { row: (typeof rows)[0]; i: number; isMobile: boolean }) {
   // Each row observes its own (comparatively short) container rather than sharing a single
-  // isInView tied to the whole section — see the note in git history: a shared isInView over
-  // the whole (very tall, stacked-on-mobile) section could never reach its visibility
-  // threshold and left everything stuck at opacity 0.
+  // isInView tied to the whole section. A shared isInView over the whole (very tall,
+  // stacked-on-mobile) section could never reach its visibility threshold and left
+  // everything stuck at opacity 0.
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px -100px 0px', amount: 0.2 });
+  const [open, setOpen] = useState(false);
+  const [opened, setOpened] = useState(false);
   const Icon = row.icon;
   const imgFromX = row.imageLeft ? -50 : 50;
   const textFromX = row.imageLeft ? 50 : -50;
+  const descId = `hiw-desc-${row.num}`;
+
+  const toggle = () => {
+    setOpen((o) => !o);
+    setOpened(true);
+  };
 
   return (
     <div
@@ -77,7 +86,7 @@ function Row({ row, i }: { row: (typeof rows)[0]; i: number }) {
           justifyContent: 'center',
           fontSize: '16px',
           fontWeight: 900,
-          color: '#f5f0eb',
+          color: 'var(--sov-white)',
           letterSpacing: '-0.02em',
           zIndex: 2,
           boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
@@ -118,36 +127,102 @@ function Row({ row, i }: { row: (typeof rows)[0]; i: number }) {
           padding: '48px 56px',
         }}
       >
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-            <Icon size={18} color="#0a0a0a" strokeWidth={1.75} style={{ flexShrink: 0 }} />
-            <span
+        {isMobile ? (
+          <div style={{ width: '100%' }}>
+            <button
+              type="button"
+              onClick={toggle}
+              aria-expanded={open}
+              aria-controls={descId}
               style={{
-                fontSize: '13px',
-                fontWeight: 700,
-                color: '#0a0a0a',
-                textTransform: 'uppercase',
-                letterSpacing: '0.15em',
+                background: 'none',
+                border: 'none',
+                width: '100%',
+                textAlign: 'left',
+                padding: 0,
+                minHeight: '56px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '14px',
+                cursor: 'pointer',
               }}
             >
-              {row.label}
-            </span>
+              <PulseRing size={56} tone="light" pulse={!opened} delay={i * 0.3}>
+                <Icon size={28} color="#4A443C" strokeWidth={1.75} />
+              </PulseRing>
+              <span
+                style={{
+                  fontSize: '18px',
+                  fontWeight: 700,
+                  color: '#0a0a0a',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.15em',
+                }}
+              >
+                {row.label}
+              </span>
+            </button>
+            <AnimatePresence initial={false}>
+              {open && (
+                <motion.div
+                  id={descId}
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.35, ease: 'easeInOut' }}
+                  style={{ overflow: 'hidden' }}
+                >
+                  <p
+                    className="hiw-desc"
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: 400,
+                      color: 'var(--sov-grey)',
+                      lineHeight: 1.65,
+                      letterSpacing: 'normal',
+                      maxWidth: '450px',
+                      textAlign: 'justify',
+                      paddingTop: '14px',
+                    }}
+                  >
+                    {row.desc}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-          <p
-            className="hiw-desc"
-            style={{
-              fontSize: '14px',
-              fontWeight: 400,
-              color: 'rgba(10,10,10,0.65)',
-              lineHeight: 1.65,
-              letterSpacing: 'normal',
-              maxWidth: '450px',
-              textAlign: 'justify',
-            }}
-          >
-            {row.desc}
-          </p>
-        </div>
+        ) : (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+              <Icon size={18} color="#0a0a0a" strokeWidth={1.75} style={{ flexShrink: 0 }} />
+              <span
+                style={{
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  color: '#0a0a0a',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.15em',
+                }}
+              >
+                {row.label}
+              </span>
+            </div>
+            <p
+              className="hiw-desc"
+              style={{
+                fontSize: '14px',
+                fontWeight: 400,
+                color: 'var(--sov-grey)',
+                lineHeight: 1.65,
+                letterSpacing: 'normal',
+                maxWidth: '450px',
+                textAlign: 'justify',
+              }}
+            >
+              {row.desc}
+            </p>
+          </div>
+        )}
       </motion.div>
     </div>
   );
@@ -156,9 +231,16 @@ function Row({ row, i }: { row: (typeof rows)[0]; i: number }) {
 export default function HowItWorks() {
   const headingRef = useRef<HTMLDivElement>(null);
   const isHeadingInView = useInView(headingRef, { once: true, margin: '0px 0px -100px 0px', amount: 0.2 });
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
 
   return (
-    <section data-bg="light" style={{ backgroundColor: '#f5f0eb', padding: '100px 0' }}>
+    <section data-bg="light" style={{ backgroundColor: 'var(--sov-white)', padding: '100px 0' }}>
       <div ref={headingRef} className="inner" style={{ maxWidth: '900px' }}>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -169,7 +251,7 @@ export default function HowItWorks() {
             fontSize: '13px',
             fontWeight: 500,
             letterSpacing: '0.2em',
-            color: '#c9a96e',
+            color: 'var(--sov-greige-dark)',
             textTransform: 'uppercase',
             marginBottom: '20px',
           }}
@@ -196,7 +278,7 @@ export default function HowItWorks() {
 
       <div className="hiw-rows-wrapper" style={{ maxWidth: '1200px', margin: '64px auto 0', display: 'flex', flexDirection: 'column', gap: '4px' }}>
         {rows.map((row, i) => (
-          <Row key={row.num} row={row} i={i} />
+          <Row key={row.num} row={row} i={i} isMobile={isMobile} />
         ))}
       </div>
     </section>

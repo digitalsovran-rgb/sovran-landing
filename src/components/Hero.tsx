@@ -1,63 +1,179 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
-const desktopImages = ['/media/heroepic.webp', '/media/heroepic1.webp', '/media/heroepic2.webp'];
-const mobileImages = ['/media/heroepicel.webp', '/media/heroepicel1.webp', '/media/heroepicel2.webp'];
+const desktopVideos = ['/media/vidher1.mp4', '/media/vidher2.mp4', '/media/vidher3.mp4'];
+const desktopPosters = ['/media/vidher1-poster.webp', '/media/vidher2-poster.webp', '/media/vidher3-poster.webp'];
+const mobileVideos = ['/media/vidher1mob.mp4', '/media/vidher2mob.mp4', '/media/vidher3mob.mp4'];
+const mobilePosters = ['/media/vidher1mob-poster.webp', '/media/vidher2mob-poster.webp', '/media/vidher3mob-poster.webp'];
 
-const HOLD_MS = 6000;
-const CROSSFADE_S = 1.5;
+const FADE_MS = 400;
+const REVEAL_FALLBACK_MS = 200;
+const END_FALLBACK_MS = 3300;
+const WARM_DELAY_MS = 1500;
+
+// Reduced motion and data saver users get the first poster as a still image, no video at all.
+function shouldSkipVideo(): boolean {
+  if (typeof window === 'undefined') return false;
+  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+  return reduced || Boolean(connection?.saveData);
+}
+
+const coverStyle: React.CSSProperties = {
+  position: 'absolute',
+  inset: 0,
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  objectPosition: 'center',
+};
 
 export default function Hero() {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
-  const [index, setIndex] = useState(0);
+  const [active, setActive] = useState(0);
+  const [blackVisible, setBlackVisible] = useState(false);
+  const [failed, setFailed] = useState(false);
   const [ctaHovered, setCtaHovered] = useState(false);
-  const images = isMobile ? mobileImages : desktopImages;
+  const [skipVideo] = useState(shouldSkipVideo);
 
-  // The very first frame is requested eagerly/high-priority (below) since it's the LCP
-  // candidate. Once the component has painted for the first time, this flips permanently so
-  // the Ken Burns rotation cycling back to index 0 every ~18s never re-issues a wasteful
-  // duplicate high-priority fetch of the same already-cached image.
-  const hasPaintedFirstFrameRef = useRef(false);
-  useEffect(() => {
-    hasPaintedFirstFrameRef.current = true;
-  }, []);
-  const isEagerFirstFrame = index === 0 && !hasPaintedFirstFrameRef.current;
+  const videos = isMobile ? mobileVideos : desktopVideos;
+  const posters = isMobile ? mobilePosters : desktopPosters;
+  const showStatic = skipVideo || failed;
 
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([null, null, null]);
+  const activeRef = useRef(0);
+  const lockRef = useRef(false);
+  const stoppedRef = useRef(false);
+  const timersRef = useRef<number[]>([]);
+  const fallbackRef = useRef<number | null>(null);
+  const pendingRevealRef = useRef<(() => void) | null>(null);
+
+  // Crossing the breakpoint swaps the clip set, so the sequence restarts from clip 1.
   useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768);
+    let wasMobile = window.innerWidth < 768;
+    const handler = () => {
+      const nowMobile = window.innerWidth < 768;
+      if (nowMobile === wasMobile) return;
+      wasMobile = nowMobile;
+      setIsMobile(nowMobile);
+      setActive(0);
+      setBlackVisible(false);
+    };
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
 
-  // Only the first frame is requested eagerly (via the <img>'s fetchPriority/loading
-  // attributes below) — it's the LCP candidate, so it must not compete for bandwidth with
-  // anything else. The other frames for this viewport aren't needed until their turn in the
-  // rotation, seconds away, so they're fetched in the background only after the page has
-  // finished loading (or shortly after, if 'load' already fired by the time this runs).
+  const later = (fn: () => void, ms: number) => {
+    const id = window.setTimeout(fn, ms);
+    timersRef.current.push(id);
+    return id;
+  };
+
+  const clearFallback = () => {
+    if (fallbackRef.current !== null) {
+      window.clearTimeout(fallbackRef.current);
+      fallbackRef.current = null;
+    }
+  };
+
+  const clearAllTimers = () => {
+    timersRef.current.forEach((id) => window.clearTimeout(id));
+    timersRef.current = [];
+    clearFallback();
+  };
+
+  // A rejected play() (autoplay blocked, low power mode) ends the rotation and leaves the
+  // first poster on screen.
+  const stopRotation = () => {
+    stoppedRef.current = true;
+    pendingRevealRef.current = null;
+    clearAllTimers();
+    setBlackVisible(false);
+    setFailed(true);
+  };
+
+  const startTransition = (from: number) => {
+    if (stoppedRef.current || lockRef.current || activeRef.current !== from) return;
+    lockRef.current = true;
+    clearFallback();
+    setBlackVisible(true);
+
+    later(() => {
+      if (stoppedRef.current) return;
+      videoRefs.current[from]?.pause();
+
+      const to = (from + 1) % 3;
+      const next = videoRefs.current[to];
+      activeRef.current = to;
+      setActive(to);
+
+      let revealed = false;
+      const reveal = () => {
+        if (revealed) return;
+        revealed = true;
+        pendingRevealRef.current = null;
+        setBlackVisible(false);
+        lockRef.current = false;
+      };
+      pendingRevealRef.current = reveal;
+      later(reveal, REVEAL_FALLBACK_MS);
+
+      if (next) {
+        next.currentTime = 0;
+        next.play()?.catch(stopRotation);
+      }
+    }, FADE_MS);
+  };
+
+  const handlePlaying = (index: number) => {
+    if (index !== activeRef.current || stoppedRef.current) return;
+    pendingRevealRef.current?.();
+    clearFallback();
+    fallbackRef.current = window.setTimeout(() => startTransition(index), END_FALLBACK_MS);
+  };
+
+  // (Re)start the sequence from clip 1 on mount and whenever the breakpoint flips.
   useEffect(() => {
-    const preloadRest = () => {
-      images.slice(1).forEach((src) => {
-        const img = new Image();
-        img.src = src;
-      });
+    if (showStatic) return;
+    activeRef.current = 0;
+    lockRef.current = false;
+    stoppedRef.current = false;
+    pendingRevealRef.current = null;
+
+    const first = videoRefs.current[0];
+    if (first) {
+      first.muted = true;
+      first.play()?.catch(stopRotation);
+    }
+    return clearAllTimers;
+    // stopRotation and clearAllTimers only touch refs and stable setters
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile, showStatic]);
+
+  // Clips 2 and 3 only load metadata until the page has finished loading, so they never
+  // compete with the first poster and clip for bandwidth.
+  useEffect(() => {
+    if (showStatic) return;
+    let timer: number | undefined;
+    const warm = () => {
+      timer = window.setTimeout(() => {
+        [1, 2].forEach((i) => {
+          const el = videoRefs.current[i];
+          if (el) el.preload = 'auto';
+        });
+      }, WARM_DELAY_MS);
     };
 
     if (document.readyState === 'complete') {
-      const t = window.setTimeout(preloadRest, 1500);
-      return () => window.clearTimeout(t);
+      warm();
+    } else {
+      window.addEventListener('load', warm, { once: true });
     }
-
-    window.addEventListener('load', preloadRest, { once: true });
-    return () => window.removeEventListener('load', preloadRest);
-  }, [images]);
-
-  useEffect(() => {
-    setIndex(0);
-    const id = setInterval(() => {
-      setIndex((i) => (i + 1) % images.length);
-    }, HOLD_MS);
-    return () => clearInterval(id);
-  }, [images]);
+    return () => {
+      window.removeEventListener('load', warm);
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
+  }, [isMobile, showStatic]);
 
   const scrollToForm = () => {
     document.getElementById('consultation')?.scrollIntoView({ behavior: 'smooth' });
@@ -102,35 +218,54 @@ export default function Hero() {
           backgroundColor: '#0a0a0a',
         }}
       >
-        {/* Background — rotating 3-image sequence, each held with a slow Ken Burns zoom and
-            crossfaded into the next so the hero reads as continuous motion, not a slideshow. */}
+        {/* Background: three short clips stacked, one visible at a time. A black layer fades
+            in between clips so the cut reads as a dip to black rather than a hard swap. */}
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
-          <AnimatePresence>
-            <motion.img
-              key={images[index]}
-              src={images[index]}
+          {showStatic ? (
+            <img
+              src={posters[0]}
               alt=""
               aria-hidden="true"
-              fetchPriority={isEagerFirstFrame ? 'high' : 'auto'}
-              loading={isEagerFirstFrame ? 'eager' : 'lazy'}
-              initial={{ opacity: 0, scale: 1 }}
-              animate={{ opacity: 1, scale: 1.04 }}
-              exit={{ opacity: 0 }}
-              transition={{
-                opacity: { duration: CROSSFADE_S, ease: 'easeInOut' },
-                scale: { duration: (HOLD_MS + CROSSFADE_S * 1000) / 1000, ease: 'linear' },
-              }}
-              style={{
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center',
-              }}
+              fetchPriority="high"
+              loading="eager"
+              style={coverStyle}
             />
-          </AnimatePresence>
+          ) : (
+            videos.map((src, i) => (
+              <video
+                key={`${isMobile ? 'm' : 'd'}-${i}`}
+                ref={(el) => {
+                  videoRefs.current[i] = el;
+                  if (el) el.muted = true;
+                }}
+                src={src}
+                poster={posters[i]}
+                muted
+                playsInline
+                autoPlay={i === 0}
+                preload={i === 0 ? 'auto' : 'metadata'}
+                aria-hidden="true"
+                tabIndex={-1}
+                disablePictureInPicture
+                onPlaying={() => handlePlaying(i)}
+                onEnded={() => startTransition(i)}
+                style={{ ...coverStyle, opacity: active === i ? 1 : 0 }}
+              />
+            ))
+          )}
         </div>
+
+        {/* Black layer used for the dip between clips */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundColor: '#000000',
+            opacity: blackVisible ? 1 : 0,
+            transition: `opacity ${FADE_MS}ms ease`,
+            pointerEvents: 'none',
+          }}
+        />
 
         {/* Overlay */}
         <div
@@ -141,7 +276,7 @@ export default function Hero() {
           }}
         />
 
-        {/* Bottom gradient fade — blends the hero image into the dark section below */}
+        {/* Bottom gradient fade: blends the hero into the dark section below */}
         <div
           style={{
             position: 'absolute',
@@ -150,15 +285,15 @@ export default function Hero() {
             right: 0,
             width: '100%',
             height: '30%',
-            background: 'linear-gradient(to bottom, rgba(10,10,10,0) 0%, rgba(10,10,10,0.28) 55%, #0a0a0a 100%)',
+            background: 'linear-gradient(to bottom, rgba(10,10,10,0) 0%, rgba(10,10,10,0.28) 55%, #0A0A0A 100%)',
             zIndex: 1,
             pointerEvents: 'none',
           }}
         />
 
-        {/* Logo — sits where a navbar would, confined to the hero.
-            Positioning lives on a plain (non-motion) wrapper: framer-motion writes its own
-            `transform` for animated values, which would clobber a static translateX(-50%). */}
+        {/* Logo: sits where a navbar would, confined to the hero.
+            Positioning lives on a plain (non-motion) wrapper because framer-motion writes its
+            own `transform` for animated values, which would clobber a static translateX(-50%). */}
         <div
           style={{
             position: 'absolute',
@@ -182,14 +317,13 @@ export default function Hero() {
           />
         </div>
 
-        {/* Content — the headline is the vertical anchor, not the group. The two flex:1
-            spacers above/below it always claim equal leftover space, so the headline's own
-            center lands at the section's true vertical center regardless of how tall the
-            eyebrow or the subhead+button cluster are; each spacer's inner justifyContent
+        {/* Content: the headline is the vertical anchor, not the group. The two flex:1
+            spacers above and below it always claim equal leftover space, so the headline's
+            own center lands at the section's true vertical center regardless of how tall the
+            eyebrow or the subhead and button cluster are; each spacer's inner justifyContent
             keeps its content flush against the headline, preserving the existing margins.
             The bottom padding is a hard reservation (not space left over from flex-grow), so
-            it guarantees the button-to-section-edge gap at any hero/viewport height — a fixed
-            translateY nudge would only have held at the one height it was tuned against. */}
+            it guarantees the button-to-section-edge gap at any hero or viewport height. */}
         <div
           className="hero-content"
           style={{
@@ -215,7 +349,7 @@ export default function Hero() {
                 fontSize: '12px',
                 fontWeight: 500,
                 letterSpacing: '0.2em',
-                color: '#c9a96e',
+                color: 'var(--sov-greige-light)',
                 textTransform: 'uppercase',
                 marginBottom: '40px',
               }}
@@ -245,7 +379,7 @@ export default function Hero() {
 
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', width: '100%' }}>
           {/* Not Framer Motion-animated (unlike its siblings): this paragraph is the confirmed
-              LCP element on mobile, and animating it delays the "final" paint LCP measures. */}
+              LCP element on mobile, and animating it delays the final paint LCP measures. */}
           <p
             className="hero-desc hero-desc-desktop"
             style={{
@@ -263,7 +397,7 @@ export default function Hero() {
           </p>
 
           {/* Not Framer Motion-animated (unlike its siblings): this paragraph is the confirmed
-              LCP element on mobile, and animating it delays the "final" paint LCP measures. */}
+              LCP element on mobile, and animating it delays the final paint LCP measures. */}
           <p
             className="hero-desc hero-desc-mobile"
             style={{
@@ -298,9 +432,9 @@ export default function Hero() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 minHeight: '60px',
-                backgroundColor: ctaHovered ? '#f5f0eb' : '#ffffff',
-                color: '#0a0a0a',
-                border: 'none',
+                backgroundColor: ctaHovered ? 'var(--sov-black)' : 'var(--sov-greige-dark)',
+                color: 'var(--sov-white)',
+                border: '1px solid var(--sov-greige-light)',
                 fontSize: '15px',
                 fontWeight: 600,
                 fontFamily: 'Inter, sans-serif',

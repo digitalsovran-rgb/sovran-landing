@@ -132,7 +132,7 @@ function TestimonialCard({ t }: { t: (typeof testimonials)[0] }) {
         </p>
         <div style={{ display: 'flex', gap: '2px', margin: '0 0 6px' }}>
           {Array.from({ length: 5 }).map((_, i) => (
-            <Star key={i} size={16} color="#c9a96e" fill="#c9a96e" />
+            <Star key={i} size={16} color="#C2B2A0" fill="#C2B2A0" />
           ))}
         </div>
         <p
@@ -198,7 +198,7 @@ function TestimonialRow() {
                 border: 'none',
                 padding: 0,
                 cursor: 'pointer',
-                backgroundColor: i === activeIndex ? '#c9a96e' : 'rgba(255,255,255,0.2)',
+                backgroundColor: i === activeIndex ? 'var(--sov-greige-light)' : 'rgba(255,255,255,0.2)',
                 transition: 'background-color 0.25s ease',
               }}
             />
@@ -254,7 +254,7 @@ export default function AboutSovran() {
             fontSize: '13px',
             fontWeight: 500,
             letterSpacing: '0.2em',
-            color: '#c9a96e',
+            color: 'var(--sov-greige-light)',
             textTransform: 'uppercase',
             marginBottom: '20px',
           }}
@@ -270,7 +270,7 @@ export default function AboutSovran() {
             textAlign: 'center',
             fontSize: 'clamp(30px, 3.5vw, 44px)',
             fontWeight: 900,
-            color: '#f5f0eb',
+            color: 'var(--sov-white)',
             letterSpacing: '-0.005em',
             lineHeight: 1.1,
           }}
@@ -286,7 +286,7 @@ export default function AboutSovran() {
             textAlign: 'center',
             fontSize: '16px',
             fontWeight: 400,
-            color: '#f5f0eb',
+            color: 'var(--sov-white)',
             lineHeight: 1.7,
             letterSpacing: 'normal',
             maxWidth: '650px',
@@ -320,12 +320,12 @@ export default function AboutSovran() {
                 padding: '4px 4px 0',
               }}
             >
-              <div style={{ width: '40px', height: '2px', backgroundColor: '#c9a96e', marginBottom: '14px' }} />
+              <div style={{ width: '40px', height: '2px', backgroundColor: 'var(--sov-greige-light)', marginBottom: '14px' }} />
               <h3
                 style={{
                   fontSize: '13px',
                   fontWeight: 700,
-                  color: '#f5f0eb',
+                  color: 'var(--sov-white)',
                   textTransform: 'uppercase',
                   letterSpacing: '0.1em',
                   marginBottom: '8px',
@@ -338,7 +338,7 @@ export default function AboutSovran() {
                 style={{
                   fontSize: '13px',
                   fontWeight: 400,
-                  color: 'rgba(245,240,235,0.65)',
+                  color: 'rgba(255,255,255,0.65)',
                   lineHeight: 1.6,
                   letterSpacing: 'normal',
                   textAlign: 'justify',
@@ -372,7 +372,7 @@ export default function AboutSovran() {
                 style={{
                   fontSize: 'clamp(24px, 2.6vw, 28px)',
                   fontWeight: 900,
-                  color: '#f5f0eb',
+                  color: 'var(--sov-white)',
                   letterSpacing: '-0.005em',
                   lineHeight: 1,
                   marginBottom: '6px',
@@ -384,7 +384,7 @@ export default function AboutSovran() {
                 style={{
                   fontSize: '11px',
                   fontWeight: 500,
-                  color: 'rgba(245,240,235,0.6)',
+                  color: 'rgba(255,255,255,0.6)',
                   textTransform: 'uppercase',
                   letterSpacing: '0.1em',
                 }}
@@ -404,7 +404,7 @@ export default function AboutSovran() {
             fontSize: '13px',
             fontWeight: 600,
             letterSpacing: '0.2em',
-            color: '#c9a96e',
+            color: 'var(--sov-greige-light)',
             textTransform: 'uppercase',
             marginTop: '56px',
             marginBottom: '16px',
@@ -421,7 +421,7 @@ export default function AboutSovran() {
             textAlign: 'center',
             fontSize: 'clamp(22px, 2.6vw, 30px)',
             fontWeight: 900,
-            color: '#f5f0eb',
+            color: 'var(--sov-white)',
             letterSpacing: '-0.005em',
             marginBottom: '40px',
           }}

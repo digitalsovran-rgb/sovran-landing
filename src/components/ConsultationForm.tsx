@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getSlotCount } from '../utils/slotCount';
 
@@ -134,7 +134,7 @@ function SelectCard({
       style={{
         border: `1px solid ${selected ? '#0a0a0a' : hovered ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.12)'}`,
         backgroundColor: selected ? '#0a0a0a' : 'transparent',
-        color: selected ? '#f5f0eb' : '#0a0a0a',
+        color: selected ? 'var(--sov-white)' : '#0a0a0a',
         fontSize: '12px',
         fontWeight: 500,
         textTransform: 'uppercase',
@@ -197,7 +197,7 @@ function TextInput({
           width: '100%',
           backgroundColor: 'transparent',
           border: 'none',
-          borderBottom: `1px solid ${error ? '#c0392b' : focused ? '#c9a96e' : 'rgba(0,0,0,0.2)'}`,
+          borderBottom: `1px solid ${error ? '#c0392b' : focused ? 'var(--sov-greige-dark)' : 'rgba(0,0,0,0.2)'}`,
           color: '#0a0a0a',
           fontSize: '14px',
           fontWeight: 400,
@@ -245,9 +245,9 @@ const columnLabelStyle: React.CSSProperties = {
 };
 
 const navBtnBase: React.CSSProperties = {
-  backgroundColor: '#0a0a0a',
+  backgroundColor: 'var(--sov-greige-dark)',
   color: '#ffffff',
-  border: '1px solid #0a0a0a',
+  border: '1px solid var(--sov-greige-dark)',
   fontSize: '13px',
   fontWeight: 500,
   letterSpacing: '0.1em',
@@ -389,14 +389,14 @@ function WheelPicker({
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0,
         height: `${PADDING}px`,
-        background: 'linear-gradient(to bottom, rgba(245,240,235,1) 40%, rgba(245,240,235,0))',
+        background: 'linear-gradient(to bottom, rgba(255,255,255,1) 40%, rgba(255,255,255,0))',
         zIndex: 3, pointerEvents: 'none',
       }} />
       {/* Bottom fade */}
       <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0,
         height: `${PADDING}px`,
-        background: 'linear-gradient(to top, rgba(245,240,235,1) 40%, rgba(245,240,235,0))',
+        background: 'linear-gradient(to top, rgba(255,255,255,1) 40%, rgba(255,255,255,0))',
         zIndex: 3, pointerEvents: 'none',
       }} />
       {/* Static chevron arrow */}
@@ -605,14 +605,14 @@ export default function ConsultationForm() {
       <section
         id="consultation"
         data-bg="light"
-        style={{ backgroundColor: '#f5f0eb', padding: '100px 0' }}
+        style={{ backgroundColor: 'var(--sov-white)', padding: '100px 0' }}
       >
       <div className="inner">
         <p
           style={{
             fontSize: '13px',
             fontWeight: 600,
-            color: '#c9a96e',
+            color: 'var(--sov-greige-dark)',
             textTransform: 'uppercase',
             letterSpacing: '0.15em',
             textAlign: 'center',
@@ -672,10 +672,10 @@ export default function ConsultationForm() {
                 xmlns="http://www.w3.org/2000/svg"
                 style={{ margin: '0 auto 32px' }}
               >
-                <circle cx="28" cy="28" r="27" stroke="#c9a96e" strokeWidth="1.5" />
+                <circle cx="28" cy="28" r="27" stroke="#4A443C" strokeWidth="1.5" />
                 <path
                   d="M17 28L24 35L39 20"
-                  stroke="#c9a96e"
+                  stroke="#4A443C"
                   strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -696,7 +696,7 @@ export default function ConsultationForm() {
                 style={{
                   fontSize: '15px',
                   fontWeight: 400,
-                  color: 'rgba(0,0,0,0.6)',
+                  color: 'var(--sov-grey)',
                   lineHeight: 1.7,
                   maxWidth: '500px',
                   margin: '0 auto 40px',
@@ -723,9 +723,9 @@ export default function ConsultationForm() {
                   setSubmitError('');
                 }}
                 style={{
-                  backgroundColor: '#ffffff',
-                  color: '#0a0a0a',
-                  border: '1px solid #0a0a0a',
+                  backgroundColor: 'var(--sov-greige-dark)',
+                  color: 'var(--sov-white)',
+                  border: '1px solid var(--sov-greige-dark)',
                   fontSize: '13px',
                   fontWeight: 500,
                   letterSpacing: '0.1em',
@@ -735,12 +735,12 @@ export default function ConsultationForm() {
                   transition: 'all 0.2s ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#0a0a0a';
-                  e.currentTarget.style.color = '#ffffff';
+                  e.currentTarget.style.backgroundColor = '#0A0A0A';
+                  e.currentTarget.style.borderColor = '#0A0A0A';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                  e.currentTarget.style.color = '#0a0a0a';
+                  e.currentTarget.style.backgroundColor = 'var(--sov-greige-dark)';
+                  e.currentTarget.style.borderColor = 'var(--sov-greige-dark)';
                 }}
               >
                 Submit Another Enquiry
@@ -766,7 +766,7 @@ export default function ConsultationForm() {
                       top: 0,
                       left: 0,
                       height: '100%',
-                      backgroundColor: '#c9a96e',
+                      backgroundColor: 'var(--sov-greige-dark)',
                     }}
                   />
                 </div>
@@ -923,13 +923,13 @@ export default function ConsultationForm() {
                                 }}
                                 onMouseEnter={(e) => {
                                   if (canNext()) {
-                                    e.currentTarget.style.backgroundColor = '#c9a96e';
-                                    e.currentTarget.style.borderColor = '#c9a96e';
+                                    e.currentTarget.style.backgroundColor = '#0A0A0A';
+                                    e.currentTarget.style.borderColor = '#0A0A0A';
                                   }
                                 }}
                                 onMouseLeave={(e) => {
-                                  e.currentTarget.style.backgroundColor = '#0a0a0a';
-                                  e.currentTarget.style.borderColor = '#0a0a0a';
+                                  e.currentTarget.style.backgroundColor = 'var(--sov-greige-dark)';
+                                  e.currentTarget.style.borderColor = 'var(--sov-greige-dark)';
                                 }}
                               >
                                 Check Availability
@@ -957,14 +957,14 @@ export default function ConsultationForm() {
                                     top: 0,
                                     left: 0,
                                     height: '100%',
-                                    backgroundColor: '#c9a96e',
+                                    backgroundColor: 'var(--sov-greige-dark)',
                                   }}
                                 />
                               </div>
                               <p
                                 style={{
                                   fontSize: '14px',
-                                  color: 'rgba(0,0,0,0.55)',
+                                  color: 'var(--sov-grey)',
                                   lineHeight: 1.6,
                                   letterSpacing: 'normal',
                                 }}
@@ -979,7 +979,7 @@ export default function ConsultationForm() {
                               <p
                                 style={{
                                   fontSize: '14px',
-                                  color: 'rgba(0,0,0,0.55)',
+                                  color: 'var(--sov-grey)',
                                   lineHeight: 1.65,
                                   marginBottom: '32px',
                                   letterSpacing: 'normal',
@@ -1004,13 +1004,13 @@ export default function ConsultationForm() {
                                 }}
                                 onMouseEnter={(e) => {
                                   if (canNext()) {
-                                    e.currentTarget.style.backgroundColor = '#c9a96e';
-                                    e.currentTarget.style.borderColor = '#c9a96e';
+                                    e.currentTarget.style.backgroundColor = '#0A0A0A';
+                                    e.currentTarget.style.borderColor = '#0A0A0A';
                                   }
                                 }}
                                 onMouseLeave={(e) => {
-                                  e.currentTarget.style.backgroundColor = '#0a0a0a';
-                                  e.currentTarget.style.borderColor = '#0a0a0a';
+                                  e.currentTarget.style.backgroundColor = 'var(--sov-greige-dark)';
+                                  e.currentTarget.style.borderColor = 'var(--sov-greige-dark)';
                                 }}
                               >
                                 Continue
@@ -1128,13 +1128,13 @@ export default function ConsultationForm() {
                     }}
                     onMouseEnter={(e) => {
                       if (canNext() && !submitting) {
-                        e.currentTarget.style.backgroundColor = '#c9a96e';
-                        e.currentTarget.style.borderColor = '#c9a96e';
+                        e.currentTarget.style.backgroundColor = '#0A0A0A';
+                        e.currentTarget.style.borderColor = '#0A0A0A';
                       }
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#0a0a0a';
-                      e.currentTarget.style.borderColor = '#0a0a0a';
+                      e.currentTarget.style.backgroundColor = 'var(--sov-greige-dark)';
+                      e.currentTarget.style.borderColor = 'var(--sov-greige-dark)';
                     }}
                   >
                     {step === 3

@@ -3,9 +3,9 @@ import { getSlotCount } from '../utils/slotCount';
 
 export default function StickyOfferBar() {
   const [visible, setVisible] = useState(true);
-  // The bar's own visual style — always the inverse of whatever section currently sits
-  // behind it, so it stays legible against both dark and cream sections.
-  const [barStyle, setBarStyle] = useState<'dark' | 'light'>('light');
+  // True while a dark section sits behind the bar. The bar keeps one fill in both cases and
+  // only adds its outline over dark sections, where it would otherwise blend in.
+  const [overDark, setOverDark] = useState(true);
   const areasRef = useRef(new Map<Element, number>());
 
   // Bug A fix: which section is behind the bar right now. Shrinks the observed root down to
@@ -41,8 +41,8 @@ export default function StickyOfferBar() {
 
           if (best) {
             const bg = (best as HTMLElement).dataset.bg;
-            if (bg === 'dark') setBarStyle('light');
-            else if (bg === 'light') setBarStyle('dark');
+            if (bg === 'dark') setOverDark(true);
+            else if (bg === 'light') setOverDark(false);
           }
         },
         { threshold: [0, 0.1, 0.25, 0.5, 0.75, 1], rootMargin: `-${topInset}px 0px 0px 0px` }
@@ -83,8 +83,6 @@ export default function StickyOfferBar() {
     return () => observer.disconnect();
   }, []);
 
-  const dark = barStyle === 'dark';
-
   return (
     <>
       <style>{`
@@ -114,10 +112,11 @@ export default function StickyOfferBar() {
           borderRadius: '12px',
           overflow: 'hidden',
           boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
-          backgroundColor: dark ? '#0a0a0a' : '#f5f0eb',
+          backgroundColor: 'var(--sov-greige-dark)',
+          border: overDark ? '1px solid var(--sov-greige-light)' : '1px solid transparent',
           opacity: visible ? 1 : 0,
           pointerEvents: visible ? 'auto' : 'none',
-          transition: 'opacity 0.3s ease, background-color 0.2s ease',
+          transition: 'opacity 0.3s ease, border-color 0.2s ease',
         }}
       >
         <button
@@ -130,10 +129,9 @@ export default function StickyOfferBar() {
             height: '100%',
             background: 'transparent',
             border: 'none',
-            color: dark ? '#f5f0eb' : '#0a0a0a',
+            color: 'var(--sov-white)',
             fontFamily: 'Inter, sans-serif',
             cursor: 'pointer',
-            transition: 'color 0.2s ease',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',

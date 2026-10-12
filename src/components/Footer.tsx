@@ -186,31 +186,31 @@ export default function Footer() {
           font-family: Inter, sans-serif;
           font-weight: 300;
           font-size: clamp(15px, 1.1vw, 19px);
-          color: rgba(245,240,235,0.45);
+          color: rgba(255,255,255,0.45);
           text-decoration: none;
           margin-bottom: clamp(12px, 1.5vh, 20px);
           transition: color 0.3s ease, transform 0.3s ease;
           will-change: transform;
         }
         .footer-link:hover {
-          color: #f5f0eb;
+          color: #FFFFFF;
           transform: translateX(8px);
         }
         .footer-social-icon {
           display: flex;
           align-items: center;
-          color: rgba(245,240,235,0.35);
+          color: rgba(255,255,255,0.35);
           transition: color 0.3s ease;
           text-decoration: none;
         }
-        .footer-social-icon:hover { color: #f5f0eb; }
+        .footer-social-icon:hover { color: #FFFFFF; }
         .footer-backtop-btn {
           display: flex;
           align-items: center;
           gap: 8px;
-          border: 1px solid rgba(245,240,235,0.15);
+          border: 1px solid rgba(255,255,255,0.15);
           background: transparent;
-          color: rgba(245,240,235,0.5);
+          color: rgba(255,255,255,0.5);
           font-family: Inter, sans-serif;
           font-weight: 300;
           font-size: clamp(10px, 0.75vw, 12px);
@@ -221,9 +221,9 @@ export default function Footer() {
           transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
         }
         .footer-backtop-btn:hover {
-          color: #f5f0eb;
-          border-color: rgba(245,240,235,0.4);
-          background-color: rgba(245,240,235,0.05);
+          color: #FFFFFF;
+          border-color: rgba(255,255,255,0.4);
+          background-color: rgba(255,255,255,0.05);
         }
         @media (max-width: 768px) {
           .footer-top-row {
@@ -278,7 +278,7 @@ export default function Footer() {
           ref={topLineRef}
           style={{
             height: '1px',
-            backgroundColor: 'rgba(245,240,235,0.08)',
+            backgroundColor: 'rgba(255,255,255,0.08)',
             marginLeft: 'clamp(32px, 6vw, 120px)',
             marginRight: 'clamp(32px, 6vw, 120px)',
             position: 'relative',
@@ -313,7 +313,7 @@ export default function Footer() {
               fontFamily: 'Inter, sans-serif',
               fontWeight: 300,
               fontSize: 'clamp(12px, 0.9vw, 15px)',
-              color: 'rgba(245,240,235,0.3)',
+              color: 'rgba(255,255,255,0.3)',
               maxWidth: '280px',
               textAlign: 'right',
               lineHeight: 1.7,
@@ -327,7 +327,7 @@ export default function Footer() {
         {/* MIDDLE SECTION — 4 column nav */}
         <div
           style={{
-            borderTop: '1px solid rgba(245,240,235,0.05)',
+            borderTop: '1px solid rgba(255,255,255,0.05)',
             padding: 'clamp(48px, 6vh, 80px) clamp(32px, 6vw, 120px)',
             position: 'relative',
             zIndex: 1,
@@ -344,7 +344,7 @@ export default function Footer() {
               <div
                 key={col.label}
                 style={{
-                  borderLeft: ci > 0 ? '1px solid rgba(245,240,235,0.05)' : 'none',
+                  borderLeft: ci > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none',
                   paddingLeft: ci > 0 ? 'clamp(24px, 3vw, 48px)' : 0,
                   paddingRight: ci < NAV_COLUMNS.length - 1 ? 'clamp(24px, 3vw, 48px)' : 0,
                 }}
@@ -357,7 +357,7 @@ export default function Footer() {
                     fontSize: 'clamp(9px, 0.7vw, 11px)',
                     letterSpacing: '0.2em',
                     textTransform: 'uppercase',
-                    color: 'rgba(245,240,235,0.2)',
+                    color: 'rgba(255,255,255,0.2)',
                     margin: '0 0 clamp(20px, 2.5vh, 36px) 0',
                   }}
                 >
@@ -382,7 +382,7 @@ export default function Footer() {
         {/* SOCIAL LINKS ROW */}
         <div
           style={{
-            borderTop: '1px solid rgba(245,240,235,0.05)',
+            borderTop: '1px solid rgba(255,255,255,0.05)',
             padding: 'clamp(24px, 3vh, 40px) clamp(32px, 6vw, 120px)',
             display: 'flex',
             alignItems: 'center',
@@ -399,7 +399,7 @@ export default function Footer() {
               fontSize: 'clamp(9px, 0.7vw, 11px)',
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
-              color: 'rgba(245,240,235,0.2)',
+              color: 'rgba(255,255,255,0.2)',
               margin: 0,
               marginRight: 'auto',
             }}
@@ -425,7 +425,7 @@ export default function Footer() {
           ref={bottomLineRef}
           style={{
             height: '1px',
-            backgroundColor: 'rgba(245,240,235,0.05)',
+            backgroundColor: 'rgba(255,255,255,0.05)',
             marginLeft: 'clamp(32px, 6vw, 120px)',
             marginRight: 'clamp(32px, 6vw, 120px)',
             position: 'relative',
@@ -451,7 +451,7 @@ export default function Footer() {
               fontFamily: 'Inter, sans-serif',
               fontWeight: 300,
               fontSize: 'clamp(10px, 0.75vw, 12px)',
-              color: 'rgba(245,240,235,0.18)',
+              color: 'rgba(255,255,255,0.18)',
               margin: 0,
             }}
           >
