@@ -242,7 +242,9 @@ export default function Hero() {
       >
         {/* Background: three short clips stacked, one visible at a time. The next clip fades in
             over the current one, so there is no dip between clips. */}
-        <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'hidden' }}>
+        {/* isolation keeps the clips' own z-index values inside this wrapper, so the overlay and
+            scrim below always paint on top of whichever clip is showing. */}
+        <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'hidden', isolation: 'isolate' }}>
           {showStatic ? (
             <img
               src={posters[0]}
@@ -289,7 +291,21 @@ export default function Hero() {
           style={{
             position: 'absolute',
             inset: 0,
-            backgroundColor: 'rgba(0,0,0,0.35)',
+            backgroundColor: 'rgba(0,0,0,0.40)',
+          }}
+        />
+
+        {/* Text scrim: a soft dark ellipse behind the headline block for legibility over bright
+            frames. Same stacking level as the overlay, below the content block. */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            background: isMobile
+              ? 'radial-gradient(ellipse 120% 40% at 50% 50%, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.38) 40%, rgba(0,0,0,0) 100%)'
+              : 'radial-gradient(ellipse 70% 45% at 50% 50%, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.38) 35%, rgba(0,0,0,0) 100%)',
           }}
         />
 
@@ -397,7 +413,7 @@ export default function Hero() {
             style={{
               fontSize: '17.6px',
               fontWeight: 400,
-              color: 'rgba(255,255,255,0.7)',
+              color: 'rgba(255,255,255,0.92)',
               maxWidth: '560px',
               margin: '40px auto 0',
               lineHeight: 1.75,
@@ -415,7 +431,7 @@ export default function Hero() {
             style={{
               fontSize: '17.6px',
               fontWeight: 400,
-              color: 'rgba(255,255,255,0.7)',
+              color: 'rgba(255,255,255,0.92)',
               maxWidth: '560px',
               margin: '40px auto 0',
               lineHeight: 1.75,
