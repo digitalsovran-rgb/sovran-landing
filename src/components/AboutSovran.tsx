@@ -1,18 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Compass, FingerprintPattern, ShieldCheck, Users } from 'lucide-react';
 
 const ethosCards = [
   {
     label: 'One Team',
+    icon: Users,
     desc: 'You speak to the same people from your first conversation to the day we hand over the keys.',
   },
   {
     label: 'Planning Expertise',
+    icon: Compass,
     desc: 'Our team includes former planning officers, so we know what a council needs to see before you even apply.',
   },
   {
     label: 'Protected Investment',
+    icon: ShieldCheck,
     desc: 'A fixed price, agreed upfront, so there are no surprises waiting for you halfway through your project.',
   },
 ];
@@ -30,6 +33,13 @@ const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
 
 // Height of one collapsed description line: 14px font at line-height 1.6.
 const LINE_PX = 14 * 1.6;
+
+// Press and hold control: how long the hold lasts and the circumference of its progress ring
+// (2 * PI * r with r = 72).
+const HOLD_MS = 2500;
+const RING_CIRCUMFERENCE = 452.39;
+
+type EthosCard = (typeof ethosCards)[number];
 
 // Counts from 0 up to `target` once `active` becomes true, and stays latched (never restarts
 // on later re-triggers).
@@ -85,56 +95,91 @@ function StatNumber({
   );
 }
 
-const numberStyle: React.CSSProperties = {
-  fontSize: '28px',
-  fontWeight: 900,
-  color: 'transparent',
-  WebkitTextStroke: '1px var(--sov-greige-light)',
-  letterSpacing: '0.02em',
-  lineHeight: 1,
+const panelStyle: React.CSSProperties = {
+  position: 'relative',
+  overflow: 'hidden',
+  textAlign: 'left',
+  color: 'var(--sov-white)',
+  padding: '28px 24px 22px',
+  borderRadius: '4px',
+  border: '1px solid rgba(194,178,160,0.28)',
+  background: 'linear-gradient(165deg, rgba(194,178,160,0.16) 0%, rgba(255,255,255,0.03) 60%)',
 };
 
 const titleStyle: React.CSSProperties = {
+  position: 'relative',
+  zIndex: 1,
+  marginTop: '24px',
   textTransform: 'uppercase',
   fontSize: '15px',
   fontWeight: 700,
-  letterSpacing: '0.12em',
+  letterSpacing: '0.14em',
   color: 'var(--sov-white)',
 };
 
-const cardStyle: React.CSSProperties = {
-  display: 'block',
-  width: '100%',
-  textAlign: 'left',
-  backgroundColor: 'rgba(255,255,255,0.04)',
-  borderLeft: '2px solid var(--sov-greige-light)',
-  borderRadius: '6px',
-  padding: '20px 18px',
+const ruleStyle: React.CSSProperties = {
+  position: 'relative',
+  zIndex: 1,
+  width: '28px',
+  height: '2px',
+  backgroundColor: 'var(--sov-greige-light)',
+  margin: '14px 0',
 };
 
 const descTextStyle: React.CSSProperties = {
+  position: 'relative',
+  zIndex: 1,
   fontSize: '14px',
   lineHeight: 1.6,
   color: 'rgba(255,255,255,0.72)',
 };
 
-function PillarCard({
+// Large faint copy of the icon in the panel corner, plus the ringed icon at the top left.
+function PanelIcons({ icon: Icon }: { icon: EthosCard['icon'] }) {
+  return (
+    <>
+      <Icon
+        size={150}
+        strokeWidth={0.6}
+        color="rgba(194,178,160,0.12)"
+        aria-hidden="true"
+        style={{ position: 'absolute', top: '-24px', right: '-28px', pointerEvents: 'none' }}
+      />
+      <span
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '52px',
+          height: '52px',
+          borderRadius: '50%',
+          border: '1px solid rgba(194,178,160,0.5)',
+        }}
+      >
+        <Icon size={24} strokeWidth={1.4} color="#C2B2A0" />
+      </span>
+    </>
+  );
+}
+
+function MobilePanel({
   card,
   index,
-  isMobile,
+  trackInView,
 }: {
-  card: (typeof ethosCards)[number];
+  card: EthosCard;
   index: number;
-  isMobile: boolean;
+  trackInView: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  // The one-line clamp comes off as soon as the card opens and goes back on only after the
+  // The one-line clamp comes off as soon as the panel opens and goes back on only after the
   // collapse animation has finished, so the text never jumps while the height is animating.
   const [clamped, setClamped] = useState(true);
   const [fullHeight, setFullHeight] = useState(LINE_PX);
   const descRef = useRef<HTMLSpanElement>(null);
   const descId = `about-pillar-${index}`;
-  const number = String(index + 1).padStart(2, '0');
 
   useEffect(() => {
     if (!open) return;
@@ -153,101 +198,104 @@ function PillarCard({
     setOpen(!open);
   };
 
-  if (!isMobile) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 0.8, delay: index * 0.15, ease: EASE }}
-        style={cardStyle}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <span style={numberStyle}>{number}</span>
-          <h3 style={titleStyle}>{card.label}</h3>
-        </div>
-        <p style={{ ...descTextStyle, marginTop: '12px' }}>{card.desc}</p>
-      </motion.div>
-    );
-  }
-
   return (
-    <motion.div
-      initial={{ opacity: 0, x: index % 2 === 0 ? -60 : 60 }}
-      whileInView={{ opacity: 1, x: 0 }}
+    <motion.button
+      type="button"
+      onClick={toggle}
+      aria-expanded={open}
+      aria-controls={descId}
+      initial={{ opacity: 0, x: 60 }}
+      animate={trackInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 60 }}
+      transition={{ duration: 0.8, delay: index * 0.18, ease: EASE }}
+      style={{
+        ...panelStyle,
+        display: 'block',
+        flex: '0 0 auto',
+        width: 'min(76vw, 320px)',
+        scrollSnapAlign: 'start',
+        cursor: 'pointer',
+        font: 'inherit',
+      }}
+    >
+      <PanelIcons icon={card.icon} />
+      <span style={{ ...titleStyle, display: 'block' }}>{card.label}</span>
+      <span style={{ ...ruleStyle, display: 'block' }} />
+
+      <motion.span
+        id={descId}
+        initial={false}
+        animate={{ height: open ? fullHeight : LINE_PX }}
+        transition={{ duration: 0.35, ease: 'easeInOut' }}
+        onAnimationComplete={() => {
+          if (!open) setClamped(true);
+        }}
+        style={{ position: 'relative', zIndex: 1, display: 'block', overflow: 'hidden' }}
+      >
+        <span
+          ref={descRef}
+          style={{
+            ...descTextStyle,
+            ...(clamped
+              ? {
+                  display: '-webkit-box',
+                  WebkitLineClamp: 1,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                }
+              : { display: 'block' }),
+          }}
+        >
+          {card.desc}
+        </span>
+      </motion.span>
+
+      <span
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          marginTop: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          fontSize: '11px',
+          textTransform: 'uppercase',
+          letterSpacing: '0.16em',
+          fontWeight: 600,
+          color: 'var(--sov-greige-light)',
+        }}
+      >
+        {open ? 'Less' : 'Read more'}
+        <motion.span
+          animate={{ rotate: open ? 180 : 0 }}
+          transition={{ duration: 0.3 }}
+          style={{ display: 'inline-flex' }}
+        >
+          <ChevronDown size={16} color="#C2B2A0" />
+        </motion.span>
+      </span>
+    </motion.button>
+  );
+}
+
+function DesktopPanel({ card, index }: { card: EthosCard; index: number }) {
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.8, delay: index * 0.15, ease: EASE }}
+      style={panelStyle}
     >
-      <button
-        type="button"
-        onClick={toggle}
-        aria-expanded={open}
-        aria-controls={descId}
-        style={{ ...cardStyle, border: 'none', borderLeft: '2px solid var(--sov-greige-light)', cursor: 'pointer', font: 'inherit' }}
-      >
-        <span style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <span style={numberStyle}>{number}</span>
-          <span style={titleStyle}>{card.label}</span>
-        </span>
-
-        <motion.span
-          id={descId}
-          initial={false}
-          animate={{ height: open ? fullHeight : LINE_PX }}
-          transition={{ duration: 0.35, ease: 'easeInOut' }}
-          onAnimationComplete={() => {
-            if (!open) setClamped(true);
-          }}
-          style={{ display: 'block', overflow: 'hidden', marginTop: '12px' }}
-        >
-          <span
-            ref={descRef}
-            style={{
-              ...descTextStyle,
-              ...(clamped
-                ? {
-                    display: '-webkit-box',
-                    WebkitLineClamp: 1,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                  }
-                : { display: 'block' }),
-            }}
-          >
-            {card.desc}
-          </span>
-        </motion.span>
-
-        <span
-          style={{
-            marginTop: '10px',
-            display: 'flex',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '11px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.16em',
-            fontWeight: 600,
-            color: 'var(--sov-greige-light)',
-          }}
-        >
-          {open ? 'Less' : 'Read more'}
-          <motion.span
-            animate={{ rotate: open ? 180 : 0 }}
-            transition={{ duration: 0.3 }}
-            style={{ display: 'inline-flex' }}
-          >
-            <ChevronDown size={16} color="#C2B2A0" />
-          </motion.span>
-        </span>
-      </button>
-    </motion.div>
+      <PanelIcons icon={card.icon} />
+      <h3 style={titleStyle}>{card.label}</h3>
+      <div style={ruleStyle} />
+      <p style={descTextStyle}>{card.desc}</p>
+    </motion.article>
   );
 }
 
 function StatsBlock({ isMobile, active }: { isMobile: boolean; active: boolean }) {
-  const ruleStyle: React.CSSProperties = {
+  const ruleLineStyle: React.CSSProperties = {
     height: '1px',
     backgroundColor: 'rgba(255,255,255,0.18)',
     transformOrigin: 'left',
@@ -275,7 +323,7 @@ function StatsBlock({ isMobile, active }: { isMobile: boolean; active: boolean }
       <div style={{ marginTop: '40px', textAlign: 'left' }}>
         {stats.map((stat, i) => (
           <div key={stat.label}>
-            <motion.div style={ruleStyle} {...ruleMotion(0.15 + i * 0.14)} />
+            <motion.div style={ruleLineStyle} {...ruleMotion(0.15 + i * 0.14)} />
             <motion.div
               {...itemMotion(i)}
               style={{
@@ -290,7 +338,7 @@ function StatsBlock({ isMobile, active }: { isMobile: boolean; active: boolean }
             </motion.div>
           </div>
         ))}
-        <motion.div style={ruleStyle} {...ruleMotion(0.15 + stats.length * 0.14)} />
+        <motion.div style={ruleLineStyle} {...ruleMotion(0.15 + stats.length * 0.14)} />
       </div>
     );
   }
@@ -308,7 +356,7 @@ function StatsBlock({ isMobile, active }: { isMobile: boolean; active: boolean }
       {stats.map((stat, i) => (
         <motion.div key={stat.label} {...itemMotion(i)}>
           <StatNumber stat={stat} active={active} numberSize="60px" suffixSize="32px" />
-          <motion.div style={{ ...ruleStyle, margin: '20px 0 14px' }} {...ruleMotion(0.15 + i * 0.14)} />
+          <motion.div style={{ ...ruleLineStyle, margin: '20px 0 14px' }} {...ruleMotion(0.15 + i * 0.14)} />
           <span style={labelStyle}>{stat.label}</span>
         </motion.div>
       ))}
@@ -319,15 +367,86 @@ function StatsBlock({ isMobile, active }: { isMobile: boolean; active: boolean }
 export default function AboutSovran() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
+  const trackRef = useRef<HTMLDivElement>(null);
+  const trackInView = useInView(trackRef, { once: true, amount: 0.3 });
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const [statsRevealed, setStatsRevealed] = useState(false);
-  const [revealHovered, setRevealHovered] = useState(false);
+  const [isHolding, setIsHolding] = useState(false);
+
+  const ringRef = useRef<SVGCircleElement>(null);
+  const holdingRef = useRef(false);
+  const completedRef = useRef(false);
+  const startTsRef = useRef(0);
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  const startHold = () => {
+    if (holdingRef.current || completedRef.current) return;
+    holdingRef.current = true;
+    if (ringRef.current) ringRef.current.style.transition = 'none';
+    setIsHolding(true);
+    startTsRef.current = performance.now();
+
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - startTsRef.current) / HOLD_MS);
+      if (ringRef.current) ringRef.current.style.strokeDashoffset = String(RING_CIRCUMFERENCE * (1 - p));
+      if (p >= 1) {
+        rafRef.current = null;
+        holdingRef.current = false;
+        completedRef.current = true;
+        navigator.vibrate?.(40);
+        setIsHolding(false);
+        setStatsRevealed(true);
+        return;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+  };
+
+  const cancelHold = () => {
+    if (!holdingRef.current) return;
+    holdingRef.current = false;
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    setIsHolding(false);
+    if (ringRef.current) {
+      ringRef.current.style.transition = 'stroke-dashoffset 0.4s ease';
+      ringRef.current.style.strokeDashoffset = String(RING_CIRCUMFERENCE);
+    }
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    startHold();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    if (e.repeat) return;
+    startHold();
+  };
+
+  const handleKeyUp = (e: React.KeyboardEvent) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    cancelHold();
+  };
+
+  const holdSize = isMobile ? 148 : 160;
 
   return (
     <section ref={ref} data-bg="dark" style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}>
@@ -386,19 +505,42 @@ export default function AboutSovran() {
           interiors, each one carried by the same team from first drawing to completion.
         </motion.p>
 
-        <div
-          style={{
-            marginTop: '56px',
-            display: 'grid',
-            gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
-            gap: isMobile ? '14px' : '24px',
-            alignItems: 'start',
-          }}
-        >
-          {ethosCards.map((card, i) => (
-            <PillarCard key={card.label} card={card} index={i} isMobile={isMobile} />
-          ))}
-        </div>
+        {isMobile ? (
+          <div
+            ref={trackRef}
+            className="sov-track"
+            style={{
+              display: 'flex',
+              gap: '14px',
+              alignItems: 'flex-start',
+              overflowX: 'auto',
+              scrollSnapType: 'x mandatory',
+              scrollPaddingLeft: '24px',
+              padding: '4px 24px 12px',
+              margin: '56px -24px 0',
+              scrollbarWidth: 'none',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
+            {ethosCards.map((card, i) => (
+              <MobilePanel key={card.label} card={card} index={i} trackInView={trackInView} />
+            ))}
+          </div>
+        ) : (
+          <div
+            style={{
+              marginTop: '56px',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '24px',
+              alignItems: 'start',
+            }}
+          >
+            {ethosCards.map((card, i) => (
+              <DesktopPanel key={card.label} card={card} index={i} />
+            ))}
+          </div>
+        )}
 
         <div style={{ marginTop: '72px', textAlign: 'center' }}>
           <p
@@ -436,40 +578,117 @@ export default function AboutSovran() {
               </motion.div>
             ) : (
               <motion.div
-                key="reveal"
+                key="hold"
                 exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.4 }}
+                transition={{ duration: 0.5 }}
                 style={{ overflow: 'hidden' }}
               >
-                <div style={{ paddingTop: '28px' }}>
-                  <button
-                    type="button"
-                    onClick={() => setStatsRevealed(true)}
-                    onMouseEnter={() => setRevealHovered(true)}
-                    onMouseLeave={() => setRevealHovered(false)}
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.p
+                    key={isHolding ? 'holding' : 'idle'}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.25 }}
                     style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '10px',
-                      width: isMobile ? '100%' : 'auto',
-                      backgroundColor: revealHovered ? 'var(--sov-white)' : 'var(--sov-greige-light)',
-                      color: 'var(--sov-black)',
-                      border: 'none',
-                      padding: '16px 28px',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      letterSpacing: '0.14em',
+                      margin: '28px 0 22px',
                       textTransform: 'uppercase',
-                      borderRadius: 0,
-                      cursor: 'pointer',
-                      transition: 'background-color 0.25s ease',
+                      fontSize: '13px',
+                      letterSpacing: '0.18em',
+                      fontWeight: 500,
+                      color: 'rgba(255,255,255,0.7)',
                     }}
                   >
-                    Show Our Numbers
-                    <ChevronDown size={18} />
-                  </button>
-                </div>
+                    {isHolding
+                      ? 'Keep holding...'
+                      : isMobile
+                        ? 'Tap and hold to reveal our numbers'
+                        : 'Click and hold to reveal our numbers'}
+                  </motion.p>
+                </AnimatePresence>
+
+                <button
+                  type="button"
+                  aria-label="Press and hold to reveal our numbers"
+                  className="sov-hold-btn"
+                  onPointerDown={handlePointerDown}
+                  onPointerUp={cancelHold}
+                  onPointerCancel={cancelHold}
+                  onPointerLeave={cancelHold}
+                  onLostPointerCapture={cancelHold}
+                  onKeyDown={handleKeyDown}
+                  onKeyUp={handleKeyUp}
+                  onContextMenu={(e) => e.preventDefault()}
+                  style={{
+                    width: `${holdSize}px`,
+                    height: `${holdSize}px`,
+                    borderRadius: '50%',
+                    position: 'relative',
+                    display: 'grid',
+                    placeItems: 'center',
+                    padding: 0,
+                    margin: '0 auto',
+                    backgroundColor: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(194,178,160,0.35)',
+                    cursor: 'pointer',
+                    color: '#C2B2A0',
+                    touchAction: 'none',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    WebkitTouchCallout: 'none',
+                    WebkitTapHighlightColor: 'transparent',
+                    outline: 'none',
+                  }}
+                >
+                  <span
+                    className={isHolding ? undefined : 'sov-beat'}
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      borderRadius: '50%',
+                      border: '1px solid rgba(194,178,160,0.5)',
+                      pointerEvents: 'none',
+                      ...(isHolding ? { opacity: 0 } : {}),
+                    }}
+                  />
+                  <svg
+                    viewBox="0 0 148 148"
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      width: '100%',
+                      height: '100%',
+                      transform: 'rotate(-90deg)',
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    <circle
+                      ref={ringRef}
+                      cx="74"
+                      cy="74"
+                      r="72"
+                      fill="none"
+                      stroke="#C2B2A0"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeDasharray={RING_CIRCUMFERENCE}
+                      strokeDashoffset={RING_CIRCUMFERENCE}
+                    />
+                  </svg>
+                  <FingerprintPattern
+                    size={72}
+                    strokeWidth={1.1}
+                    color="#C2B2A0"
+                    aria-hidden="true"
+                    style={{
+                      position: 'relative',
+                      opacity: isHolding ? 1 : 0.55,
+                      transform: isHolding ? 'scale(1.06)' : 'scale(1)',
+                      transition: 'opacity 0.3s ease, transform 0.3s ease',
+                    }}
+                  />
+                </button>
               </motion.div>
             )}
           </AnimatePresence>

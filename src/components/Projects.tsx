@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'framer-motion';
-import type { Variants } from 'framer-motion';
+import type { PanInfo } from 'framer-motion';
 import { Info, X } from 'lucide-react';
 import PulseRing from './PulseRing';
 
@@ -37,65 +37,43 @@ const PROJECTS = [
   },
 ];
 
-const SLIDE_COUNT = PROJECTS.length;
-const HOLD_MS = 4000;
 const EASE: [number, number, number, number] = [0.2, 0.7, 0.2, 1];
+const EXIT_EASE: [number, number, number, number] = [0.4, 0, 0.9, 0.4];
+const EXIT_MS = 650;
+const DEAL_DONE_MS = 3300;
+const AUTOPLAY_MS = 4500;
+const LAST_DEPTH = PROJECTS.length - 1;
 
-// Every enter and exit state is spread over NEUTRAL so no property is ever undefined.
-const NEUTRAL = { x: 0, y: 0, scale: 1, rotate: 0, opacity: 1, clipPath: 'inset(0% 0% 0% 0%)' };
+// How each card sits in the pile, by depth (0 is the top card).
+const POSE_ROTATE = [0, -3.5, 3, -5.5, 4.5];
+const POSE_X_MOBILE = [0, -8, 7, -12, 10];
+const POSE_X_DESKTOP = [0, -16, 14, -24, 20];
+const POSE_Y = [0, 5, 9, 13, 17];
 
-type Overrides = Partial<{
-  x: number | string;
-  y: number | string;
-  scale: number;
-  rotate: number;
-  opacity: number;
-  clipPath: string;
-}>;
+// Cards are dealt deepest first (k = 0) so the pile ends with the first project on top.
+const DEAL_DELAY = [0, 1.0, 1.6, 2.1, 2.5];
+const DEAL_DURATION = [1.1, 0.9, 0.8, 0.7, 0.6];
 
-const TYPES = {
-  slideLeft: { enter: { x: '100%' }, exit: { x: '-25%', opacity: 0.5 } },
-  slideRight: { enter: { x: '-100%' }, exit: { x: '25%', opacity: 0.5 } },
-  slideUp: { enter: { y: '100%' }, exit: { y: '-20%', opacity: 0.5 } },
-  slideDown: { enter: { y: '-100%' }, exit: { y: '20%', opacity: 0.5 } },
-  zoom: { enter: { opacity: 0, scale: 1.18 }, exit: { opacity: 0, scale: 0.95 } },
-  rotate: { enter: { opacity: 0, rotate: 5, scale: 1.15 }, exit: { opacity: 0, rotate: -3, scale: 0.95 } },
-  // The new slide is revealed by a wipe while the old one stays fully visible underneath.
-  wipe: { enter: { clipPath: 'inset(0% 0% 100% 0%)' }, exit: {} },
-} satisfies Record<string, { enter: Overrides; exit: Overrides }>;
-
-type TransitionType = keyof typeof TYPES;
-const TYPE_NAMES = Object.keys(TYPES) as TransitionType[];
-
-const slideVariants: Variants = {
-  enter: (type: TransitionType) => ({ ...NEUTRAL, ...TYPES[type].enter, zIndex: 2 }),
-  center: { ...NEUTRAL, zIndex: 2 },
-  exit: (type: TransitionType) => ({ ...NEUTRAL, ...TYPES[type].exit, zIndex: 1 }),
-};
-
-const reducedVariants: Variants = {
-  enter: { opacity: 0, zIndex: 2 },
-  center: { opacity: 1, zIndex: 2 },
-  exit: { opacity: 0, zIndex: 1 },
-};
-
-function pickRandomType(exclude: TransitionType | null): TransitionType {
-  const pool = TYPE_NAMES.filter((name) => name !== exclude);
-  return pool[Math.floor(Math.random() * pool.length)];
-}
+const offscreen = () => (typeof window !== 'undefined' ? window.innerWidth * 1.1 : 1200);
 
 export default function Projects() {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
-  const [index, setIndex] = useState(0);
-  const [transitionType, setTransitionType] = useState<TransitionType>('slideLeft');
-  const [captionOpen, setCaptionOpen] = useState(false);
+  const [order, setOrder] = useState<number[]>(() => PROJECTS.map((_, i) => i));
+  const [exitingId, setExitingId] = useState<number | null>(null);
+  const [exitDir, setExitDir] = useState<-1 | 1>(1);
+  const [dealt, setDealt] = useState(false);
+  const [open, setOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
 
   const reduced = useReducedMotion();
-  const stageRef = useRef<HTMLDivElement>(null);
-  const stageInView = useInView(stageRef, { amount: 0.3 });
-  const lastTypeRef = useRef<TransitionType | null>(null);
-  const pointerStartRef = useRef<{ x: number; y: number; t: number } | null>(null);
+  const stackRef = useRef<HTMLDivElement>(null);
+  const dealInView = useInView(stackRef, { amount: 0.35, once: true });
+  const liveInView = useInView(stackRef, { amount: 0.3 });
+  const cycleRef = useRef(0);
+  const exitTimerRef = useRef<number | null>(null);
+
+  // With reduced motion there is no deal, so the pile counts as dealt from the start.
+  const isDealt = Boolean(reduced) || dealt;
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768);
@@ -103,227 +81,312 @@ export default function Projects() {
     return () => window.removeEventListener('resize', handler);
   }, []);
 
-  // Warm the cache for the slide that comes next.
   useEffect(() => {
-    const preload = new Image();
-    preload.src = PROJECTS[(index + 1) % SLIDE_COUNT].img;
-  }, [index]);
-
-  // Each slide is held for HOLD_MS. The timer restarts from zero whenever the slide changes,
-  // the caption closes, or the stage scrolls back into view.
-  useEffect(() => {
-    if (reduced || !stageInView || captionOpen) return;
-    const timer = window.setTimeout(() => {
-      const next = pickRandomType(lastTypeRef.current);
-      lastTypeRef.current = next;
-      setTransitionType(next);
-      setIndex((i) => (i + 1) % SLIDE_COUNT);
-    }, HOLD_MS);
+    if (!dealInView || reduced) return;
+    const timer = window.setTimeout(() => setDealt(true), DEAL_DONE_MS);
     return () => window.clearTimeout(timer);
-  }, [index, stageInView, captionOpen, reduced]);
+  }, [dealInView, reduced]);
+
+  useEffect(() => {
+    return () => {
+      if (exitTimerRef.current !== null) window.clearTimeout(exitTimerRef.current);
+    };
+  }, []);
+
+  const advance = (dir: -1 | 1) => {
+    if (exitingId !== null || !isDealt) return;
+    if (reduced) {
+      setOrder((prev) => [...prev.slice(1), prev[0]]);
+      return;
+    }
+    setExitingId(order[0]);
+    setExitDir(dir);
+    exitTimerRef.current = window.setTimeout(() => {
+      setOrder((prev) => [...prev.slice(1), prev[0]]);
+      setExitingId(null);
+      exitTimerRef.current = null;
+    }, EXIT_MS);
+  };
+
+  // Autoplay: the top card leaves every AUTOPLAY_MS while the pile is on screen and the
+  // caption is closed. The timer restarts from zero whenever any of these inputs change.
+  useEffect(() => {
+    if (reduced || !isDealt || !liveInView || open || exitingId !== null) return;
+    const timer = window.setTimeout(() => {
+      advance(cycleRef.current++ % 2 === 0 ? -1 : 1);
+    }, AUTOPLAY_MS);
+    return () => window.clearTimeout(timer);
+    // advance reads the same state that is listed here
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order, open, isDealt, liveInView, exitingId, reduced]);
 
   const toggleCaption = () => {
-    if (!captionOpen) setHasOpened(true);
-    setCaptionOpen(!captionOpen);
+    if (!isDealt) return;
+    if (!open) setHasOpened(true);
+    setOpen(!open);
   };
 
-  const swipe = (toNext: boolean) => {
-    const type: TransitionType = toNext ? 'slideLeft' : 'slideRight';
-    lastTypeRef.current = type;
-    setTransitionType(type);
-    setIndex((i) => (toNext ? (i + 1) % SLIDE_COUNT : (i - 1 + SLIDE_COUNT) % SLIDE_COUNT));
-    setCaptionOpen(false);
-  };
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    pointerStartRef.current = { x: e.clientX, y: e.clientY, t: performance.now() };
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    const start = pointerStartRef.current;
-    pointerStartRef.current = null;
-    if (!start) return;
-    const dx = e.clientX - start.x;
-    const dy = e.clientY - start.y;
-    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
-      swipe(dx < 0);
-    } else if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
-      toggleCaption();
+  const handleDragEnd = (_: unknown, info: PanInfo) => {
+    if (Math.abs(info.offset.x) > 90 || Math.abs(info.velocity.x) > 600) {
+      setOpen(false);
+      advance(info.offset.x < 0 ? -1 : 1);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.target !== e.currentTarget) return;
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      toggleCaption();
-    }
-  };
+  const poseFor = (depth: number) => ({
+    x: (isMobile ? POSE_X_MOBILE : POSE_X_DESKTOP)[depth],
+    y: POSE_Y[depth],
+    rotate: POSE_ROTATE[depth],
+    opacity: 1,
+    scale: 1,
+  });
 
-  const project = PROJECTS[index];
-  const variants = reduced ? reducedVariants : slideVariants;
-  const slideTransition = reduced ? { duration: 0.3 } : { duration: 0.9, ease: EASE };
-
-  const stage = (
-    <div
-      ref={stageRef}
-      role="region"
-      aria-roledescription="carousel"
-      aria-label="Our projects"
-      tabIndex={0}
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onKeyDown={handleKeyDown}
-      style={{
-        position: 'relative',
-        overflow: 'hidden',
-        width: '100%',
-        backgroundColor: '#141414',
-        touchAction: 'pan-y',
-        cursor: 'pointer',
-        userSelect: 'none',
-        ...(isMobile
-          ? { height: 'min(80svh, 680px)' }
-          : { aspectRatio: '16 / 9', maxHeight: '80vh' }),
-      }}
-    >
-      <AnimatePresence initial={false} custom={transitionType}>
-        <motion.div
-          key={index}
-          custom={transitionType}
-          variants={variants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={slideTransition}
-          style={{ position: 'absolute', inset: 0 }}
-        >
-          <img
-            src={project.img}
-            alt={project.title}
-            draggable={false}
-            decoding="async"
-            loading={index === 0 ? 'eager' : 'lazy'}
-            fetchPriority={index === 0 ? 'high' : undefined}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'center',
-              display: 'block',
-            }}
-          />
-        </motion.div>
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {index === 0 && !hasOpened && !captionOpen && (
-          <motion.div
-            key="hint"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { duration: 0.6, delay: 1.2 } }}
-            exit={{ opacity: 0, transition: { duration: 0.3 } }}
-            style={{ position: 'absolute', bottom: 20, right: 20, zIndex: 4, pointerEvents: 'none' }}
-          >
-            <PulseRing size={52} tone="dark" pulse delay={0}>
-              <Info size={22} color="#FFFFFF" />
-            </PulseRing>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {captionOpen && (
-          <motion.div
-            key="caption"
-            initial={{ y: '100%', opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: '100%', opacity: 0 }}
-            transition={{ duration: 0.45, ease: EASE }}
-            onPointerDown={(e) => e.stopPropagation()}
-            onPointerUp={(e) => e.stopPropagation()}
-            style={{
-              position: 'absolute',
-              left: 0,
-              right: 0,
-              bottom: 0,
-              zIndex: 5,
-              padding: isMobile ? '28px 24px 32px' : '36px 40px 40px',
-              backgroundColor: 'rgba(10,10,10,0.86)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-              borderTop: '1px solid rgba(194,178,160,0.35)',
-              cursor: 'default',
-              textAlign: 'left',
-            }}
-          >
-            <button
-              type="button"
-              aria-label="Close"
-              onClick={() => setCaptionOpen(false)}
-              style={{
-                position: 'absolute',
-                top: '10px',
-                right: '10px',
-                width: '40px',
-                height: '40px',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <X size={20} color="#FFFFFF" />
-            </button>
-            <p
-              style={{
-                textTransform: 'uppercase',
-                fontSize: '12px',
-                letterSpacing: '0.2em',
-                fontWeight: 500,
-                color: '#C2B2A0',
-              }}
-            >
-              {project.location}
-            </p>
-            <div style={{ width: '32px', height: '2px', backgroundColor: '#C2B2A0', margin: '14px 0' }} />
-            <h3
-              style={{
-                color: '#FFFFFF',
-                fontSize: isMobile ? '24px' : '30px',
-                fontWeight: 700,
-                lineHeight: 1.2,
-                letterSpacing: 'normal',
-              }}
-            >
-              {project.title}
-            </h3>
-            <p
-              style={{
-                marginTop: '10px',
-                fontSize: isMobile ? '15px' : '17px',
-                lineHeight: 1.6,
-                color: 'rgba(255,255,255,0.82)',
-                textAlign: 'left',
-              }}
-            >
-              {project.desc}
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
+  const top = PROJECTS[order[0]];
+  const stackWidth = isMobile ? 'min(88vw, 460px)' : 'min(820px, 100%)';
+  const showHint = isDealt && !hasOpened && !open && exitingId === null;
 
   return (
     <section
       id="projects"
       data-bg="dark"
-      style={{ backgroundColor: '#0A0A0A', padding: isMobile ? 0 : '80px 0' }}
+      style={{ backgroundColor: '#0A0A0A', overflow: 'hidden', padding: isMobile ? '72px 0' : '100px 0' }}
     >
-      {isMobile ? stage : <div className="inner">{stage}</div>}
+      <div className="inner">
+        <motion.h2
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          style={{
+            color: 'var(--sov-white)',
+            textTransform: 'uppercase',
+            fontSize: 'clamp(30px, 3.85vw, 50px)',
+            fontWeight: 900,
+            letterSpacing: '-0.02em',
+            margin: '0 0 24px',
+            fontFamily: 'Inter, sans-serif',
+          }}
+        >
+          Our Work
+        </motion.h2>
+        <div
+          style={{
+            height: '1px',
+            backgroundColor: 'rgba(255,255,255,0.15)',
+            marginBottom: isMobile ? '36px' : '48px',
+          }}
+        />
+
+        <div
+          ref={stackRef}
+          role="region"
+          aria-roledescription="carousel"
+          aria-label="Our projects"
+          style={{
+            position: 'relative',
+            width: stackWidth,
+            aspectRatio: '4 / 3',
+            margin: '0 auto 44px',
+            touchAction: 'pan-y',
+          }}
+        >
+          {PROJECTS.map((project, idx) => {
+            const depth = order.indexOf(idx);
+            const isTop = depth === 0;
+            const isExiting = exitingId === idx;
+            const k = LAST_DEPTH - depth;
+            const side = k % 2 === 0 ? -1 : 1;
+            const start = { x: side * offscreen(), y: 0, rotate: side * 20, opacity: 1, scale: 1 };
+            const pose = poseFor(depth);
+
+            let target;
+            let transition;
+            if (isExiting) {
+              target = { x: exitDir * offscreen(), y: 20, rotate: exitDir * 16, opacity: 1, scale: 1 };
+              transition = { duration: EXIT_MS / 1000, ease: EXIT_EASE };
+            } else if (reduced) {
+              target = pose;
+              transition = { duration: 0 };
+            } else if (!dealInView) {
+              target = start;
+              transition = { duration: 0 };
+            } else if (!dealt) {
+              target = pose;
+              transition = { delay: DEAL_DELAY[k], duration: DEAL_DURATION[k], ease: EASE };
+            } else {
+              target = pose;
+              transition = { duration: 0.7, ease: EASE };
+            }
+
+            const canInteract = isTop && !isExiting && isDealt;
+
+            return (
+              <motion.div
+                key={idx}
+                initial={reduced ? pose : start}
+                animate={target}
+                transition={transition}
+                drag={canInteract ? 'x' : false}
+                dragSnapToOrigin
+                dragElastic={0.4}
+                dragMomentum={false}
+                onDragEnd={canInteract ? handleDragEnd : undefined}
+                onTap={canInteract ? toggleCaption : undefined}
+                tabIndex={isTop ? 0 : undefined}
+                role={isTop ? 'button' : undefined}
+                aria-expanded={isTop ? open : undefined}
+                aria-label={isTop ? `${project.title}, ${project.location}` : undefined}
+                onKeyDown={
+                  isTop
+                    ? (e: React.KeyboardEvent) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggleCaption();
+                        }
+                      }
+                    : undefined
+                }
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  aspectRatio: '4 / 3',
+                  padding: isMobile ? '8px' : '12px',
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: '3px',
+                  boxShadow: '0 18px 40px rgba(0,0,0,0.45)',
+                  boxSizing: 'border-box',
+                  cursor: isTop ? 'pointer' : 'default',
+                  userSelect: 'none',
+                  willChange: 'transform',
+                  zIndex: isExiting ? 20 : 10 - depth,
+                  pointerEvents: isTop && !isExiting ? 'auto' : 'none',
+                }}
+              >
+                <img
+                  src={project.img}
+                  alt={project.title}
+                  draggable={false}
+                  decoding="async"
+                  loading="eager"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'center',
+                    display: 'block',
+                  }}
+                />
+                {isTop && (
+                  <AnimatePresence>
+                    {showHint && (
+                      <motion.div
+                        key="hint"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1, transition: { duration: 0.6, delay: 0.8 } }}
+                        exit={{ opacity: 0, transition: { duration: 0.3 } }}
+                        style={{
+                          position: 'absolute',
+                          bottom: '18px',
+                          right: '18px',
+                          zIndex: 4,
+                          pointerEvents: 'none',
+                          width: '52px',
+                          height: '52px',
+                          borderRadius: '50%',
+                          backgroundColor: 'rgba(10,10,10,0.55)',
+                        }}
+                      >
+                        <PulseRing size={52} tone="dark" pulse delay={0}>
+                          <Info size={22} color="#FFFFFF" />
+                        </PulseRing>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              key="caption"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.4, ease: EASE }}
+              style={{
+                width: stackWidth,
+                margin: '0 auto',
+                overflow: 'hidden',
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(194,178,160,0.3)',
+                position: 'relative',
+              }}
+            >
+              <div style={{ padding: isMobile ? '22px 22px 24px' : '28px 32px 30px' }}>
+                <button
+                  type="button"
+                  aria-label="Close"
+                  onClick={() => setOpen(false)}
+                  style={{
+                    position: 'absolute',
+                    top: '6px',
+                    right: '6px',
+                    width: '40px',
+                    height: '40px',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <X size={18} color="#FFFFFF" />
+                </button>
+                <p
+                  style={{
+                    textTransform: 'uppercase',
+                    fontSize: '12px',
+                    letterSpacing: '0.2em',
+                    fontWeight: 500,
+                    color: '#C2B2A0',
+                  }}
+                >
+                  {top.location}
+                </p>
+                <div style={{ width: '32px', height: '2px', backgroundColor: '#C2B2A0', margin: '14px 0' }} />
+                <h3
+                  style={{
+                    color: '#FFFFFF',
+                    fontSize: isMobile ? '24px' : '30px',
+                    fontWeight: 700,
+                    lineHeight: 1.2,
+                    letterSpacing: 'normal',
+                  }}
+                >
+                  {top.title}
+                </h3>
+                <p
+                  style={{
+                    marginTop: '10px',
+                    fontSize: isMobile ? '15px' : '17px',
+                    lineHeight: 1.6,
+                    color: 'rgba(255,255,255,0.82)',
+                    textAlign: 'left',
+                  }}
+                >
+                  {top.desc}
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </section>
   );
 }

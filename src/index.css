@@ -184,3 +184,7 @@ img {
 .sov-beat { animation: sov-beat 2.4s ease-in-out infinite; }
 .sov-float { animation: sov-float 3.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .sov-beat, .sov-float { animation: none; } }
+
+/* About section: pillar swipe track hides its scrollbar, hold-to-reveal control focus ring */
+.sov-track::-webkit-scrollbar { display: none; }
+.sov-hold-btn:focus-visible { outline: 2px solid #C2B2A0; outline-offset: 4px; }
