@@ -1,65 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getSlotCount } from '../utils/slotCount';
 
 export default function StickyOfferBar() {
   const [visible, setVisible] = useState(true);
-  // True while a dark section sits behind the bar. The bar keeps one fill in both cases and
-  // only adds its outline over dark sections, where it would otherwise blend in.
-  const [overDark, setOverDark] = useState(true);
-  const areasRef = useRef(new Map<Element, number>());
+  const [hovered, setHovered] = useState(false);
 
-  // Bug A fix: which section is behind the bar right now. Shrinks the observed root down to
-  // just the horizontal strip the bar occupies (bottom `barHeight` px of the viewport), then
-  // picks whichever [data-bg] section currently covers the most of that strip — comparing
-  // overlap area (not intersectionRatio, which is normalized per-target and not comparable
-  // across sections of very different heights).
-  useEffect(() => {
-    let observer: IntersectionObserver | null = null;
-
-    const setup = () => {
-      observer?.disconnect();
-      areasRef.current = new Map();
-      const barHeight = window.innerWidth < 768 ? 56 : 60;
-      const topInset = Math.max(window.innerHeight - barHeight, 0);
-
-      observer = new IntersectionObserver(
-        (entries) => {
-          const areas = areasRef.current;
-          entries.forEach((entry) => {
-            const rect = entry.intersectionRect;
-            areas.set(entry.target, entry.isIntersecting ? rect.width * rect.height : 0);
-          });
-
-          let best: Element | null = null;
-          let bestArea = 0;
-          areas.forEach((area, el) => {
-            if (area > bestArea) {
-              bestArea = area;
-              best = el;
-            }
-          });
-
-          if (best) {
-            const bg = (best as HTMLElement).dataset.bg;
-            if (bg === 'dark') setOverDark(true);
-            else if (bg === 'light') setOverDark(false);
-          }
-        },
-        { threshold: [0, 0.1, 0.25, 0.5, 0.75, 1], rootMargin: `-${topInset}px 0px 0px 0px` }
-      );
-
-      document.querySelectorAll('[data-bg]').forEach((el) => observer!.observe(el));
-    };
-
-    setup();
-    window.addEventListener('resize', setup);
-    return () => {
-      window.removeEventListener('resize', setup);
-      observer?.disconnect();
-    };
-  }, []);
-
-  // Visibility is recomputed from live isIntersecting values on every callback — never
+  // Visibility is recomputed from live isIntersecting values on every callback and never
   // latched. Hidden while #hero, #consultation, or the footer is actually in view (Hero has
   // its own "Claim Offer" button already, so the persistent bar is redundant there), so
   // scrolling back up past any of them always brings the bar back.
@@ -106,17 +52,19 @@ export default function StickyOfferBar() {
       `}</style>
       <div
         className="sticky-offer-bar"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         style={{
           position: 'fixed',
           zIndex: 55,
           borderRadius: '12px',
           overflow: 'hidden',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
-          backgroundColor: 'var(--sov-greige-dark)',
-          border: overDark ? '1px solid var(--sov-greige-light)' : '1px solid transparent',
+          boxShadow: '0 6px 24px rgba(0,0,0,0.30)',
+          backgroundColor: hovered ? 'var(--sov-white)' : 'var(--sov-greige-light)',
+          border: '1px solid rgba(10,10,10,0.12)',
           opacity: visible ? 1 : 0,
           pointerEvents: visible ? 'auto' : 'none',
-          transition: 'opacity 0.3s ease, border-color 0.2s ease',
+          transition: 'opacity 0.3s ease, background-color 0.25s ease',
         }}
       >
         <button
@@ -129,7 +77,7 @@ export default function StickyOfferBar() {
             height: '100%',
             background: 'transparent',
             border: 'none',
-            color: 'var(--sov-white)',
+            color: 'var(--sov-black)',
             fontFamily: 'Inter, sans-serif',
             cursor: 'pointer',
             display: 'flex',
@@ -152,7 +100,7 @@ export default function StickyOfferBar() {
             style={{
               fontSize: '8px',
               fontWeight: 500,
-              opacity: 0.8,
+              color: 'rgba(10,10,10,0.7)',
               marginTop: '5px',
               letterSpacing: '0.05em',
             }}

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import Hero from './components/Hero';
 import WhatYouDiscover from './components/WhatYouDiscover';
 import HowItWorks from './components/HowItWorks';
-import ExtensionTypes from './components/ExtensionTypes';
+import Projects from './components/Projects';
 import AboutSovran from './components/AboutSovran';
 import ConsultationForm from './components/ConsultationForm';
 import Footer from './components/Footer';
@@ -26,7 +26,7 @@ export default function App() {
       <Hero />
       <WhatYouDiscover />
       <HowItWorks />
-      <ExtensionTypes />
+      <Projects />
       <AboutSovran />
       <ConsultationForm />
       <Footer />

@@ -1,27 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import { Star } from 'lucide-react';
-
-const testimonials = [
-  {
-    quote:
-      "We've worked with Sovran for over five years on multiple developments. Their consistency and reliability keep us coming back.",
-    name: "Marcus O'Neill",
-    image: '/media/marcus.webp',
-  },
-  {
-    quote:
-      'Military-level precision on every project. Sovran understood our vision from day one and delivered on time.',
-    name: 'Shiv Patel',
-    image: '/media/shiv.webp',
-  },
-  {
-    quote:
-      'They went beyond our expectations. The communication throughout, and the final result, exceeded what we thought was possible.',
-    name: 'Nyla Idrissi',
-    image: '/media/nyla.webp',
-  },
-];
+import { ChevronDown } from 'lucide-react';
 
 const ethosCards = [
   {
@@ -45,15 +24,17 @@ const stats = [
   { target: 4.9, decimals: 1, suffix: '', label: 'Google Rating' },
 ];
 
+const EASE: [number, number, number, number] = [0.2, 0.7, 0.2, 1];
 const COUNT_UP_MS = 1500;
 const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
 
+// Height of one collapsed description line: 14px font at line-height 1.6.
+const LINE_PX = 14 * 1.6;
+
 // Counts from 0 up to `target` once `active` becomes true, and stays latched (never restarts
-// on later re-triggers). `done` flips true only once the animation finishes, so callers can
-// hold off appending a suffix (e.g. "+", "%") until the final value is reached.
+// on later re-triggers).
 function useCountUp(target: number, decimals: number, active: boolean) {
   const [value, setValue] = useState(0);
-  const [done, setDone] = useState(false);
   const startedRef = useRef(false);
 
   useEffect(() => {
@@ -65,13 +46,11 @@ function useCountUp(target: number, decimals: number, active: boolean) {
 
     const tick = (now: number) => {
       const progress = Math.min((now - startTime) / COUNT_UP_MS, 1);
-      const eased = easeOutCubic(progress);
-      setValue(target * eased);
+      setValue(target * easeOutCubic(progress));
       if (progress < 1) {
         rafId = requestAnimationFrame(tick);
       } else {
         setValue(target);
-        setDone(true);
       }
     };
 
@@ -79,139 +58,259 @@ function useCountUp(target: number, decimals: number, active: boolean) {
     return () => cancelAnimationFrame(rafId);
   }, [active, target]);
 
-  const display = decimals > 0 ? value.toFixed(decimals) : Math.round(value).toLocaleString('en-US');
-  return { display, done };
+  return decimals > 0 ? value.toFixed(decimals) : Math.round(value).toLocaleString('en-GB');
 }
 
-function StatValue({ stat, active }: { stat: (typeof stats)[0]; active: boolean }) {
-  const { display, done } = useCountUp(stat.target, stat.decimals, active);
+function StatNumber({
+  stat,
+  active,
+  numberSize,
+  suffixSize,
+}: {
+  stat: (typeof stats)[number];
+  active: boolean;
+  numberSize: string;
+  suffixSize: string;
+}) {
+  const display = useCountUp(stat.target, stat.decimals, active);
   return (
-    <>
-      {display}
-      {done ? stat.suffix : ''}
-    </>
+    <span style={{ whiteSpace: 'nowrap' }}>
+      <span style={{ fontSize: numberSize, fontWeight: 900, color: 'var(--sov-white)', lineHeight: 1 }}>
+        {display}
+      </span>
+      <span style={{ fontSize: suffixSize, fontWeight: 900, color: 'var(--sov-greige-light)', lineHeight: 1 }}>
+        {stat.suffix}
+      </span>
+    </span>
   );
 }
 
-function TestimonialCard({ t }: { t: (typeof testimonials)[0] }) {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '16px',
-        backgroundColor: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: '6px',
-        padding: '20px 22px',
-      }}
-    >
-      <img
-        src={t.image}
-        alt={t.name}
-        style={{
-          width: '52px',
-          height: '52px',
-          borderRadius: '50%',
-          objectFit: 'cover',
-          objectPosition: 'center top',
-          flexShrink: 0,
-        }}
-      />
-      <div style={{ minWidth: 0 }}>
-        <p
-          style={{
-            fontSize: '14px',
-            fontWeight: 700,
-            color: '#ffffff',
-            letterSpacing: '0.01em',
-            margin: '0 0 4px',
-          }}
-        >
-          {t.name}
-        </p>
-        <div style={{ display: 'flex', gap: '2px', margin: '0 0 6px' }}>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star key={i} size={16} color="#C2B2A0" fill="#C2B2A0" />
-          ))}
-        </div>
-        <p
-          style={{
-            fontSize: '13px',
-            fontWeight: 400,
-            color: 'rgba(255,255,255,0.6)',
-            lineHeight: 1.5,
-            letterSpacing: 'normal',
-            margin: 0,
-          }}
-        >
-          {t.quote}
-        </p>
-      </div>
-    </div>
-  );
-}
+const numberStyle: React.CSSProperties = {
+  fontSize: '28px',
+  fontWeight: 900,
+  color: 'transparent',
+  WebkitTextStroke: '1px var(--sov-greige-light)',
+  letterSpacing: '0.02em',
+  lineHeight: 1,
+};
 
-function TestimonialRow() {
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
-  const [activeIndex, setActiveIndex] = useState(0);
+const titleStyle: React.CSSProperties = {
+  textTransform: 'uppercase',
+  fontSize: '15px',
+  fontWeight: 700,
+  letterSpacing: '0.12em',
+  color: 'var(--sov-white)',
+};
+
+const cardStyle: React.CSSProperties = {
+  display: 'block',
+  width: '100%',
+  textAlign: 'left',
+  backgroundColor: 'rgba(255,255,255,0.04)',
+  borderLeft: '2px solid var(--sov-greige-light)',
+  borderRadius: '6px',
+  padding: '20px 18px',
+};
+
+const descTextStyle: React.CSSProperties = {
+  fontSize: '14px',
+  lineHeight: 1.6,
+  color: 'rgba(255,255,255,0.72)',
+};
+
+function PillarCard({
+  card,
+  index,
+  isMobile,
+}: {
+  card: (typeof ethosCards)[number];
+  index: number;
+  isMobile: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  // The one-line clamp comes off as soon as the card opens and goes back on only after the
+  // collapse animation has finished, so the text never jumps while the height is animating.
+  const [clamped, setClamped] = useState(true);
+  const [fullHeight, setFullHeight] = useState(LINE_PX);
+  const descRef = useRef<HTMLSpanElement>(null);
+  const descId = `about-pillar-${index}`;
+  const number = String(index + 1).padStart(2, '0');
 
   useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768);
+    if (!open) return;
+    const handler = () => {
+      if (descRef.current) setFullHeight(descRef.current.scrollHeight);
+    };
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
-  }, []);
+  }, [open]);
 
-  useEffect(() => {
-    if (!isMobile) return;
-    const id = setInterval(() => {
-      setActiveIndex((i) => (i + 1) % testimonials.length);
-    }, 4000);
-    return () => clearInterval(id);
-  }, [isMobile, activeIndex]);
+  const toggle = () => {
+    if (!open) {
+      if (descRef.current) setFullHeight(descRef.current.scrollHeight);
+      setClamped(false);
+    }
+    setOpen(!open);
+  };
+
+  if (!isMobile) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.8, delay: index * 0.15, ease: EASE }}
+        style={cardStyle}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <span style={numberStyle}>{number}</span>
+          <h3 style={titleStyle}>{card.label}</h3>
+        </div>
+        <p style={{ ...descTextStyle, marginTop: '12px' }}>{card.desc}</p>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: index % 2 === 0 ? -60 : 60 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.8, delay: index * 0.15, ease: EASE }}
+    >
+      <button
+        type="button"
+        onClick={toggle}
+        aria-expanded={open}
+        aria-controls={descId}
+        style={{ ...cardStyle, border: 'none', borderLeft: '2px solid var(--sov-greige-light)', cursor: 'pointer', font: 'inherit' }}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <span style={numberStyle}>{number}</span>
+          <span style={titleStyle}>{card.label}</span>
+        </span>
+
+        <motion.span
+          id={descId}
+          initial={false}
+          animate={{ height: open ? fullHeight : LINE_PX }}
+          transition={{ duration: 0.35, ease: 'easeInOut' }}
+          onAnimationComplete={() => {
+            if (!open) setClamped(true);
+          }}
+          style={{ display: 'block', overflow: 'hidden', marginTop: '12px' }}
+        >
+          <span
+            ref={descRef}
+            style={{
+              ...descTextStyle,
+              ...(clamped
+                ? {
+                    display: '-webkit-box',
+                    WebkitLineClamp: 1,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }
+                : { display: 'block' }),
+            }}
+          >
+            {card.desc}
+          </span>
+        </motion.span>
+
+        <span
+          style={{
+            marginTop: '10px',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '11px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.16em',
+            fontWeight: 600,
+            color: 'var(--sov-greige-light)',
+          }}
+        >
+          {open ? 'Less' : 'Read more'}
+          <motion.span
+            animate={{ rotate: open ? 180 : 0 }}
+            transition={{ duration: 0.3 }}
+            style={{ display: 'inline-flex' }}
+          >
+            <ChevronDown size={16} color="#C2B2A0" />
+          </motion.span>
+        </span>
+      </button>
+    </motion.div>
+  );
+}
+
+function StatsBlock({ isMobile, active }: { isMobile: boolean; active: boolean }) {
+  const ruleStyle: React.CSSProperties = {
+    height: '1px',
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    transformOrigin: 'left',
+  };
+  const labelStyle: React.CSSProperties = {
+    textTransform: 'uppercase',
+    fontSize: '12px',
+    letterSpacing: '0.18em',
+    fontWeight: 500,
+    color: 'rgba(255,255,255,0.65)',
+  };
+  const ruleMotion = (delay: number) => ({
+    initial: { scaleX: 0 },
+    animate: { scaleX: 1 },
+    transition: { duration: 0.8, delay, ease: EASE },
+  });
+  const itemMotion = (i: number) => ({
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.7, delay: 0.15 + i * 0.14, ease: EASE },
+  });
 
   if (isMobile) {
     return (
-      <div>
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={testimonials[activeIndex].name}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: 'easeInOut' }}
-          >
-            <TestimonialCard t={testimonials[activeIndex]} />
-          </motion.div>
-        </AnimatePresence>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '16px' }}>
-          {testimonials.map((t, i) => (
-            <button
-              key={t.name}
-              type="button"
-              onClick={() => setActiveIndex(i)}
-              aria-label={`Go to ${t.name}`}
+      <div style={{ marginTop: '40px', textAlign: 'left' }}>
+        {stats.map((stat, i) => (
+          <div key={stat.label}>
+            <motion.div style={ruleStyle} {...ruleMotion(0.15 + i * 0.14)} />
+            <motion.div
+              {...itemMotion(i)}
               style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                border: 'none',
-                padding: 0,
-                cursor: 'pointer',
-                backgroundColor: i === activeIndex ? 'var(--sov-greige-light)' : 'rgba(255,255,255,0.2)',
-                transition: 'background-color 0.25s ease',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'baseline',
+                padding: '24px 0',
               }}
-            />
-          ))}
-        </div>
+            >
+              <span style={labelStyle}>{stat.label}</span>
+              <StatNumber stat={stat} active={active} numberSize="52px" suffixSize="28px" />
+            </motion.div>
+          </div>
+        ))}
+        <motion.div style={ruleStyle} {...ruleMotion(0.15 + stats.length * 0.14)} />
       </div>
     );
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-      {testimonials.map((t) => (
-        <TestimonialCard key={t.name} t={t} />
+    <div
+      style={{
+        marginTop: '48px',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '32px',
+        textAlign: 'left',
+      }}
+    >
+      {stats.map((stat, i) => (
+        <motion.div key={stat.label} {...itemMotion(i)}>
+          <StatNumber stat={stat} active={active} numberSize="60px" suffixSize="32px" />
+          <motion.div style={{ ...ruleStyle, margin: '20px 0 14px' }} {...ruleMotion(0.15 + i * 0.14)} />
+          <span style={labelStyle}>{stat.label}</span>
+        </motion.div>
       ))}
     </div>
   );
@@ -220,26 +319,14 @@ function TestimonialRow() {
 export default function AboutSovran() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+  const [statsRevealed, setStatsRevealed] = useState(false);
+  const [revealHovered, setRevealHovered] = useState(false);
 
-  // Separate from `isInView` above (which drives the entrance fade for the whole section) —
-  // this fires once, specifically when the stats grid itself scrolls into view, and never
-  // resets, so the count-up plays exactly one time regardless of later scrolling in and out.
-  const statsRef = useRef<HTMLDivElement>(null);
-  const [statsTriggered, setStatsTriggered] = useState(false);
   useEffect(() => {
-    const el = statsRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setStatsTriggered(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.3 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
   }, []);
 
   return (
@@ -300,142 +387,93 @@ export default function AboutSovran() {
         </motion.p>
 
         <div
-          className="about-ethos-grid"
           style={{
             marginTop: '56px',
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            columnGap: '32px',
-            rowGap: '32px',
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+            gap: isMobile ? '14px' : '24px',
+            alignItems: 'start',
           }}
         >
           {ethosCards.map((card, i) => (
-            <motion.div
-              key={card.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.6, delay: 0.3 + i * 0.1, ease: 'easeOut' }}
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.03)',
-                padding: '4px 4px 0',
-              }}
-            >
-              <div style={{ width: '40px', height: '2px', backgroundColor: 'var(--sov-greige-light)', marginBottom: '14px' }} />
-              <h3
-                style={{
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  color: 'var(--sov-white)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  marginBottom: '8px',
-                }}
-              >
-                {card.label}
-              </h3>
-              <p
-                className="about-ethos-desc"
-                style={{
-                  fontSize: '13px',
-                  fontWeight: 400,
-                  color: 'rgba(255,255,255,0.65)',
-                  lineHeight: 1.6,
-                  letterSpacing: 'normal',
-                  textAlign: 'justify',
-                }}
-              >
-                {card.desc}
-              </p>
-            </motion.div>
+            <PillarCard key={card.label} card={card} index={i} isMobile={isMobile} />
           ))}
         </div>
 
-        <div
-          ref={statsRef}
-          className="about-stats-grid"
-          style={{
-            marginTop: '56px',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '24px',
-          }}
-        >
-          {stats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.6, delay: 0.5 + i * 0.08, ease: 'easeOut' }}
-              style={{ textAlign: 'center' }}
-            >
-              <div
-                style={{
-                  fontSize: 'clamp(24px, 2.6vw, 28px)',
-                  fontWeight: 900,
-                  color: 'var(--sov-white)',
-                  letterSpacing: '-0.005em',
-                  lineHeight: 1,
-                  marginBottom: '6px',
-                }}
+        <div style={{ marginTop: '72px', textAlign: 'center' }}>
+          <p
+            style={{
+              fontSize: '13px',
+              fontWeight: 500,
+              letterSpacing: '0.2em',
+              color: 'var(--sov-greige-light)',
+              textTransform: 'uppercase',
+              marginBottom: '20px',
+            }}
+          >
+            Our Track Record
+          </p>
+          <h3
+            style={{
+              fontSize: 'clamp(22px, 2.6vw, 30px)',
+              fontWeight: 900,
+              color: 'var(--sov-white)',
+              letterSpacing: '-0.005em',
+            }}
+          >
+            See The Numbers Behind Our Work.
+          </h3>
+
+          <AnimatePresence mode="wait" initial={false}>
+            {statsRevealed ? (
+              <motion.div
+                key="stats"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
               >
-                <StatValue stat={stat} active={statsTriggered} />
-              </div>
-              <div
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 500,
-                  color: 'rgba(255,255,255,0.6)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                }}
+                <StatsBlock isMobile={isMobile} active={statsRevealed} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="reveal"
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.4 }}
+                style={{ overflow: 'hidden' }}
               >
-                {stat.label}
-              </div>
-            </motion.div>
-          ))}
+                <div style={{ paddingTop: '28px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setStatsRevealed(true)}
+                    onMouseEnter={() => setRevealHovered(true)}
+                    onMouseLeave={() => setRevealHovered(false)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '10px',
+                      width: isMobile ? '100%' : 'auto',
+                      backgroundColor: revealHovered ? 'var(--sov-white)' : 'var(--sov-greige-light)',
+                      color: 'var(--sov-black)',
+                      border: 'none',
+                      padding: '16px 28px',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                      borderRadius: 0,
+                      cursor: 'pointer',
+                      transition: 'background-color 0.25s ease',
+                    }}
+                  >
+                    Show Our Numbers
+                    <ChevronDown size={18} />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
-          style={{
-            textAlign: 'center',
-            fontSize: '13px',
-            fontWeight: 600,
-            letterSpacing: '0.2em',
-            color: 'var(--sov-greige-light)',
-            textTransform: 'uppercase',
-            marginTop: '56px',
-            marginBottom: '16px',
-          }}
-        >
-          Client Stories
-        </motion.p>
-
-        <motion.h3
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.8, delay: 0.45, ease: 'easeOut' }}
-          style={{
-            textAlign: 'center',
-            fontSize: 'clamp(22px, 2.6vw, 30px)',
-            fontWeight: 900,
-            color: 'var(--sov-white)',
-            letterSpacing: '-0.005em',
-            marginBottom: '40px',
-          }}
-        >
-          What Our Clients Say About Us.
-        </motion.h3>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.8, delay: 0.5, ease: 'easeOut' }}
-        >
-          <TestimonialRow />
-        </motion.div>
       </div>
     </section>
   );

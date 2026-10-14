@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { FileSearch, PenTool, Video, ClipboardCheck } from 'lucide-react';
 import PulseRing from './PulseRing';
+import HandHint from './HandHint';
 
 const rows = [
   {
@@ -52,9 +53,29 @@ function Row({ row, i, isMobile }: { row: (typeof rows)[0]; i: number; isMobile:
   const textFromX = row.imageLeft ? 50 : -50;
   const descId = `hiw-desc-${row.num}`;
 
+  // Mobile only, first row only: one tap-hint hand over the icon, a second after the header
+  // scrolls into view, unless the row has been opened by then.
+  const [handHint, setHandHint] = useState<'idle' | 'show' | 'done'>('idle');
+  const headerRef = useRef<HTMLButtonElement>(null);
+  const headerInView = useInView(headerRef, { once: true, amount: 0.8 });
+  const isHintRow = i === 0 && isMobile;
+
+  useEffect(() => {
+    if (!isHintRow || !headerInView) return;
+    const timer = window.setTimeout(() => setHandHint((h) => (h === 'idle' ? 'show' : h)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [isHintRow, headerInView]);
+
+  useEffect(() => {
+    if (handHint !== 'show') return;
+    const timer = window.setTimeout(() => setHandHint('done'), 3400);
+    return () => window.clearTimeout(timer);
+  }, [handHint]);
+
   const toggle = () => {
     setOpen((o) => !o);
     setOpened(true);
+    setHandHint('done');
   };
 
   return (
@@ -130,6 +151,7 @@ function Row({ row, i, isMobile }: { row: (typeof rows)[0]; i: number; isMobile:
         {isMobile ? (
           <div style={{ width: '100%' }}>
             <button
+              ref={headerRef}
               type="button"
               onClick={toggle}
               aria-expanded={open}
@@ -147,9 +169,12 @@ function Row({ row, i, isMobile }: { row: (typeof rows)[0]; i: number; isMobile:
                 cursor: 'pointer',
               }}
             >
-              <PulseRing size={56} tone="light" pulse={!opened} delay={i * 0.3}>
-                <Icon size={28} color="#4A443C" strokeWidth={1.75} />
-              </PulseRing>
+              <span style={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>
+                <PulseRing size={56} tone="light" pulse={!opened} delay={i * 0.3}>
+                  <Icon size={28} color="#4A443C" strokeWidth={1.75} />
+                </PulseRing>
+                {i === 0 && <HandHint show={handHint === 'show'} tone="light" />}
+              </span>
               <span
                 style={{
                   fontSize: '18px',

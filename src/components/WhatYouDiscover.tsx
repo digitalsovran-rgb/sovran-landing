@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { Home, TrendingUp, ClipboardCheck, Wallet, LayoutGrid, ShieldAlert } from 'lucide-react';
 import PulseRing from './PulseRing';
+import HandHint from './HandHint';
 
 const tiles = [
   {
@@ -89,6 +90,8 @@ function MobileTile({
   open,
   opened,
   onToggle,
+  tileRef,
+  showHand,
 }: {
   tile: TileData;
   index: number;
@@ -97,11 +100,14 @@ function MobileTile({
   open: boolean;
   opened: boolean;
   onToggle: () => void;
+  tileRef?: React.Ref<HTMLDivElement>;
+  showHand?: boolean;
 }) {
   const Icon = tile.icon;
   const descId = `wyd-desc-${index}`;
   return (
     <motion.div
+      ref={tileRef}
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
       transition={{ duration: 0.7, delay, ease: 'easeOut' }}
@@ -136,9 +142,12 @@ function MobileTile({
             letterSpacing: 'inherit',
           }}
         >
-          <PulseRing size={64} tone="dark" pulse={!opened} delay={index * 0.3}>
-            <Icon size={34} color="#C2B2A0" strokeWidth={1.75} />
-          </PulseRing>
+          <span style={{ position: 'relative', display: 'inline-flex' }}>
+            <PulseRing size={64} tone="dark" pulse={!opened} delay={index * 0.3}>
+              <Icon size={34} color="#C2B2A0" strokeWidth={1.75} />
+            </PulseRing>
+            {index === 0 && <HandHint show={Boolean(showHand)} tone="dark" />}
+          </span>
           <span style={{ display: 'block', marginTop: '16px' }}>{tile.label}</span>
         </button>
       </h3>
@@ -166,6 +175,9 @@ export default function WhatYouDiscover() {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const [expanded, setExpanded] = useState<Set<number>>(() => new Set());
   const [opened, setOpened] = useState<Set<number>>(() => new Set());
+  const [handHint, setHandHint] = useState<'idle' | 'show' | 'done'>('idle');
+  const firstTileRef = useRef<HTMLDivElement>(null);
+  const firstTileInView = useInView(firstTileRef, { once: true, amount: 0.8 });
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768);
@@ -173,7 +185,22 @@ export default function WhatYouDiscover() {
     return () => window.removeEventListener('resize', handler);
   }, []);
 
+  // Mobile only: one tap-hint hand over the first tile's icon, a second after that tile
+  // scrolls into view, unless a tile has been opened by then.
+  useEffect(() => {
+    if (!isMobile || !firstTileInView) return;
+    const timer = window.setTimeout(() => setHandHint((h) => (h === 'idle' ? 'show' : h)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [isMobile, firstTileInView]);
+
+  useEffect(() => {
+    if (handHint !== 'show') return;
+    const timer = window.setTimeout(() => setHandHint('done'), 3400);
+    return () => window.clearTimeout(timer);
+  }, [handHint]);
+
   const toggle = (i: number) => {
+    setHandHint('done');
     setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(i)) next.delete(i);
@@ -260,6 +287,8 @@ export default function WhatYouDiscover() {
                 open={expanded.has(i)}
                 opened={opened.has(i)}
                 onToggle={() => toggle(i)}
+                tileRef={i === 0 ? firstTileRef : undefined}
+                showHand={i === 0 && handHint === 'show'}
               />
             ) : (
               <Tile key={tile.label} tile={tile} delay={i * 0.08} isInView={isInView} />
