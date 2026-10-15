@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
-import { Info, X } from 'lucide-react';
-import PulseRing from './PulseRing';
 
 const PROJECTS = [
   {
@@ -63,7 +61,7 @@ export default function Projects() {
   const [exitDir, setExitDir] = useState<-1 | 1>(1);
   const [dealt, setDealt] = useState(false);
   const [open, setOpen] = useState(false);
-  const [hasOpened, setHasOpened] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   const reduced = useReducedMotion();
   const stackRef = useRef<HTMLDivElement>(null);
@@ -71,6 +69,12 @@ export default function Projects() {
   const liveInView = useInView(stackRef, { amount: 0.3 });
   const cycleRef = useRef(0);
   const exitTimerRef = useRef<number | null>(null);
+
+  // Tap detection on the top card. A tap only counts if the pointer barely moved, was quick,
+  // no drag started, and it is not the tail end of a drag that just finished.
+  const downRef = useRef<{ x: number; y: number; t: number } | null>(null);
+  const movedRef = useRef(false);
+  const suppressUntilRef = useRef(0);
 
   // With reduced motion there is no deal, so the pile counts as dealt from the start.
   const isDealt = Boolean(reduced) || dealt;
@@ -94,6 +98,7 @@ export default function Projects() {
   }, []);
 
   const advance = (dir: -1 | 1) => {
+    setOpen(false);
     if (exitingId !== null || !isDealt) return;
     if (reduced) {
       setOrder((prev) => [...prev.slice(1), prev[0]]);
@@ -122,14 +127,34 @@ export default function Projects() {
 
   const toggleCaption = () => {
     if (!isDealt) return;
-    if (!open) setHasOpened(true);
+    if (!open) setHasInteracted(true);
     setOpen(!open);
   };
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
+    suppressUntilRef.current = performance.now() + 400;
     if (Math.abs(info.offset.x) > 90 || Math.abs(info.velocity.x) > 600) {
+      setHasInteracted(true);
       setOpen(false);
       advance(info.offset.x < 0 ? -1 : 1);
+    }
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    downRef.current = { x: e.clientX, y: e.clientY, t: performance.now() };
+    movedRef.current = false;
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    const d = downRef.current;
+    downRef.current = null;
+    if (d === null) return;
+    const dx = Math.abs(e.clientX - d.x);
+    const dy = Math.abs(e.clientY - d.y);
+    const now = performance.now();
+    const dt = now - d.t;
+    if (!movedRef.current && dx < 8 && dy < 8 && dt < 400 && now > suppressUntilRef.current) {
+      toggleCaption();
     }
   };
 
@@ -143,7 +168,7 @@ export default function Projects() {
 
   const top = PROJECTS[order[0]];
   const stackWidth = isMobile ? 'min(88vw, 460px)' : 'min(820px, 100%)';
-  const showHint = isDealt && !hasOpened && !open && exitingId === null;
+  const showHint = isDealt && !hasInteracted && !open;
 
   return (
     <section
@@ -230,8 +255,23 @@ export default function Projects() {
                 dragSnapToOrigin
                 dragElastic={0.4}
                 dragMomentum={false}
+                onDragStart={
+                  canInteract
+                    ? () => {
+                        movedRef.current = true;
+                      }
+                    : undefined
+                }
                 onDragEnd={canInteract ? handleDragEnd : undefined}
-                onTap={canInteract ? toggleCaption : undefined}
+                onPointerDown={canInteract ? handlePointerDown : undefined}
+                onPointerUp={canInteract ? handlePointerUp : undefined}
+                onPointerCancel={
+                  canInteract
+                    ? () => {
+                        downRef.current = null;
+                      }
+                    : undefined
+                }
                 tabIndex={isTop ? 0 : undefined}
                 role={isTop ? 'button' : undefined}
                 aria-expanded={isTop ? open : undefined}
@@ -278,36 +318,44 @@ export default function Projects() {
                     display: 'block',
                   }}
                 />
-                {isTop && (
-                  <AnimatePresence>
-                    {showHint && (
-                      <motion.div
-                        key="hint"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1, transition: { duration: 0.6, delay: 0.8 } }}
-                        exit={{ opacity: 0, transition: { duration: 0.3 } }}
-                        style={{
-                          position: 'absolute',
-                          bottom: '18px',
-                          right: '18px',
-                          zIndex: 4,
-                          pointerEvents: 'none',
-                          width: '52px',
-                          height: '52px',
-                          borderRadius: '50%',
-                          backgroundColor: 'rgba(10,10,10,0.55)',
-                        }}
-                      >
-                        <PulseRing size={52} tone="dark" pulse delay={0}>
-                          <Info size={22} color="#FFFFFF" />
-                        </PulseRing>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                )}
               </motion.div>
             );
           })}
+
+          <AnimatePresence>
+            {showHint && (
+              <motion.div
+                key="hint"
+                aria-hidden="true"
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.8 } }}
+                exit={{ opacity: 0, transition: { duration: 0.3 } }}
+                style={{
+                  position: 'absolute',
+                  top: isMobile ? '14px' : '18px',
+                  right: isMobile ? '14px' : '18px',
+                  zIndex: 30,
+                  pointerEvents: 'none',
+                  backgroundColor: 'rgba(10,10,10,0.55)',
+                  backdropFilter: 'blur(6px)',
+                  WebkitBackdropFilter: 'blur(6px)',
+                  padding: '8px 12px',
+                  borderRadius: '10px',
+                  textAlign: 'right',
+                  color: '#FFFFFF',
+                  textTransform: 'uppercase',
+                  fontSize: '10.5px',
+                  fontWeight: 600,
+                  letterSpacing: '0.14em',
+                  lineHeight: 1.5,
+                }}
+              >
+                Swipe for more
+                <br />
+                Tap for details
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <AnimatePresence>
@@ -318,36 +366,25 @@ export default function Projects() {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.4, ease: EASE }}
+              role="button"
+              tabIndex={0}
+              aria-label="Close details"
+              onClick={() => setOpen(false)}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setOpen(false);
+                }
+              }}
               style={{
                 width: stackWidth,
                 margin: '0 auto',
                 overflow: 'hidden',
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(194,178,160,0.3)',
-                position: 'relative',
+                cursor: 'pointer',
+                textAlign: 'center',
               }}
             >
-              <div style={{ padding: isMobile ? '22px 22px 24px' : '28px 32px 30px' }}>
-                <button
-                  type="button"
-                  aria-label="Close"
-                  onClick={() => setOpen(false)}
-                  style={{
-                    position: 'absolute',
-                    top: '6px',
-                    right: '6px',
-                    width: '40px',
-                    height: '40px',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <X size={18} color="#FFFFFF" />
-                </button>
+              <div style={{ padding: isMobile ? '22px 4px 0' : '28px 4px 0' }}>
                 <p
                   style={{
                     textTransform: 'uppercase',
@@ -359,7 +396,7 @@ export default function Projects() {
                 >
                   {top.location}
                 </p>
-                <div style={{ width: '32px', height: '2px', backgroundColor: '#C2B2A0', margin: '14px 0' }} />
+                <div style={{ width: '32px', height: '2px', backgroundColor: '#C2B2A0', margin: '14px auto' }} />
                 <h3
                   style={{
                     color: '#FFFFFF',

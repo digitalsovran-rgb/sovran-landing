@@ -58,24 +58,26 @@ export default function HandHint({ show, tone }: HandHintProps) {
   return (
     <motion.span
       aria-hidden="true"
-      initial={{ opacity: 0, x: 14, y: 14 }}
-      animate={{ opacity: [0, 1, 1, 0], x: [14, 0, 0, 6], y: [14, 0, 0, 6] }}
+      initial={{ opacity: 0, x: 8, y: 8 }}
+      animate={{ opacity: [0, 0.5, 0.5, 0], x: [8, 0, 0, 4], y: [8, 0, 0, 4] }}
       transition={{ duration: TOTAL_S, ease: 'easeInOut', times: [0, 0.1, 0.84, 1] }}
       style={{
         position: 'absolute',
-        left: 'calc(50% + 12px)',
-        top: 'calc(50% + 19px)',
-        width: 56,
-        height: 56,
-        margin: '-28px 0 0 -28px',
+        // Places the fingertip (8, 2 in the 24 unit geometry, after the -32deg rotation)
+        // about 22px right of and 14px below the centre of the icon being pointed at.
+        left: 'calc(50% + 34px)',
+        top: 'calc(50% + 23px)',
+        width: 34,
+        height: 34,
+        margin: '-17px 0 0 -17px',
         pointerEvents: 'none',
         zIndex: 3,
-        filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.4))',
+        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))',
       }}
     >
       <svg
-        width="60"
-        height="60"
+        width="34"
+        height="34"
         viewBox="0 0 24 24"
         fill="none"
         overflow="visible"
@@ -83,8 +85,8 @@ export default function HandHint({ show, tone }: HandHintProps) {
         strokeLinejoin="round"
         style={{ transform: 'rotate(-32deg)', display: 'block' }}
       >
-        {layer(halo, '4.2')}
-        {layer(main, '2')}
+        {layer(halo, '3')}
+        {layer(main, '1.5')}
 
         <motion.circle
           cx={RIPPLE_CX}
@@ -92,7 +94,7 @@ export default function HandHint({ show, tone }: HandHintProps) {
           r="2"
           fill="none"
           stroke={main}
-          strokeWidth="0.7"
+          strokeWidth="0.6"
           style={{ transformBox: 'fill-box', transformOrigin: '50% 50%' }}
           initial={{ scale: 0.4, opacity: 0 }}
           animate={{

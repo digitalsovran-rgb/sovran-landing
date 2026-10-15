@@ -188,3 +188,10 @@ img {
 /* About section: pillar swipe track hides its scrollbar, hold-to-reveal control focus ring */
 .sov-track::-webkit-scrollbar { display: none; }
 .sov-hold-btn:focus-visible { outline: 2px solid #C2B2A0; outline-offset: 4px; }
+
+/* About pillars: the large ghost icon slowly draws itself in and out while drifting */
+@keyframes sov-ghost-draw { 0% { stroke-dashoffset: 100; } 30% { stroke-dashoffset: 0; } 72% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -100; } }
+@keyframes sov-ghost-drift { 0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); } 50% { transform: translate3d(-6px, 5px, 0) rotate(3deg); } }
+.sov-ghost-wrap { animation: sov-ghost-drift 9s ease-in-out infinite; animation-delay: var(--sov-delay, 0s); will-change: transform; }
+.sov-ghost * { stroke-dasharray: 100; stroke-dashoffset: 100; animation: sov-ghost-draw 8s ease-in-out infinite; animation-delay: var(--sov-delay, 0s); }
+@media (prefers-reduced-motion: reduce) { .sov-ghost-wrap, .sov-ghost * { animation: none; } .sov-ghost * { stroke-dasharray: none; stroke-dashoffset: 0; } }

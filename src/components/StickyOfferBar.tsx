@@ -59,12 +59,15 @@ export default function StickyOfferBar() {
           zIndex: 55,
           borderRadius: '12px',
           overflow: 'hidden',
-          boxShadow: '0 6px 24px rgba(0,0,0,0.30)',
-          backgroundColor: hovered ? 'var(--sov-white)' : 'var(--sov-greige-light)',
+          boxShadow: hovered ? '0 8px 28px rgba(0,0,0,0.38)' : '0 6px 24px rgba(0,0,0,0.30)',
+          backgroundColor: 'var(--sov-greige-light)',
+          // The desktop class centres the bar with translateX(-50%), so the hover lift has to
+          // keep that translate. On mobile the class forces transform: none !important.
+          transform: hovered ? 'translateX(-50%) translateY(-1px)' : undefined,
           border: '1px solid rgba(10,10,10,0.12)',
           opacity: visible ? 1 : 0,
           pointerEvents: visible ? 'auto' : 'none',
-          transition: 'opacity 0.3s ease, background-color 0.25s ease',
+          transition: 'opacity 0.3s ease, transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease',
         }}
       >
         <button
@@ -92,6 +95,8 @@ export default function StickyOfferBar() {
               fontWeight: 500,
               textTransform: 'uppercase',
               letterSpacing: '0.15em',
+              color: '#FFFFFF',
+              textShadow: '0 1px 2px rgba(74,68,60,0.85), 0 0 10px rgba(74,68,60,0.55)',
             }}
           >
             Claim Your Design Package
@@ -100,7 +105,8 @@ export default function StickyOfferBar() {
             style={{
               fontSize: '8px',
               fontWeight: 500,
-              color: 'rgba(10,10,10,0.7)',
+              color: 'rgba(255,255,255,0.92)',
+              textShadow: '0 1px 2px rgba(74,68,60,0.85), 0 0 10px rgba(74,68,60,0.55)',
               marginTop: '5px',
               letterSpacing: '0.05em',
             }}

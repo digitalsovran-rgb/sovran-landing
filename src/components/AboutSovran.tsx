@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Compass, FingerprintPattern, ShieldCheck, Users } from 'lucide-react';
+import { ChevronDown, Compass, ShieldCheck, Users } from 'lucide-react';
+import HouseMark from './HouseMark';
 
 const ethosCards = [
   {
@@ -36,10 +37,30 @@ const LINE_PX = 14 * 1.6;
 
 // Press and hold control: how long the hold lasts and the circumference of its progress ring
 // (2 * PI * r with r = 72).
-const HOLD_MS = 2500;
+const HOLD_MS = 1600;
+// A hold is cancelled if the pointer wanders further than this from where it went down.
+const HOLD_MAX_DRIFT_PX = 80;
 const RING_CIRCUMFERENCE = 452.39;
 
 type EthosCard = (typeof ethosCards)[number];
+
+// Shared look of the two stacked hold messages (idle and "Keep holding...").
+const holdTextStyle: React.CSSProperties = {
+  position: 'absolute',
+  inset: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  textAlign: 'center',
+  padding: '0 8px',
+  pointerEvents: 'none',
+  textTransform: 'uppercase',
+  fontSize: '13px',
+  letterSpacing: '0.18em',
+  fontWeight: 500,
+  color: 'rgba(255,255,255,0.7)',
+  transition: 'opacity 0.25s ease',
+};
 
 // Counts from 0 up to `target` once `active` becomes true, and stays latched (never restarts
 // on later re-triggers).
@@ -135,16 +156,32 @@ const descTextStyle: React.CSSProperties = {
 };
 
 // Large faint copy of the icon in the panel corner, plus the ringed icon at the top left.
-function PanelIcons({ icon: Icon }: { icon: EthosCard['icon'] }) {
+// The ghost icon drifts and redraws itself (sov-ghost classes in index.css), staggered per
+// pillar through --sov-delay.
+function PanelIcons({ icon: Icon, index }: { icon: EthosCard['icon']; index: number }) {
   return (
     <>
-      <Icon
-        size={150}
-        strokeWidth={0.6}
-        color="rgba(194,178,160,0.12)"
-        aria-hidden="true"
-        style={{ position: 'absolute', top: '-24px', right: '-28px', pointerEvents: 'none' }}
-      />
+      <span
+        className="sov-ghost-wrap"
+        style={
+          {
+            position: 'absolute',
+            top: '-24px',
+            right: '-28px',
+            pointerEvents: 'none',
+            display: 'block',
+            '--sov-delay': `${index * 1.4}s`,
+          } as React.CSSProperties
+        }
+      >
+        <Icon
+          size={150}
+          strokeWidth={0.6}
+          color="rgba(194,178,160,0.12)"
+          aria-hidden="true"
+          className="sov-ghost"
+        />
+      </span>
       <span
         style={{
           position: 'relative',
@@ -217,7 +254,7 @@ function MobilePanel({
         font: 'inherit',
       }}
     >
-      <PanelIcons icon={card.icon} />
+      <PanelIcons icon={card.icon} index={index} />
       <span style={{ ...titleStyle, display: 'block' }}>{card.label}</span>
       <span style={{ ...ruleStyle, display: 'block' }} />
 
@@ -286,7 +323,7 @@ function DesktopPanel({ card, index }: { card: EthosCard; index: number }) {
       transition={{ duration: 0.8, delay: index * 0.15, ease: EASE }}
       style={panelStyle}
     >
-      <PanelIcons icon={card.icon} />
+      <PanelIcons icon={card.icon} index={index} />
       <h3 style={titleStyle}>{card.label}</h3>
       <div style={ruleStyle} />
       <p style={descTextStyle}>{card.desc}</p>
@@ -374,6 +411,8 @@ export default function AboutSovran() {
   const [isHolding, setIsHolding] = useState(false);
 
   const ringRef = useRef<SVGCircleElement>(null);
+  const houseRef = useRef<SVGGElement>(null);
+  const downPosRef = useRef<{ x: number; y: number } | null>(null);
   const holdingRef = useRef(false);
   const completedRef = useRef(false);
   const startTsRef = useRef(0);
@@ -395,12 +434,14 @@ export default function AboutSovran() {
     if (holdingRef.current || completedRef.current) return;
     holdingRef.current = true;
     if (ringRef.current) ringRef.current.style.transition = 'none';
+    if (houseRef.current) houseRef.current.style.transition = 'none';
     setIsHolding(true);
     startTsRef.current = performance.now();
 
     const tick = (now: number) => {
       const p = Math.min(1, (now - startTsRef.current) / HOLD_MS);
       if (ringRef.current) ringRef.current.style.strokeDashoffset = String(RING_CIRCUMFERENCE * (1 - p));
+      if (houseRef.current) houseRef.current.style.strokeDashoffset = String(1 - p);
       if (p >= 1) {
         rafRef.current = null;
         holdingRef.current = false;
@@ -427,11 +468,22 @@ export default function AboutSovran() {
       ringRef.current.style.transition = 'stroke-dashoffset 0.4s ease';
       ringRef.current.style.strokeDashoffset = String(RING_CIRCUMFERENCE);
     }
+    if (houseRef.current) {
+      houseRef.current.style.transition = 'stroke-dashoffset 0.4s ease';
+      houseRef.current.style.strokeDashoffset = '1';
+    }
   };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
+    downPosRef.current = { x: e.clientX, y: e.clientY };
     startHold();
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const down = downPosRef.current;
+    if (!holdingRef.current || down === null) return;
+    if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > HOLD_MAX_DRIFT_PX) cancelHold();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -583,38 +635,26 @@ export default function AboutSovran() {
                 transition={{ duration: 0.5 }}
                 style={{ overflow: 'hidden' }}
               >
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.p
-                    key={isHolding ? 'holding' : 'idle'}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.25 }}
-                    style={{
-                      margin: '28px 0 22px',
-                      textTransform: 'uppercase',
-                      fontSize: '13px',
-                      letterSpacing: '0.18em',
-                      fontWeight: 500,
-                      color: 'rgba(255,255,255,0.7)',
-                    }}
-                  >
-                    {isHolding
-                      ? 'Keep holding...'
-                      : isMobile
-                        ? 'Tap and hold to reveal our numbers'
-                        : 'Click and hold to reveal our numbers'}
-                  </motion.p>
-                </AnimatePresence>
+                {/* Fixed-height slot: both messages are always laid out and only cross-fade, so
+                    the control below never shifts while holding. */}
+                <div
+                  aria-live="polite"
+                  style={{ position: 'relative', width: '100%', height: '52px', margin: '18px 0 22px' }}
+                >
+                  <span style={{ ...holdTextStyle, opacity: isHolding ? 0 : 1 }}>
+                    {isMobile ? 'Tap and hold to reveal our numbers' : 'Click and hold to reveal our numbers'}
+                  </span>
+                  <span style={{ ...holdTextStyle, opacity: isHolding ? 1 : 0 }}>Keep holding...</span>
+                </div>
 
                 <button
                   type="button"
                   aria-label="Press and hold to reveal our numbers"
                   className="sov-hold-btn"
                   onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
                   onPointerUp={cancelHold}
                   onPointerCancel={cancelHold}
-                  onPointerLeave={cancelHold}
                   onLostPointerCapture={cancelHold}
                   onKeyDown={handleKeyDown}
                   onKeyUp={handleKeyUp}
@@ -676,18 +716,16 @@ export default function AboutSovran() {
                       strokeDashoffset={RING_CIRCUMFERENCE}
                     />
                   </svg>
-                  <FingerprintPattern
-                    size={72}
-                    strokeWidth={1.1}
-                    color="#C2B2A0"
-                    aria-hidden="true"
+                  <span
                     style={{
-                      position: 'relative',
-                      opacity: isHolding ? 1 : 0.55,
-                      transform: isHolding ? 'scale(1.06)' : 'scale(1)',
-                      transition: 'opacity 0.3s ease, transform 0.3s ease',
+                      display: 'grid',
+                      placeItems: 'center',
+                      transform: isHolding ? 'scale(1.05)' : 'scale(1)',
+                      transition: 'transform 0.3s ease',
                     }}
-                  />
+                  >
+                    <HouseMark size={78} drawRef={houseRef} holding={isHolding} />
+                  </span>
                 </button>
               </motion.div>
             )}

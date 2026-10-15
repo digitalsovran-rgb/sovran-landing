@@ -460,9 +460,13 @@ export default function Hero() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 minHeight: '60px',
-                backgroundColor: ctaHovered ? 'var(--sov-white)' : 'var(--sov-greige-light)',
-                color: 'var(--sov-black)',
+                backgroundColor: 'var(--sov-greige-light)',
+                color: '#FFFFFF',
+                textShadow: '0 1px 2px rgba(74,68,60,0.85), 0 0 10px rgba(74,68,60,0.55)',
                 border: 'none',
+                borderRadius: '12px',
+                transform: ctaHovered ? 'translateY(-1px)' : 'none',
+                boxShadow: ctaHovered ? '0 8px 24px rgba(0,0,0,0.35)' : 'none',
                 fontSize: '15px',
                 fontWeight: 600,
                 fontFamily: 'Inter, sans-serif',
@@ -470,7 +474,7 @@ export default function Hero() {
                 letterSpacing: '0.14em',
                 padding: '18px 56px',
                 cursor: 'pointer',
-                transition: 'background-color 0.25s ease',
+                transition: 'transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease',
               }}
             >
               Claim Offer
