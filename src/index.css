@@ -210,3 +210,7 @@ img {
 /* Justified copy whose last line sits left, and no automatic hyphenation */
 .sov-nohyph { hyphens: none; -webkit-hyphens: none; overflow-wrap: normal; word-break: normal; }
 .sov-justify-l { text-align-last: left; }
+
+/* Larger section heading, used for the Our Work title */
+.sov-h2-lg { font-size: clamp(40px, 5.2vw, 68px); font-weight: 900; letter-spacing: -0.02em; line-height: 1.05; }
+@media (max-width: 767px) { .sov-h2-lg { font-size: clamp(36px, 9.8vw, 50px); } }

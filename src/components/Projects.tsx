@@ -2,36 +2,39 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
 
+// Public URL folder holding the project images (public/media).
+const URL_DIR = '/media';
+
 const PROJECTS = [
   {
-    title: 'Rear Extension',
-    location: 'Richmond, TW9',
-    desc: 'Open the back of your home to the garden.',
-    img: '/media/rearext.webp',
+    title: 'New Build',
+    location: 'Cobham, KT11',
+    desc: 'A stone country house with an arched loggia, made for long summer evenings in the garden.',
+    img: `${URL_DIR}/country1.webp`,
   },
   {
-    title: 'Loft Conversion',
-    location: 'Wimbledon, SW19',
-    desc: 'Turn unused space into the room you need.',
-    img: '/media/loftconver.webp?v=3',
+    title: 'Full Renovation',
+    location: 'Beaconsfield, HP9',
+    desc: 'A red brick Georgian house restored to full proportion, with a still pond along the approach.',
+    img: `${URL_DIR}/country2.webp`,
   },
   {
-    title: 'Side Return',
-    location: 'Chiswick, W4',
-    desc: 'Reclaim the narrow gap beside your property.',
-    img: '/media/sideret.webp',
+    title: 'Townhouse Renovation',
+    location: 'Chelsea, SW3',
+    desc: 'A dark joinery kitchen with a marble island, opening onto the dining room and the light from the tall windows.',
+    img: `${URL_DIR}/centralone.webp`,
   },
   {
-    title: 'Double Storey',
-    location: 'Hampstead, NW3',
-    desc: 'Two floors of new space. One build.',
-    img: '/media/doublstor.webp?v=3',
+    title: 'Basement Conversion',
+    location: 'Holland Park, W11',
+    desc: 'A pool and spa floor built below ground, with daylight reaching the water.',
+    img: `${URL_DIR}/basement.webp`,
   },
   {
-    title: 'Wrap Around',
-    location: 'Notting Hill, W11',
-    desc: 'Change the entire feel of your home.',
-    img: '/media/wraparound.webp',
+    title: 'New Build',
+    location: 'Virginia Water, GU25',
+    desc: 'A stone manor house that comes alive at dusk, with the pool and gardens framing the evening.',
+    img: `${URL_DIR}/country3.webp`,
   },
 ];
 
@@ -67,7 +70,7 @@ const STICKY_RESERVE = 92;
 export default function Projects() {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const [panelW, setPanelW] = useState(computePanelW);
-  const [order, setOrder] = useState<number[]>(() => PROJECTS.map((_, i) => i));
+  const [order, setOrder] = useState<number[]>(() => Array.from({ length: PROJECTS.length }, (_, i) => i));
   const [exitingId, setExitingId] = useState<number | null>(null);
   const [exitDir, setExitDir] = useState<-1 | 1>(1);
   const [dealt, setDealt] = useState(false);
@@ -388,7 +391,7 @@ export default function Projects() {
           >
             <img
               src={project.img}
-              alt={project.title}
+              alt={`${project.title}, ${project.location}`}
               draggable={false}
               decoding="async"
               loading="eager"
@@ -414,7 +417,7 @@ export default function Projects() {
     >
       <div className="inner">
         <motion.h2
-          className="sov-h2"
+          className="sov-h2-lg"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
@@ -426,7 +429,7 @@ export default function Projects() {
             fontFamily: 'Inter, sans-serif',
           }}
         >
-          Our Work.
+          Our Architectural Work.
         </motion.h2>
         <div
           style={{
