@@ -15,11 +15,6 @@ const TABS: { id: TabId; label: string }[] = [
   { id: 'not', label: 'Not for you' },
 ];
 
-const IMAGES = {
-  for: { src: '/media/rearext.webp', alt: 'A finished home extension' },
-  not: { src: '/media/archdraw.webp', alt: 'Design drawings laid out on a desk' },
-};
-
 const LISTS = {
   for: [
     'You want your property designed and built by Sovran, from the first drawing to the final detail.',
@@ -145,8 +140,6 @@ export default function WhoFor() {
     </motion.div>
   );
 
-  const imageTransition = reduced ? 'none' : 'opacity 0.7s ease, transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1)';
-
   const frame = (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -162,28 +155,24 @@ export default function WhoFor() {
         aspectRatio: '16 / 9',
       }}
     >
-      {(Object.keys(IMAGES) as TabId[]).map((id) => (
-        <img
-          key={id}
-          src={IMAGES[id].src}
-          alt={IMAGES[id].alt}
-          draggable={false}
-          loading="lazy"
-          decoding="async"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: 'center',
-            display: 'block',
-            opacity: tab === id ? 1 : 0,
-            transform: tab === id ? 'scale(1)' : 'scale(1.05)',
-            transition: imageTransition,
-          }}
-        />
-      ))}
+      <img
+        src="/media/whospic.webp"
+        alt="A Sovran design and build project"
+        draggable={false}
+        loading="lazy"
+        decoding="async"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          objectPosition: 'center',
+          display: 'block',
+          opacity: 1,
+          transform: 'none',
+        }}
+      />
     </motion.div>
   );
 
