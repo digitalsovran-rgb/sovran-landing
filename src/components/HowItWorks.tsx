@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import { FileSearch, PenTool, Video, ClipboardCheck } from 'lucide-react';
+import { FileSearch, PenTool, Video, ClipboardCheck, HardHat } from 'lucide-react';
 import PulseRing from './PulseRing';
 import HandHint from './HandHint';
 
@@ -11,7 +11,7 @@ const rows = [
     label: 'Brief Assessment',
     image: '/media/sites.webp',
     imageLeft: true,
-    desc: "Wherever possible, we work from your existing architectural drawings and design on top of what's already there. Where a site survey is needed, it's included as part of your design pack, subject to availability.",
+    desc: 'Whether you are building a new home, extending or renovating, your plan is shaped around your goals and ambitions. If a site survey is needed, it comes as part of your package. Your project manager will walk you through the arrangements according to your location.',
   },
   {
     num: '02',
@@ -19,7 +19,7 @@ const rows = [
     label: 'Architectural Drawings',
     image: '/media/archdraw.webp',
     imageLeft: false,
-    desc: "Floor plans developed around your brief and your home, already accounting for the energy and comfort standards taking effect from March 2027, so what's drawn today still holds up tomorrow.",
+    desc: 'This is where our commitment to design shows most. You receive floor plans developed around your brief and your property, already prepared for the energy standards arriving in 2027, so what is drawn today stands up tomorrow.',
   },
   {
     num: '03',
@@ -27,7 +27,7 @@ const rows = [
     label: '3D Render & Walkthrough',
     image: '/media/renderw.webp',
     imageLeft: true,
-    desc: 'See the finished extension before a single brick is laid, rendered and walked through in full.',
+    desc: 'Walk through your new home with our experts and live in it before it exists. Adjust any specification, ask for our advice, and let the renders show you what your home is about to become.',
   },
   {
     num: '04',
@@ -35,7 +35,15 @@ const rows = [
     label: 'Planning Assessment',
     image: '/media/plann.webp',
     imageLeft: false,
-    desc: 'A clear read on planning potential, budget and timeline, including how the finished extension performs against the standards coming into force in 2027.',
+    desc: 'A seamless process in which we prepare and manage the documentation and the application, so everything is in place when you are ready to build with us. We stay current with upcoming changes to permissions and regulations that could affect the performance standards your home must meet.',
+  },
+  {
+    num: '05',
+    icon: HardHat,
+    label: 'Start Building',
+    image: '/media/doublstor.webp?v=3',
+    imageLeft: true,
+    desc: 'With everything in place, our construction team begins, led by a dedicated project manager who works from the same specification as the team that designed your home. As a design and build company, there are no extra contracts and no teams for you to manage. From the first day to the day you step inside, it feels easy.',
   },
 ];
 
@@ -297,7 +305,7 @@ export default function HowItWorks() {
             lineHeight: 1.15,
           }}
         >
-          How Your Design Pack Comes Together.
+          Start Your Architectural Journey.
         </motion.h2>
       </div>
 

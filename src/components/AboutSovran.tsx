@@ -7,24 +7,24 @@ const ethosCards = [
   {
     label: 'One Team',
     icon: Users,
-    desc: 'You speak to the same people from your first conversation to the day we hand over the keys.',
+    desc: 'One project manager runs your build. They are your single point of contact: you ask them, they answer, and they plan and coordinate every trade on site, so you never have to chase anyone.',
   },
   {
     label: 'Planning Expertise',
     icon: Compass,
-    desc: 'Our team includes former planning officers, so we know what a council needs to see before you even apply.',
+    desc: 'We know what a council needs to see. Our team includes former planning officers, so your application arrives prepared the way the council expects it, with the right documents in the right order, ready to be approved the first time.',
   },
   {
     label: 'Protected Investment',
     icon: ShieldCheck,
-    desc: 'A fixed price, agreed upfront, so there are no surprises waiting for you halfway through your project.',
+    desc: 'Your price is fixed before work begins. Airtight contracts and milestone payments protect your investment at each stage, and Sovran backs it with legal insurance.',
   },
 ];
 
 const stats = [
   { target: 15, decimals: 0, suffix: '+', label: 'Years' },
   { target: 1000, decimals: 0, suffix: '+', label: 'Projects Delivered' },
-  { target: 95, decimals: 0, suffix: '%', label: 'Planning Success' },
+  { target: 97, decimals: 0, suffix: '%', label: 'Planning Success' },
   { target: 4.9, decimals: 1, suffix: '', label: 'Google Rating' },
 ];
 
@@ -551,10 +551,12 @@ export default function AboutSovran() {
             margin: '20px auto 0',
           }}
         >
-          Sovran is a design and build studio: architects, planners and construction specialists
-          working as one team, under one roof. Founded in 2011, we&apos;ve delivered over 1,000
-          projects across London and the Home Counties, spanning architecture, construction and
-          interiors, each one carried by the same team from first drawing to completion.
+          Our evolved approach to architecture creates places people remember, and our mission is to
+          shape how you experience your home through every design decision. A home deserves a design
+          made only for it, and you are the one who will enjoy it for the rest of your life. For us,
+          architecture is a commitment to perfection, and we carry that same standard into the studio.
+          By managing design and construction as one team, we protect it at any level and at each
+          stage of your project. That is our footprint: spatial harmony, at all times.
         </motion.p>
 
         {isMobile ? (

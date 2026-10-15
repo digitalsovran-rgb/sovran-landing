@@ -211,7 +211,7 @@ export default function Hero() {
         @media (max-width: 767px) {
           .hero-h1 { font-size: clamp(26px, 7.1vw, 35px) !important; font-weight: 900 !important; }
           .hero-label { font-size: 10px !important; margin-bottom: 24px !important; font-weight: 600 !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
-          .hero-desc { font-size: 14.3px !important; font-weight: 500 !important; text-shadow: 0 2px 8px rgba(0,0,0,0.5) !important; }
+          .hero-desc { font-size: 13.5px !important; line-height: 1.6 !important; font-weight: 500 !important; text-shadow: 0 2px 8px rgba(0,0,0,0.5) !important; }
           .hero-desc-desktop { display: none !important; }
           .hero-desc-mobile { display: block !important; }
           .hero-cta-wrap { width: calc(100% + 16px) !important; margin-left: -8px !important; margin-right: -8px !important; }
@@ -234,8 +234,8 @@ export default function Hero() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          paddingTop: '96px',
-          paddingBottom: '72px',
+          paddingTop: isMobile ? '88px' : '96px',
+          paddingBottom: isMobile ? '56px' : '72px',
           boxSizing: 'border-box',
           backgroundColor: '#0a0a0a',
         }}
@@ -382,7 +382,7 @@ export default function Hero() {
                 marginBottom: '40px',
               }}
             >
-              Complimentary Concept Design Package
+              Complimentary Architectural Package
             </motion.p>
           </div>
 
@@ -402,7 +402,7 @@ export default function Hero() {
               fontFamily: 'Inter, sans-serif',
             }}
           >
-            A Complete Design Package To Support Your Extension.
+            Innovative Architecture Design For Your Home.
           </motion.h1>
 
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', width: '100%' }}>
@@ -421,7 +421,7 @@ export default function Hero() {
               textShadow: '0 2px 8px rgba(0,0,0,0.5)',
             }}
           >
-            Sovran is offering a complimentary Home Transformation Blueprint for a limited period — floor plans, 3D visuals, moodboard, and a full project proposal, built around your home extension project.
+            The homes people never forget start with a drawing. Architecture decides how daylight crosses a room, how one space opens into the next, and how it feels to walk through your own front door. It is the refined decision behind every home worth remembering. That is why Sovran is offering a complimentary architectural package with every build: so your home feels like yours from the very first drawing.
           </p>
 
           {/* Not Framer Motion-animated (unlike its siblings): this paragraph is the confirmed
@@ -439,7 +439,7 @@ export default function Hero() {
               textShadow: '0 2px 8px rgba(0,0,0,0.5)',
             }}
           >
-            Sovran is offering a complimentary Home Transformation Blueprint for a limited period — floor plans, 3D visuals, moodboard, and a full project proposal, built around your home extension project.
+            The homes people never forget start with a drawing. Architecture decides how daylight crosses a room, how one space opens into the next, and how it feels to walk through your own front door. It is the refined decision behind every home worth remembering. That is why Sovran is offering a complimentary architectural package with every build: so your home feels like yours from the very first drawing.
           </p>
 
           <motion.div
@@ -477,7 +477,7 @@ export default function Hero() {
                 transition: 'transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease',
               }}
             >
-              Claim Offer
+              Get My Architecture Design
             </button>
           </motion.div>
           </div>

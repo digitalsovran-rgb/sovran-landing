@@ -10,20 +10,20 @@ const TABS: { id: TabId; label: string }[] = [
 ];
 
 const IMAGES = {
-  for: { src: '/media/rearext.webp', alt: 'A finished rear extension', tag: 'Designed and built with Sovran' },
-  not: { src: '/media/archdraw.webp', alt: 'Design drawings laid out on a desk', tag: 'Design on its own' },
+  for: { src: '/media/rearext.webp', alt: 'A finished home extension' },
+  not: { src: '/media/archdraw.webp', alt: 'Design drawings laid out on a desk' },
 };
 
 const LISTS = {
   for: [
-    'You want your extension designed and built by Sovran, from first drawing to the day you move in.',
-    'You own the property, or you are about to complete on it.',
-    'You are ready to choose your team now, even if building starts later.',
+    'You want your property designed and built by Sovran, from the first drawing to the final detail.',
+    'You own the property, or are close to completing on it.',
+    'You are ready to choose your team and start building.',
   ],
   not: [
-    'You are looking for design work with no build attached.',
-    'Price is the main thing you are comparing.',
-    'You are exploring ideas with no plan to build.',
+    'You are looking for architectural advice, design or an architectural service on its own.',
+    'You do not own the property and are not close to owning it.',
+    'You are exploring what your property could become, with no plans to build.',
   ],
 };
 
@@ -97,8 +97,9 @@ export default function WhoFor() {
           margin: isMobile ? '0 auto' : '0',
         }}
       >
-        The design package is offered to projects that Sovran will also build. Here is how to tell if yours is
-        one of them.
+        We take pride in creating spaces that meet our clients&apos; expectations and go beyond them. As an
+        extension of that commitment, the architectural package is offered to clients who have chosen
+        Sovran&apos;s design and build or construction service. Here is how to tell if yours is one of them.
       </p>
     </motion.div>
   );
@@ -143,40 +144,6 @@ export default function WhoFor() {
           }}
         />
       ))}
-      <div
-        style={{
-          position: 'absolute',
-          top: '14px',
-          left: '14px',
-          zIndex: 2,
-          pointerEvents: 'none',
-        }}
-      >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={tab}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            style={{
-              backgroundColor: 'rgba(10,10,10,0.55)',
-              backdropFilter: 'blur(6px)',
-              WebkitBackdropFilter: 'blur(6px)',
-              padding: '8px 12px',
-              borderRadius: '10px',
-              color: '#FFFFFF',
-              textTransform: 'uppercase',
-              fontSize: '10.5px',
-              fontWeight: 600,
-              letterSpacing: '0.14em',
-              lineHeight: 1.4,
-            }}
-          >
-            {IMAGES[tab].tag}
-          </motion.div>
-        </AnimatePresence>
-      </div>
     </motion.div>
   );
 
@@ -253,7 +220,7 @@ export default function WhoFor() {
 
   const panel = (
     <AnimatePresence mode="wait">
-      <motion.ul
+      <motion.div
         key={tab}
         id="who-for-panel"
         role="tabpanel"
@@ -262,6 +229,8 @@ export default function WhoFor() {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
+      >
+      <ul
         style={{
           margin: 0,
           padding: 0,
@@ -316,7 +285,35 @@ export default function WhoFor() {
             </p>
           </motion.li>
         ))}
-      </motion.ul>
+      </ul>
+      {tab === 'not' && (
+        <p
+          style={{
+            margin: '22px 0 0',
+            fontSize: '14px',
+            lineHeight: 1.6,
+            color: 'rgba(255,255,255,0.72)',
+            textAlign: 'left',
+          }}
+        >
+          Looking for architecture on its own? We would still be glad to help.{' '}
+          <a
+            href="https://www.sovranstudio.co.uk/architecture"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: '#FFFFFF',
+              textDecoration: 'underline',
+              textDecorationColor: '#C2B2A0',
+              textUnderlineOffset: '3px',
+            }}
+          >
+            Visit our architecture page
+          </a>{' '}
+          and enquire about the service you need.
+        </p>
+      )}
+      </motion.div>
     </AnimatePresence>
   );
 

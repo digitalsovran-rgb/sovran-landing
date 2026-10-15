@@ -8,32 +8,32 @@ const tiles = [
   {
     icon: Home,
     label: 'Suitability',
-    desc: 'Which extension ideas suit your home best, based on your plot, surroundings and existing architecture.',
+    desc: 'Every property presents its own challenges, from a new build to a basement. We understand yours before the first line is drawn.',
   },
   {
     icon: TrendingUp,
     label: 'Value Increase',
-    desc: "An estimate of what this project could add to your property's value.",
+    desc: 'A clear roadmap of how your investment with Sovran adds to your property, for years to come.',
   },
   {
     icon: ClipboardCheck,
     label: 'Planning Potential',
-    desc: "A clear read on what's likely to be approved, before you apply.",
+    desc: 'A professional overview of the best path and the documents to submit, so your application is approved first time, from householder consent to a full planning application.',
   },
   {
     icon: Wallet,
     label: 'Budget & Timeline',
-    desc: 'Realistic figures from the current market prices.',
+    desc: 'A price that holds, protected by airtight contracts, with every milestone agreed before work begins.',
   },
   {
     icon: LayoutGrid,
     label: 'Layout Ideas',
-    desc: 'Suggested configurations you may not have thought of.',
+    desc: 'Architecture, bespoke joinery and interior design work as one team, so we bring ideas and statement details to your property that go beyond what you had imagined.',
   },
   {
     icon: ShieldAlert,
     label: 'Risk Assessment',
-    desc: 'The issues that could derail the project, identified early.',
+    desc: 'We have faced and solved some of the most demanding challenges in construction, so problems are spotted early. If something surfaces midway, our team is trained to handle it.',
   },
 ];
 
@@ -227,7 +227,7 @@ export default function WhatYouDiscover() {
             marginBottom: '20px',
           }}
         >
-          Before You Start
+          For You To Start
         </motion.p>
 
         <motion.h2
@@ -243,7 +243,7 @@ export default function WhatYouDiscover() {
             lineHeight: 1.1,
           }}
         >
-          Know Exactly What&apos;s Possible.
+          The Life You Want, Drawn First.
         </motion.h2>
 
         <motion.p
@@ -261,8 +261,10 @@ export default function WhatYouDiscover() {
             margin: '20px auto 0',
           }}
         >
-          Your design package doesn&apos;t just show you a drawing. It answers the questions that
-          actually decide whether this project is worth doing.
+          Building your dream home is a big challenge, and Sovran is committed to taking it on with you.
+          Whether it is a new build, an extension, a renovation or a basement, you start with floor
+          plans, 3D visuals, a mood board and a full project proposal, everything you need to begin
+          bringing your home to life.
         </motion.p>
 
         <div

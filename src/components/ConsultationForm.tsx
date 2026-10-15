@@ -5,38 +5,54 @@ import { getSlotCount } from '../utils/slotCount';
 type FormData = {
   name: string;
   email: string;
+  // Digits only, the 10 national digits that follow +44 (no leading 0).
   phone: string;
 };
 
-type QualifyingSubStep = 'input' | 'loading' | 'result';
+type Screen = 'type' | 'invest' | 'start' | 'loading' | 'result' | 'contact';
 
-const extensionOptions = [
-  'Rear Extension',
-  'Loft Conversion',
-  'Side Return',
-  'Double Storey',
-  'Wrap Around',
-  'Multiple Projects',
-];
+const projectTypeOptions = ['New Build', 'Home Extension', 'Home Renovation', 'Basements'];
 
-const budgetOptions = ['Under £150K', '£150K – £500K', '£500K – £1M', '£1M+'];
+const budgetOptions = ['£90K – £150K', '£150K – £500K', '£500K – £1M', '£1M+'];
 
-const timelineOptions = [
-  'Within 1 Month',
-  'Within 3 Months',
-  'Within 6 Months',
-  'Next Year',
-];
+const timelineOptions = ['Start ASAP', 'Within 1 Month', 'Within 3 Months'];
 
-const progressMap: Record<number, string> = {
-  1: '50%',
-  2: '100%',
+const DEFAULT_TYPE = 'Home Extension';
+const DEFAULT_BUDGET = '£150K – £500K';
+const DEFAULT_TIMELINE = 'Start ASAP';
+
+// Shown under an option's text as a second line. Display only: it is never part of a value.
+const budgetNotes: Record<string, string> = { '£90K – £150K': 'Minimum' };
+
+const progressMap: Partial<Record<Screen, string>> = {
+  type: '33%',
+  invest: '66%',
+  start: '100%',
 };
 
-const stepHeadings: Record<number, string> = {
-  1: 'Select your extension type',
-  2: 'Select your investment range and timeline',
-  3: 'Enter your details and we will reach you shortly.',
+const screenHeadings: Record<Screen, string> = {
+  type: "I'm looking for:",
+  invest: "I'm prepared to invest in a space that feels truly mine.",
+  start: "I'm ready to start creating my new home.",
+  loading: 'Checking Our Availability',
+  result: 'Good News: Your Architecture Package Is Available.',
+  contact: 'Enter your details and we will call you shortly.',
+};
+
+// UI labels mapped to the values the Monday board understands.
+const extensionTypeMap: Record<string, string> = {
+  'New Build': 'New Build',
+  'Home Extension': 'Extension',
+  'Home Renovation': 'Full Renovation',
+  Basements: 'Other',
+};
+
+// The server reads the first number and a trailing K from this text.
+const budgetMap: Record<string, string> = {
+  '£90K – £150K': '£90K',
+  '£150K – £500K': '£150K',
+  '£500K – £1M': '£500K',
+  '£1M+': '£1000K',
 };
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/;
@@ -57,7 +73,7 @@ const SUBMIT_TIMEOUT_MS = 10000;
 const SUBMIT_RETRY_DELAY_MS = 500;
 
 // Retries against our own /api/monday-submit endpoint (which itself retries against Monday's
-// API server-side) — this client-side layer exists because mobile browsers can kill an
+// API server-side). This client-side layer exists because mobile browsers can kill an
 // in-flight request outright when a tab backgrounds or the screen locks, which a server-side
 // retry alone can't recover from.
 async function submitToMonday(data: MondaySubmission): Promise<MondaySubmitResult> {
@@ -109,17 +125,38 @@ function validateEmail(value: string): boolean {
   return emailRegex.test(value.trim());
 }
 
-function validatePhone(value: string): boolean {
-  const digits = value.replace(/[\s\-]/g, '');
-  return /^\d{10,11}$/.test(digits);
+// Reduces whatever was typed or pasted to the 10 national digits after +44. So
+// "07123 456789", "+44 7123 456789" and "7123456789" all become "7123456789".
+function normalisePhone(raw: string): string {
+  let digits = raw.replace(/\D/g, '');
+  if (digits.startsWith('44')) digits = digits.slice(2);
+  if (digits.startsWith('0')) digits = digits.slice(1);
+  return digits.slice(0, 10);
 }
+
+function validatePhone(value: string): boolean {
+  return /^\d{10}$/.test(value);
+}
+
+const optionNoteStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: '10px',
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+  opacity: 0.6,
+  fontWeight: 400,
+  lineHeight: 1.2,
+  marginTop: '3px',
+};
 
 function SelectCard({
   label,
+  note,
   selected,
   onClick,
 }: {
   label: string;
+  note?: string;
   selected: boolean;
   onClick: () => void;
 }) {
@@ -147,6 +184,7 @@ function SelectCard({
       }}
     >
       {label}
+      {note && <span style={optionNoteStyle}>{note}</span>}
     </button>
   );
 }
@@ -158,6 +196,9 @@ function TextInput({
   onBlur,
   type = 'text',
   error,
+  prefix,
+  inputMode,
+  autoComplete,
 }: {
   label: string;
   value: string;
@@ -165,8 +206,44 @@ function TextInput({
   onBlur?: () => void;
   type?: string;
   error?: string;
+  prefix?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
+  autoComplete?: string;
 }) {
   const [focused, setFocused] = useState(false);
+
+  const underline = `1px solid ${error ? '#c0392b' : focused ? 'var(--sov-greige-dark)' : 'rgba(0,0,0,0.2)'}`;
+
+  const input = (
+    <input
+      type={type}
+      value={value}
+      inputMode={inputMode}
+      autoComplete={autoComplete}
+      onChange={(e) => onChange(e.target.value)}
+      onFocus={() => setFocused(true)}
+      onBlur={() => {
+        setFocused(false);
+        onBlur?.();
+      }}
+      style={{
+        display: 'block',
+        width: prefix ? undefined : '100%',
+        flex: prefix ? 1 : undefined,
+        minWidth: 0,
+        backgroundColor: 'transparent',
+        border: 'none',
+        borderBottom: prefix ? 'none' : underline,
+        color: '#0a0a0a',
+        fontSize: '14px',
+        fontWeight: 400,
+        padding: '16px 0',
+        outline: 'none',
+        transition: 'border-bottom-color 0.2s',
+        boxSizing: 'border-box',
+      }}
+    />
+  );
 
   return (
     <div>
@@ -183,30 +260,32 @@ function TextInput({
       >
         {label}
       </label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onFocus={() => setFocused(true)}
-        onBlur={() => {
-          setFocused(false);
-          onBlur?.();
-        }}
-        style={{
-          display: 'block',
-          width: '100%',
-          backgroundColor: 'transparent',
-          border: 'none',
-          borderBottom: `1px solid ${error ? '#c0392b' : focused ? 'var(--sov-greige-dark)' : 'rgba(0,0,0,0.2)'}`,
-          color: '#0a0a0a',
-          fontSize: '14px',
-          fontWeight: 400,
-          padding: '16px 0',
-          outline: 'none',
-          transition: 'border-bottom-color 0.2s',
-          boxSizing: 'border-box',
-        }}
-      />
+      {prefix ? (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            borderBottom: underline,
+            transition: 'border-bottom-color 0.2s',
+          }}
+        >
+          <span
+            style={{
+              fontSize: '14px',
+              fontWeight: 500,
+              color: '#4A443C',
+              paddingRight: '10px',
+              flex: '0 0 auto',
+              userSelect: 'none',
+            }}
+          >
+            {prefix}
+          </span>
+          {input}
+        </div>
+      ) : (
+        input
+      )}
       {error && (
         <p
           style={{
@@ -227,12 +306,6 @@ const slideVariants = {
   enter: (dir: number) => ({ opacity: 0, x: dir > 0 ? 40 : -40 }),
   center: { opacity: 1, x: 0 },
   exit: (dir: number) => ({ opacity: 0, x: dir > 0 ? -40 : 40 }),
-};
-
-const fadeVariants = {
-  enter: { opacity: 0, y: 10 },
-  center: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -10 },
 };
 
 const columnLabelStyle: React.CSSProperties = {
@@ -257,21 +330,62 @@ const navBtnBase: React.CSSProperties = {
   transition: 'background-color 0.3s, border-color 0.3s',
 };
 
+function NavButton({
+  label,
+  onClick,
+  disabled,
+  grow,
+}: {
+  label: string;
+  onClick: () => void;
+  disabled: boolean;
+  grow?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        ...navBtnBase,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.3 : 1,
+        ...(grow ? { flex: '1 1 auto' } : {}),
+      }}
+      onMouseEnter={(e) => {
+        if (!disabled) {
+          e.currentTarget.style.backgroundColor = '#0A0A0A';
+          e.currentTarget.style.borderColor = '#0A0A0A';
+        }
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = 'var(--sov-greige-dark)';
+        e.currentTarget.style.borderColor = 'var(--sov-greige-dark)';
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
 function WheelPicker({
   options,
   value,
   onChange,
   defaultIndex = 0,
   compact = false,
+  notes,
 }: {
   options: string[];
   value: string;
   onChange: (v: string) => void;
   defaultIndex?: number;
-  // Same scroll/select interaction, smaller footprint — for use when two pickers sit
-  // side-by-side in a narrow column (e.g. the merged Investment/Timeline step) rather than
-  // this component's usual near-full-width single-column placement.
+  // Same scroll/select interaction, smaller footprint, for use when two pickers sit
+  // side-by-side in a narrow column rather than this component's usual near-full-width
+  // single-column placement.
   compact?: boolean;
+  // Optional second line shown under an option's text. Display only.
+  notes?: Record<string, string>;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<number | null>(null);
@@ -295,16 +409,16 @@ function WheelPicker({
     ? (options.indexOf(value) === -1 ? defaultIndex : options.indexOf(value))
     : defaultIndex;
 
-  // Mutable ref — tracks which index is highlighted without triggering any re-render
+  // Mutable ref: tracks which index is highlighted without triggering any re-render
   const centeredIndexRef = useRef<number>(initIdx);
 
-  // Sets scrollTop synchronously before first paint — no visible jump
+  // Sets scrollTop synchronously before first paint, so there is no visible jump
   const assignRef = (el: HTMLDivElement | null) => {
     containerRef.current = el;
     if (el) el.scrollTop = initIdx * ITEM_HEIGHT;
   };
 
-  // Imperative highlight update — zero React involvement, zero re-render
+  // Imperative highlight update: zero React involvement, zero re-render
   const applyHighlight = (idx: number) => {
     const prevIdx = centeredIndexRef.current;
 
@@ -346,7 +460,7 @@ function WheelPicker({
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            // Direct DOM mutation — no setState, no re-render, momentum unaffected
+            // Direct DOM mutation: no setState, no re-render, momentum unaffected
             applyHighlight(Number((entry.target as HTMLElement).dataset.idx));
           }
         });
@@ -367,7 +481,7 @@ function WheelPicker({
     };
   }, []);
 
-  // Scroll handler does nothing visual — only commits the settled value after 80ms
+  // Scroll handler does nothing visual, it only commits the settled value after 80ms
   const handleScroll = () => {
     const el = containerRef.current;
     if (!el) return;
@@ -380,8 +494,8 @@ function WheelPicker({
   };
 
   return (
-    // No isolation/z-index on outer div — stacking order is resolved by siblings below.
-    // Layer order (back to front): pill(z:1) → scroll container(z:2) → fades(z:3) → arrow(z:4).
+    // No isolation/z-index on outer div: stacking order is resolved by siblings below.
+    // Layer order (back to front): pill(z:1), scroll container(z:2), fades(z:3), arrow(z:4).
     // The scroll container's transparent background lets the pill show through;
     // item text renders inside the z:2 stacking context, naturally above the z:1 pill.
     <div style={{ position: 'relative', height: `${CONTAINER_HEIGHT}px`, overflow: 'hidden' }}>
@@ -414,7 +528,7 @@ function WheelPicker({
       >
         <polygon points="4,2 4,22 20,12" fill="#0a0a0a"/>
       </svg>
-      {/* Outlined pill — z:1, behind the scroll container (z:2).
+      {/* Outlined pill: z:1, behind the scroll container (z:2).
           Transparent fill + dark border frames the selected item without heavy fill. */}
       <div style={{
         position: 'absolute',
@@ -429,7 +543,7 @@ function WheelPicker({
         zIndex: 1,
         pointerEvents: 'none',
       }} />
-      {/* Scroll list — z:2 sits above the pill so item text is always in front of it.
+      {/* Scroll list: z:2 sits above the pill so item text is always in front of it.
           touch-action: pan-y ensures vertical swipes scroll the list, never the page. */}
       <div
         ref={assignRef}
@@ -448,7 +562,7 @@ function WheelPicker({
       >
         <div style={{ height: `${PADDING}px`, flexShrink: 0 }} />
         {options.map((opt, i) => {
-          // Static initial styles — applyHighlight overrides these imperatively after mount
+          // Static initial styles: applyHighlight overrides these imperatively after mount
           const isInitial = i === initIdx;
           return (
             <div
@@ -489,6 +603,7 @@ function WheelPicker({
                 }}
               >
                 {opt}
+                {notes?.[opt] && <span style={optionNoteStyle}>{notes[opt]}</span>}
               </span>
             </div>
           );
@@ -500,12 +615,11 @@ function WheelPicker({
 }
 
 export default function ConsultationForm() {
-  const [step, setStep] = useState(1);
+  const [screen, setScreen] = useState<Screen>('type');
   const [direction, setDirection] = useState(1);
-  const [selectedExtension, setSelectedExtension] = useState('');
-  const [selectedBudget, setSelectedBudget] = useState('');
-  const [selectedTimeline, setSelectedTimeline] = useState('');
-  const [qualifyingSubStep, setQualifyingSubStep] = useState<QualifyingSubStep>('input');
+  const [selectedType, setSelectedType] = useState(DEFAULT_TYPE);
+  const [selectedBudget, setSelectedBudget] = useState(DEFAULT_BUDGET);
+  const [selectedTimeline, setSelectedTimeline] = useState(DEFAULT_TIMELINE);
   const [formData, setFormData] = useState<FormData>({ name: '', email: '', phone: '' });
   const [emailBlurred, setEmailBlurred] = useState(false);
   const [phoneBlurred, setPhoneBlurred] = useState(false);
@@ -520,84 +634,111 @@ export default function ConsultationForm() {
     return () => window.removeEventListener('resize', handler);
   }, []);
 
-  const progress = progressMap[step] ?? '14%';
-
+  // The availability check is only a short pause before the result screen.
   useEffect(() => {
-    if (qualifyingSubStep === 'loading') {
-      const t = setTimeout(() => setQualifyingSubStep('result'), 4000);
-      return () => clearTimeout(t);
-    }
-  }, [qualifyingSubStep]);
+    if (screen !== 'loading') return;
+    const t = setTimeout(() => {
+      setDirection(1);
+      setScreen('result');
+    }, 4000);
+    return () => clearTimeout(t);
+  }, [screen]);
 
   const emailValid = validateEmail(formData.email);
   const phoneValid = validatePhone(formData.phone);
 
-  const handleCheckAvailability = () => {
-    setQualifyingSubStep('loading');
+  const goTo = (next: Screen, dir: number) => {
+    setDirection(dir);
+    setScreen(next);
   };
 
-  const canNext = () => {
-    if (step === 1) return selectedExtension !== '';
-    if (step === 2 && qualifyingSubStep === 'input') return selectedBudget !== '' && selectedTimeline !== '';
-    if (step === 2 && qualifyingSubStep === 'result') return formData.name.trim() !== '';
-    if (step === 3) return emailValid && phoneValid && formData.email.trim() !== '' && formData.phone.trim() !== '';
-    return false;
-  };
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    setSubmitError('');
 
-  const goNext = async () => {
-    if (step === 3) {
-      setSubmitting(true);
-      setSubmitError('');
+    const result = await submitToMonday({
+      name: formData.name,
+      email: formData.email,
+      phone: '0' + formData.phone,
+      extension: extensionTypeMap[selectedType] ?? selectedType,
+      budget: budgetMap[selectedBudget] ?? selectedBudget,
+      timeline: selectedType === 'Basements' ? `${selectedTimeline} | Project type: Basements` : selectedTimeline,
+    });
 
-      const result = await submitToMonday({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        extension: selectedExtension,
-        budget: selectedBudget,
-        timeline: selectedTimeline,
+    setSubmitting(false);
+
+    if (!result.ok) {
+      setSubmitError(
+        'Something went wrong submitting your enquiry. Please try again, or contact us directly if the problem continues.'
+      );
+      return;
+    }
+
+    setSubmitted(true);
+    if (typeof window !== 'undefined' && (window as any).dataLayer) {
+      (window as any).dataLayer.push({
+        event: 'form_complete',
+        form_name: 'consultation_form'
       });
-
-      setSubmitting(false);
-
-      if (!result.ok) {
-        setSubmitError(
-          'Something went wrong submitting your enquiry. Please try again, or contact us directly if the problem continues.'
-        );
-        return;
-      }
-
-      setSubmitted(true);
-      if (typeof window !== 'undefined' && (window as any).dataLayer) {
-        (window as any).dataLayer.push({
-          event: 'form_complete',
-          form_name: 'consultation_form'
-        });
-      }
-      return;
     }
+  };
+
+  const resetForm = () => {
+    setSubmitted(false);
+    setScreen('type');
     setDirection(1);
-    setStep((s) => s + 1);
+    setSelectedType(DEFAULT_TYPE);
+    setSelectedBudget(DEFAULT_BUDGET);
+    setSelectedTimeline(DEFAULT_TIMELINE);
+    setFormData({ name: '', email: '', phone: '' });
+    setEmailBlurred(false);
+    setPhoneBlurred(false);
+    setSubmitError('');
   };
 
-  const goBack = () => {
-    if (step === 2 && qualifyingSubStep !== 'input') {
-      setQualifyingSubStep('input');
-      return;
+  // Bottom row: which buttons each screen shows and what they do.
+  const nav: {
+    back?: () => void;
+    primary?: { label: string; onClick: () => void; disabled: boolean; grow?: boolean };
+  } = (() => {
+    switch (screen) {
+      case 'type':
+        return { primary: { label: 'Next →', onClick: () => goTo('invest', 1), disabled: selectedType === '' } };
+      case 'invest':
+        return {
+          back: () => goTo('type', -1),
+          primary: { label: 'Next →', onClick: () => goTo('start', 1), disabled: selectedBudget === '' },
+        };
+      case 'start':
+        return {
+          back: () => goTo('invest', -1),
+          primary: {
+            label: 'Request My Architecture Package',
+            onClick: () => goTo('loading', 1),
+            disabled: selectedTimeline === '',
+          },
+        };
+      case 'result':
+        return {
+          back: () => goTo('start', -1),
+          primary: { label: 'Continue', onClick: () => goTo('contact', 1), disabled: formData.name.trim() === '' },
+        };
+      case 'contact':
+        return {
+          back: () => goTo('result', -1),
+          primary: {
+            label: submitting ? 'Submitting…' : 'Request My Architecture Design',
+            onClick: handleSubmit,
+            disabled: !emailValid || !phoneValid || formData.email.trim() === '' || submitting,
+            grow: true,
+          },
+        };
+      default:
+        return {};
     }
-    setDirection(-1);
-    setStep((s) => s - 1);
-  };
+  })();
 
-  const getStepHeading = () => {
-    if (step === 2 && qualifyingSubStep === 'loading') return 'Checking Our Availability';
-    if (step === 2 && qualifyingSubStep === 'result')
-      return 'Good News — Your Architectural Design Package Is Available.';
-    return stepHeadings[step];
-  };
-
-  const showBack = step > 1 && !(step === 2 && qualifyingSubStep === 'loading');
-  const showNext = step !== 2;
+  const progress = progressMap[screen];
 
   return (
     <>
@@ -640,18 +781,29 @@ export default function ConsultationForm() {
             color: '#0a0a0a',
             letterSpacing: '-0.02em',
             textAlign: 'center',
-            marginBottom: '60px',
+            marginBottom: 0,
           }}
         >
-          Get Your Design Package.
+          Get My Architecture Package.
         </h2>
-
+        <p
+          style={{
+            textAlign: 'center',
+            fontSize: '14px',
+            letterSpacing: '0.04em',
+            color: '#6B655C',
+            margin: '14px 0 0',
+            fontWeight: 400,
+          }}
+        >
+          The first step to your dream home.
+        </p>
 
         <div
           className="form-inner"
           style={{
             maxWidth: '860px',
-            margin: '0 auto',
+            margin: '60px auto 0',
             backgroundColor: 'rgba(0,0,0,0.04)',
             border: '1px solid rgba(0,0,0,0.08)',
             padding: '60px 80px',
@@ -703,25 +855,12 @@ export default function ConsultationForm() {
                   letterSpacing: 'normal',
                 }}
               >
-                A member of our team will be in touch shortly to discuss your
-                project and confirm availability in your area. In the meantime,
-                feel free to explore our recent work.
+                A member of our team will be in touch shortly to talk through your project and arrange your first
+                conversation. Until then, take a look at our recent work.
               </p>
               <button
                 type="button"
-                onClick={() => {
-                  setSubmitted(false);
-                  setStep(1);
-                  setDirection(1);
-                  setSelectedExtension('');
-                  setSelectedBudget('');
-                  setSelectedTimeline('');
-                  setQualifyingSubStep('input');
-                  setFormData({ name: '', email: '', phone: '' });
-                  setEmailBlurred(false);
-                  setPhoneBlurred(false);
-                  setSubmitError('');
-                }}
+                onClick={resetForm}
                 style={{
                   backgroundColor: 'var(--sov-greige-dark)',
                   color: 'var(--sov-white)',
@@ -748,8 +887,8 @@ export default function ConsultationForm() {
             </motion.div>
           ) : (
             <>
-              {/* Progress bar — only shown on steps 1–2 */}
-              {step <= 2 && (
+              {/* Progress bar: only on the three question screens */}
+              {progress && (
                 <div
                   style={{
                     height: '2px',
@@ -782,13 +921,13 @@ export default function ConsultationForm() {
                   marginBottom: '36px',
                 }}
               >
-                {getStepHeading()}
+                {screenHeadings[screen]}
               </h3>
 
-              {/* Animated step content */}
+              {/* Animated screen content */}
               <AnimatePresence mode="wait" custom={direction}>
                 <motion.div
-                  key={step}
+                  key={screen}
                   custom={direction}
                   variants={slideVariants}
                   initial="enter"
@@ -796,15 +935,15 @@ export default function ConsultationForm() {
                   exit="exit"
                   transition={{ duration: 0.3 }}
                 >
-                  {/* STEP 1 — Extension type */}
-                  {step === 1 && (
-                    isMobile ? (
+                  {/* SCREEN 1: project type */}
+                  {screen === 'type' &&
+                    (isMobile ? (
                       <div style={{ marginBottom: '40px' }}>
                         <WheelPicker
-                          options={extensionOptions}
-                          value={selectedExtension}
-                          onChange={setSelectedExtension}
-                          defaultIndex={extensionOptions.indexOf('Rear Extension')}
+                          options={projectTypeOptions}
+                          value={selectedType}
+                          onChange={setSelectedType}
+                          defaultIndex={projectTypeOptions.indexOf(DEFAULT_TYPE)}
                         />
                       </div>
                     ) : (
@@ -812,218 +951,145 @@ export default function ConsultationForm() {
                         className="form-options-grid"
                         style={{
                           display: 'grid',
-                          gridTemplateColumns: 'repeat(3, 1fr)',
+                          gridTemplateColumns: 'repeat(2, 1fr)',
                           gap: '12px',
                           marginBottom: '40px',
                         }}
                       >
-                        {extensionOptions.map((opt) => (
+                        {projectTypeOptions.map((opt) => (
                           <SelectCard
                             key={opt}
                             label={opt}
-                            selected={selectedExtension === opt}
-                            onClick={() => setSelectedExtension(opt)}
+                            selected={selectedType === opt}
+                            onClick={() => setSelectedType(opt)}
                           />
                         ))}
                       </div>
-                    )
-                  )}
+                    ))}
 
-                  {/* STEP 2 — Investment + Timeline (merged), then Check Availability →
-                      loading → success message + Name field */}
-                  {step === 2 && (
+                  {/* SCREEN 2: investment */}
+                  {screen === 'invest' && (
                     <div style={{ marginBottom: '40px' }}>
-                      <AnimatePresence mode="wait">
-                        <motion.div
-                          key={qualifyingSubStep}
-                          variants={fadeVariants}
-                          initial="enter"
-                          animate="center"
-                          exit="exit"
-                          transition={{ duration: 0.3 }}
+                      <p style={columnLabelStyle}>My investment</p>
+                      {isMobile ? (
+                        <WheelPicker
+                          options={budgetOptions}
+                          value={selectedBudget}
+                          onChange={setSelectedBudget}
+                          defaultIndex={budgetOptions.indexOf(DEFAULT_BUDGET)}
+                          notes={budgetNotes}
+                        />
+                      ) : (
+                        <div
+                          className="form-options-grid"
+                          style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}
                         >
-                          {qualifyingSubStep === 'input' && (
-                            <div>
-                              <div
-                                className="form-two-col-grid"
-                                style={{
-                                  display: 'grid',
-                                  gridTemplateColumns: '1fr 1fr',
-                                  gap: '32px',
-                                }}
-                              >
-                                <div style={{ minWidth: 0 }}>
-                                  <p style={columnLabelStyle}>Investment</p>
-                                  {isMobile ? (
-                                    <WheelPicker
-                                      options={budgetOptions}
-                                      value={selectedBudget}
-                                      onChange={setSelectedBudget}
-                                      defaultIndex={budgetOptions.indexOf('£150K – £500K')}
-                                      compact
-                                    />
-                                  ) : (
-                                    <div
-                                      style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: 'repeat(2, 1fr)',
-                                        gap: '10px',
-                                      }}
-                                    >
-                                      {budgetOptions.map((opt) => (
-                                        <SelectCard
-                                          key={opt}
-                                          label={opt}
-                                          selected={selectedBudget === opt}
-                                          onClick={() => setSelectedBudget(opt)}
-                                        />
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                                <div style={{ minWidth: 0 }}>
-                                  <p style={columnLabelStyle}>Ideal Start</p>
-                                  {isMobile ? (
-                                    <WheelPicker
-                                      options={timelineOptions}
-                                      value={selectedTimeline}
-                                      onChange={setSelectedTimeline}
-                                      defaultIndex={timelineOptions.indexOf('Within 1 Month')}
-                                      compact
-                                    />
-                                  ) : (
-                                    <div
-                                      style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: 'repeat(2, 1fr)',
-                                        gap: '10px',
-                                      }}
-                                    >
-                                      {timelineOptions.map((opt) => (
-                                        <SelectCard
-                                          key={opt}
-                                          label={opt}
-                                          selected={selectedTimeline === opt}
-                                          onClick={() => setSelectedTimeline(opt)}
-                                        />
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={handleCheckAvailability}
-                                disabled={!canNext()}
-                                style={{
-                                  ...navBtnBase,
-                                  marginTop: '32px',
-                                  opacity: canNext() ? 1 : 0.3,
-                                  cursor: canNext() ? 'pointer' : 'not-allowed',
-                                }}
-                                onMouseEnter={(e) => {
-                                  if (canNext()) {
-                                    e.currentTarget.style.backgroundColor = '#0A0A0A';
-                                    e.currentTarget.style.borderColor = '#0A0A0A';
-                                  }
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.backgroundColor = 'var(--sov-greige-dark)';
-                                  e.currentTarget.style.borderColor = 'var(--sov-greige-dark)';
-                                }}
-                              >
-                                Check Availability
-                              </button>
-                            </div>
-                          )}
-
-                          {qualifyingSubStep === 'loading' && (
-                            <div style={{ paddingTop: '16px' }}>
-                              <div
-                                style={{
-                                  height: '2px',
-                                  backgroundColor: 'rgba(0,0,0,0.08)',
-                                  position: 'relative',
-                                  marginBottom: '24px',
-                                  overflow: 'hidden',
-                                }}
-                              >
-                                <motion.div
-                                  initial={{ width: '0%' }}
-                                  animate={{ width: '100%' }}
-                                  transition={{ duration: 4, ease: 'linear' }}
-                                  style={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    height: '100%',
-                                    backgroundColor: 'var(--sov-greige-dark)',
-                                  }}
-                                />
-                              </div>
-                              <p
-                                style={{
-                                  fontSize: '14px',
-                                  color: 'var(--sov-grey)',
-                                  lineHeight: 1.6,
-                                  letterSpacing: 'normal',
-                                }}
-                              >
-                                Checking availability for your architectural design package...
-                              </p>
-                            </div>
-                          )}
-
-                          {qualifyingSubStep === 'result' && (
-                            <div style={{ paddingTop: '8px' }}>
-                              <p
-                                style={{
-                                  fontSize: '14px',
-                                  color: 'var(--sov-grey)',
-                                  lineHeight: 1.65,
-                                  marginBottom: '32px',
-                                  letterSpacing: 'normal',
-                                }}
-                              >
-                                One of our team will be in touch to begin your design package — floor plans, 3D visuals and a full proposal, built around your home.
-                              </p>
-                              <TextInput
-                                label="Name"
-                                value={formData.name}
-                                onChange={(v) => setFormData((f) => ({ ...f, name: v }))}
-                              />
-                              <button
-                                type="button"
-                                onClick={goNext}
-                                disabled={!canNext()}
-                                style={{
-                                  ...navBtnBase,
-                                  marginTop: '32px',
-                                  opacity: canNext() ? 1 : 0.3,
-                                  cursor: canNext() ? 'pointer' : 'not-allowed',
-                                }}
-                                onMouseEnter={(e) => {
-                                  if (canNext()) {
-                                    e.currentTarget.style.backgroundColor = '#0A0A0A';
-                                    e.currentTarget.style.borderColor = '#0A0A0A';
-                                  }
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.backgroundColor = 'var(--sov-greige-dark)';
-                                  e.currentTarget.style.borderColor = 'var(--sov-greige-dark)';
-                                }}
-                              >
-                                Continue
-                              </button>
-                            </div>
-                          )}
-                        </motion.div>
-                      </AnimatePresence>
+                          {budgetOptions.map((opt) => (
+                            <SelectCard
+                              key={opt}
+                              label={opt}
+                              note={budgetNotes[opt]}
+                              selected={selectedBudget === opt}
+                              onClick={() => setSelectedBudget(opt)}
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
 
-                  {/* STEP 3 — Contact details */}
-                  {step === 3 && (
+                  {/* SCREEN 3: start date */}
+                  {screen === 'start' && (
+                    <div style={{ marginBottom: '40px' }}>
+                      <p style={columnLabelStyle}>My start date</p>
+                      {isMobile ? (
+                        <WheelPicker
+                          options={timelineOptions}
+                          value={selectedTimeline}
+                          onChange={setSelectedTimeline}
+                          defaultIndex={timelineOptions.indexOf(DEFAULT_TIMELINE)}
+                        />
+                      ) : (
+                        <div
+                          className="form-options-grid"
+                          style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}
+                        >
+                          {timelineOptions.map((opt) => (
+                            <SelectCard
+                              key={opt}
+                              label={opt}
+                              selected={selectedTimeline === opt}
+                              onClick={() => setSelectedTimeline(opt)}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* LOADING: short availability pause with a filling bar */}
+                  {screen === 'loading' && (
+                    <div style={{ paddingTop: '16px', marginBottom: '40px' }}>
+                      <div
+                        style={{
+                          height: '2px',
+                          backgroundColor: 'rgba(0,0,0,0.08)',
+                          position: 'relative',
+                          marginBottom: '24px',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <motion.div
+                          initial={{ width: '0%' }}
+                          animate={{ width: '100%' }}
+                          transition={{ duration: 4, ease: 'linear' }}
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            height: '100%',
+                            backgroundColor: 'var(--sov-greige-dark)',
+                          }}
+                        />
+                      </div>
+                      <p
+                        style={{
+                          fontSize: '14px',
+                          color: 'var(--sov-grey)',
+                          lineHeight: 1.6,
+                          letterSpacing: 'normal',
+                        }}
+                      >
+                        Checking availability for your architecture package...
+                      </p>
+                    </div>
+                  )}
+
+                  {/* RESULT: good news message and the name field */}
+                  {screen === 'result' && (
+                    <div style={{ paddingTop: '8px', marginBottom: '40px' }}>
+                      <p
+                        style={{
+                          fontSize: '14px',
+                          color: 'var(--sov-grey)',
+                          lineHeight: 1.65,
+                          marginBottom: '32px',
+                          letterSpacing: 'normal',
+                        }}
+                      >
+                        One of our team will be in touch to begin your architecture package, with floor plans, 3D
+                        visuals and a full proposal built around your home.
+                      </p>
+                      <TextInput
+                        label="Name"
+                        value={formData.name}
+                        onChange={(v) => setFormData((f) => ({ ...f, name: v }))}
+                      />
+                    </div>
+                  )}
+
+                  {/* CONTACT: email and phone */}
+                  {screen === 'contact' && (
                     <div
                       style={{
                         display: 'flex',
@@ -1049,13 +1115,16 @@ export default function ConsultationForm() {
                       <TextInput
                         label="Phone Number"
                         type="tel"
+                        prefix="+44"
+                        inputMode="numeric"
+                        autoComplete="tel-national"
                         value={formData.phone}
                         onChange={(v) => {
-                          setFormData((f) => ({ ...f, phone: v }));
+                          setFormData((f) => ({ ...f, phone: normalisePhone(v) }));
                         }}
                         onBlur={() => setPhoneBlurred(true)}
                         error={
-                          phoneBlurred && formData.phone.trim() !== '' && !phoneValid
+                          phoneBlurred && formData.phone !== '' && !phoneValid
                             ? 'Please enter a valid UK phone number.'
                             : undefined
                         }
@@ -1065,8 +1134,8 @@ export default function ConsultationForm() {
                 </motion.div>
               </AnimatePresence>
 
-              {/* Submission error — step 3 only, shown after a failed Monday submission */}
-              {step === 3 && submitError && (
+              {/* Submission error: contact screen only, shown after a failed Monday submission */}
+              {screen === 'contact' && submitError && (
                 <p
                   style={{
                     fontSize: '13px',
@@ -1081,70 +1150,50 @@ export default function ConsultationForm() {
               )}
 
               {/* Navigation */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent:
-                    showBack && showNext
-                      ? 'space-between'
-                      : showNext
-                      ? 'flex-end'
-                      : 'flex-start',
-                  marginTop: '8px',
-                }}
-              >
-                {showBack && (
-                  <button
-                    type="button"
-                    onClick={goBack}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      fontSize: '12px',
-                      fontWeight: 500,
-                      color: 'rgba(0,0,0,0.4)',
-                      cursor: 'pointer',
-                      letterSpacing: '0.05em',
-                      padding: '0',
-                      transition: 'color 0.2s',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = '#0a0a0a')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(0,0,0,0.4)')}
-                  >
-                    ← Back
-                  </button>
-                )}
+              {(nav.back || nav.primary) && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '24px',
+                    justifyContent: nav.back ? 'space-between' : 'flex-end',
+                    marginTop: '8px',
+                  }}
+                >
+                  {nav.back && (
+                    <button
+                      type="button"
+                      onClick={nav.back}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        color: 'rgba(0,0,0,0.4)',
+                        cursor: 'pointer',
+                        letterSpacing: '0.05em',
+                        padding: '0',
+                        transition: 'color 0.2s',
+                        whiteSpace: 'nowrap',
+                        flex: '0 0 auto',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = '#0a0a0a')}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(0,0,0,0.4)')}
+                    >
+                      ← Back
+                    </button>
+                  )}
 
-                {showNext && (
-                  <button
-                    type="button"
-                    onClick={goNext}
-                    disabled={!canNext() || submitting}
-                    style={{
-                      ...navBtnBase,
-                      cursor: canNext() && !submitting ? 'pointer' : 'not-allowed',
-                      opacity: canNext() && !submitting ? 1 : 0.3,
-                    }}
-                    onMouseEnter={(e) => {
-                      if (canNext() && !submitting) {
-                        e.currentTarget.style.backgroundColor = '#0A0A0A';
-                        e.currentTarget.style.borderColor = '#0A0A0A';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'var(--sov-greige-dark)';
-                      e.currentTarget.style.borderColor = 'var(--sov-greige-dark)';
-                    }}
-                  >
-                    {step === 3
-                      ? submitting
-                        ? 'Submitting…'
-                        : 'Book Your Design Consultation'
-                      : 'Next →'}
-                  </button>
-                )}
-              </div>
+                  {nav.primary && (
+                    <NavButton
+                      label={nav.primary.label}
+                      onClick={nav.primary.onClick}
+                      disabled={nav.primary.disabled}
+                      grow={nav.primary.grow}
+                    />
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>
