@@ -98,7 +98,7 @@ function Tile({
       >
         {tile.desc}
       </p>
-      <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center' }}>
+      <div style={{ marginTop: 6, display: 'flex', justifyContent: 'center' }}>
         <MoreHint
           variant="plus"
           expanded={descOpen}

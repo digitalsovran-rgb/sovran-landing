@@ -11,15 +11,11 @@ type MoreHintProps = {
   pulse?: boolean;
 };
 
-const circle = (size: number): React.CSSProperties => ({
-  width: size,
-  height: size,
-  borderRadius: '50%',
-  border: '1px solid rgba(194,178,160,0.65)',
-  background: 'rgba(194,178,160,0.12)',
-  display: 'grid',
-  placeItems: 'center',
-});
+// Icons only: no circle, border or background. A soft shadow keeps them readable on photos.
+const iconStyle: React.CSSProperties = {
+  color: '#FFFFFF',
+  filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.55))',
+};
 
 const rotating = (on: boolean, degrees: number): React.CSSProperties => ({
   display: 'inline-flex',
@@ -27,29 +23,23 @@ const rotating = (on: boolean, degrees: number): React.CSSProperties => ({
   transition: 'transform 0.3s ease',
 });
 
-// A small "there is more" control: a ringed chevron or plus, three pulsing dots, or a rule with
-// a chevron in the middle. Used to expand text that is shortened on first view.
+// A small "there is more" control: a down arrow, a plus, or three pulsing dots with an arrow.
+// Used to expand text that is shortened on first view.
 export default function MoreHint({ variant, expanded, onToggle, controlsId, label, pulse }: MoreHintProps) {
   const animating = Boolean(pulse) && !expanded;
 
+  const arrow = (size: number) => (
+    <span style={rotating(expanded, 180)}>
+      <ChevronDown size={size} strokeWidth={1.8} color="#FFFFFF" style={iconStyle} />
+    </span>
+  );
+
   let content: React.ReactNode;
 
-  if (variant === 'chevron') {
+  if (variant === 'plus') {
     content = (
-      <span className={animating ? 'sov-nudge' : undefined} style={{ display: 'inline-flex' }}>
-        <span style={circle(40)}>
-          <span style={rotating(expanded, 180)}>
-            <ChevronDown size={20} strokeWidth={1.6} color="#FFFFFF" />
-          </span>
-        </span>
-      </span>
-    );
-  } else if (variant === 'plus') {
-    content = (
-      <span className={animating ? 'sov-beat' : undefined} style={circle(30)}>
-        <span style={rotating(expanded, 45)}>
-          <Plus size={16} strokeWidth={1.6} color="#FFFFFF" />
-        </span>
+      <span style={rotating(expanded, 45)}>
+        <Plus size={20} strokeWidth={1.8} color="#FFFFFF" style={iconStyle} />
       </span>
     );
   } else if (variant === 'dots') {
@@ -72,27 +62,15 @@ export default function MoreHint({ variant, expanded, onToggle, controlsId, labe
             }
           />
         ))}
-        <span style={circle(28)}>
-          <span style={rotating(expanded, 180)}>
-            <ChevronDown size={16} strokeWidth={1.6} color="#FFFFFF" />
-          </span>
-        </span>
+        {arrow(24)}
       </span>
     );
   } else {
-    const line: React.CSSProperties = { flex: 1, height: '1px', background: 'rgba(255,255,255,0.25)' };
+    // 'chevron' and 'rule' are both a single down arrow.
     content = (
-      <>
-        <span style={line} />
-        <span className={animating ? 'sov-nudge' : undefined} style={{ display: 'inline-flex' }}>
-          <span style={circle(36)}>
-            <span style={rotating(expanded, 180)}>
-              <ChevronDown size={18} strokeWidth={1.6} color="#FFFFFF" />
-            </span>
-          </span>
-        </span>
-        <span style={line} />
-      </>
+      <span className={animating ? 'sov-nudge' : undefined} style={{ display: 'inline-flex' }}>
+        {arrow(28)}
+      </span>
     );
   }
 
@@ -108,12 +86,16 @@ export default function MoreHint({ variant, expanded, onToggle, controlsId, labe
         background: 'none',
         border: 'none',
         padding: 0,
+        margin: 0,
         cursor: 'pointer',
         WebkitTapHighlightColor: 'transparent',
-        display: variant === 'rule' ? 'flex' : 'inline-flex',
+        display: 'inline-flex',
         alignItems: 'center',
+        justifyContent: 'center',
         color: '#FFFFFF',
-        ...(variant === 'rule' ? { width: '100%', gap: '14px' } : {}),
+        minWidth: 44,
+        minHeight: 32,
+        lineHeight: 0,
       }}
     >
       {content}

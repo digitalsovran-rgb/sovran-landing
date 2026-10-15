@@ -118,7 +118,7 @@ export default function WhoFor() {
               </motion.p>
             )}
           </AnimatePresence>
-          <div style={{ marginTop: 14, display: 'flex', justifyContent: 'center' }}>
+          <div style={{ marginTop: 4, display: 'flex', justifyContent: 'center' }}>
             <MoreHint
               variant="dots"
               expanded={introMore}
@@ -370,12 +370,13 @@ export default function WhoFor() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
+              gridTemplateColumns: '1.3fr 1fr',
               columnGap: '64px',
-              alignItems: 'center',
+              alignItems: 'start',
             }}
           >
-            <div>{frame}</div>
+            {/* Top aligned, so the image never shifts when the tab changes the list height. */}
+            <div style={{ alignSelf: 'start', marginTop: 24 }}>{frame}</div>
             <div>
               {header}
               <div style={{ marginTop: '32px' }}>{toggle}</div>

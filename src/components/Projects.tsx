@@ -60,6 +60,10 @@ const computePanelW = () => (typeof window !== 'undefined' ? Math.min(300, Math.
 // Gap between the pile and the details panel when it is open.
 const PANEL_GAP = 56;
 
+// Space kept clear at the bottom of the viewport for the sticky offer bar on mobile:
+// its 16px bottom offset + 56px mobile height + 20px breathing room.
+const STICKY_RESERVE = 92;
+
 export default function Projects() {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const [panelW, setPanelW] = useState(computePanelW);
@@ -68,10 +72,11 @@ export default function Projects() {
   const [exitDir, setExitDir] = useState<-1 | 1>(1);
   const [dealt, setDealt] = useState(false);
   const [open, setOpen] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
 
   const reduced = useReducedMotion();
   const stackRef = useRef<HTMLDivElement>(null);
+  const captionRef = useRef<HTMLDivElement>(null);
+  const openRef = useRef(open);
   const dealInView = useInView(stackRef, { amount: 0.35, once: true });
   const liveInView = useInView(stackRef, { amount: 0.3 });
   const cycleRef = useRef(0);
@@ -94,6 +99,10 @@ export default function Projects() {
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
+
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
 
   useEffect(() => {
     if (!dealInView || reduced) return;
@@ -137,14 +146,27 @@ export default function Projects() {
 
   const toggleCaption = () => {
     if (!isDealt) return;
-    if (!open) setHasInteracted(true);
     setOpen(!open);
+  };
+
+  // Mobile: once the caption has finished opening, scroll just enough to bring its bottom above
+  // the sticky offer bar, but never so far that the top of the pile leaves the screen.
+  const ensureCaptionVisible = () => {
+    const c = captionRef.current?.getBoundingClientRect();
+    const s = stackRef.current?.getBoundingClientRect();
+    if (!c || !s) return;
+    const limit = window.innerHeight - STICKY_RESERVE;
+    if (c.bottom <= limit) return;
+    const need = c.bottom - limit;
+    const room = Math.max(0, s.top - 24);
+    const amount = Math.min(need, room);
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (amount > 0) window.scrollBy({ top: amount, behavior: prefersReduced ? 'auto' : 'smooth' });
   };
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
     suppressUntilRef.current = performance.now() + 400;
     if (Math.abs(info.offset.x) > 90 || Math.abs(info.velocity.x) > 600) {
-      setHasInteracted(true);
       setOpen(false);
       advance(info.offset.x < 0 ? -1 : 1);
     }
@@ -178,7 +200,6 @@ export default function Projects() {
 
   const top = PROJECTS[order[0]];
   const stackWidth = isMobile ? 'min(88vw, 460px)' : '100%';
-  const showHint = isDealt && !hasInteracted && !open;
 
   const closeOnKey = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -230,34 +251,37 @@ export default function Projects() {
     </>
   );
 
-  // One line of instruction above the pile, shown until the visitor has used it.
+  // One permanent line of instruction above the pile. It nudges in from the right each time the
+  // top card changes.
   const hintLine = (
-    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 14, minHeight: 18 }}>
-      <AnimatePresence>
-        {showHint && (
-          <motion.p
-            key="hint"
-            aria-hidden="true"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.8 } }}
-            exit={{ opacity: 0, transition: { duration: 0.3 } }}
-            style={{
-              margin: 0,
-              textAlign: 'right',
-              color: '#C2B2A0',
-              textTransform: 'uppercase',
-              fontSize: isMobile ? 11 : 12,
-              fontWeight: 600,
-              letterSpacing: '0.14em',
-              lineHeight: 1.4,
-              pointerEvents: 'none',
-            }}
-          >
-            {isMobile ? 'Swipe for more · Tap for details' : 'Drag for more · Click for details'}
-          </motion.p>
-        )}
-      </AnimatePresence>
-    </div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.6, delay: 0.4 }}
+      style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 14, minHeight: 18 }}
+    >
+      <motion.p
+        key={order[0]}
+        initial={{ x: reduced ? 0 : 10 }}
+        animate={{ x: 0 }}
+        transition={{ duration: 0.5, ease: EASE }}
+        aria-hidden="true"
+        style={{
+          margin: 0,
+          textAlign: 'right',
+          color: '#C2B2A0',
+          textTransform: 'uppercase',
+          fontSize: isMobile ? 11 : 12,
+          fontWeight: 600,
+          letterSpacing: '0.14em',
+          lineHeight: 1.4,
+          pointerEvents: 'none',
+        }}
+      >
+        {isMobile ? 'Swipe for more · Tap for details' : 'Drag for more · Click for details'}
+      </motion.p>
+    </motion.div>
   );
 
   const stack = (
@@ -427,6 +451,10 @@ export default function Projects() {
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.4, ease: EASE }}
+                  onAnimationComplete={() => {
+                    if (!isMobile || !openRef.current) return;
+                    ensureCaptionVisible();
+                  }}
                   role="button"
                   tabIndex={0}
                   aria-label="Close details"
@@ -440,7 +468,9 @@ export default function Projects() {
                     textAlign: 'center',
                   }}
                 >
-                  <div style={{ padding: '22px 4px 0' }}>{captionContent}</div>
+                  <div ref={captionRef} style={{ padding: '22px 4px 0' }}>
+                    {captionContent}
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -455,7 +485,7 @@ export default function Projects() {
               marginBottom: 44,
             }}
           >
-            <div style={{ flex: '0 1 754px', minWidth: 0 }}>
+            <div style={{ flex: '0 1 678px', minWidth: 0 }}>
               {hintLine}
               {stack}
             </div>

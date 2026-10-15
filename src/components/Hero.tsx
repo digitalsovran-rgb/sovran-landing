@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import MoreHint from './MoreHint';
+import PeekText from './PeekText';
 
 // Hero body copy. Desktop shows both parts; mobile shows the first and reveals the second.
 const HERO_P1 =
@@ -14,16 +15,19 @@ const LOGO_RATIO = 222 / 800;
 // The hero content must start at least this far below the logo's bottom edge.
 const LOGO_CLEARANCE = 48;
 
-const mobileParaStyle: React.CSSProperties = {
+// Mobile paragraph look without its margin, shared by the first paragraph and the faded
+// continuation below it.
+const mobileParaBaseStyle: React.CSSProperties = {
   fontSize: '17.6px',
   fontWeight: 400,
   color: 'rgba(255,255,255,0.92)',
   maxWidth: '560px',
-  margin: '40px auto 0',
   lineHeight: 1.75,
   letterSpacing: 'normal',
   textShadow: '0 2px 8px rgba(0,0,0,0.5)',
 };
+
+const mobileParaStyle: React.CSSProperties = { ...mobileParaBaseStyle, margin: '40px auto 0' };
 
 const desktopVideos = ['/media/vidher1.mp4', '/media/vidher2.mp4', '/media/vidher3.mp4'];
 const desktopPosters = ['/media/vidher1-poster.webp', '/media/vidher2-poster.webp', '/media/vidher3-poster.webp'];
@@ -242,7 +246,7 @@ export default function Hero() {
           .hero-more-mobile { display: none !important; }
         }
         @media (max-width: 767px) {
-          .hero-h1 { font-size: clamp(26px, 7.1vw, 35px) !important; font-weight: 900 !important; }
+          .hero-h1 { font-size: clamp(30px, 8.4vw, 41px) !important; font-weight: 900 !important; }
           .hero-label { font-size: 10px !important; margin-bottom: 24px !important; font-weight: 600 !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
           .hero-desc { font-size: 13.5px !important; line-height: 1.6 !important; font-weight: 500 !important; text-shadow: 0 2px 8px rgba(0,0,0,0.5) !important; }
           .hero-desc-desktop { display: none !important; }
@@ -468,36 +472,33 @@ export default function Hero() {
             {HERO_P1}
           </p>
 
-          <AnimatePresence initial={false}>
-            {heroMore && (
-              <motion.p
-                key="hero-more"
-                id="hero-more"
-                className="hero-desc hero-desc-mobile sov-justify sov-justify-c"
-                lang="en-GB"
-                style={{ ...mobileParaStyle, marginTop: '8px', overflow: 'hidden' }}
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.4, ease: [0.2, 0.7, 0.2, 1] }}
-              >
-                {HERO_P2}
-              </motion.p>
-            )}
-          </AnimatePresence>
-
-          <div className="hero-more-mobile" style={{ marginTop: 14, display: 'flex', justifyContent: 'center' }}>
-            <MoreHint
-              variant="chevron"
-              expanded={heroMore}
-              onToggle={() => {
-                setHeroMore((v) => !v);
-                setHeroSeen(true);
-              }}
-              controlsId="hero-more"
-              label="Keep reading"
-              pulse={!heroSeen}
-            />
+          {/* Mobile only: the rest of the copy shows as a faded two line preview and opens with
+              the arrow. Hidden on desktop, which already shows the full text above. */}
+          <div className="hero-more-mobile">
+            <PeekText
+              id="hero-more"
+              open={heroMore}
+              lines={2}
+              marginTop={8}
+              className="hero-desc sov-justify sov-justify-c"
+              lang="en-GB"
+              style={mobileParaBaseStyle}
+            >
+              {HERO_P2}
+            </PeekText>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 0 }}>
+              <MoreHint
+                variant="chevron"
+                expanded={heroMore}
+                onToggle={() => {
+                  setHeroMore((v) => !v);
+                  setHeroSeen(true);
+                }}
+                controlsId="hero-more"
+                label="Keep reading"
+                pulse={!heroSeen}
+              />
+            </div>
           </div>
 
           <motion.div

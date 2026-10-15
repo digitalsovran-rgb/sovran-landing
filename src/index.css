@@ -198,6 +198,7 @@ img {
 
 /* Shared section heading size, justified body text, and the "show more" hint animations */
 .sov-h2 { font-size: clamp(30px, 3.85vw, 50px); font-weight: 900; letter-spacing: -0.02em; line-height: 1.05; }
+@media (max-width: 767px) { .sov-h2 { font-size: clamp(33px, 9vw, 44px); } }
 .sov-justify { text-align: justify; text-justify: inter-word; hyphens: auto; -webkit-hyphens: auto; }
 .sov-justify-c { text-align-last: center; }
 @keyframes sov-nudge { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }

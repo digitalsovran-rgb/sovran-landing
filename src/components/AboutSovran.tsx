@@ -3,6 +3,7 @@ import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Compass, ShieldCheck, Users } from 'lucide-react';
 import HouseMark from './HouseMark';
 import MoreHint from './MoreHint';
+import PeekText from './PeekText';
 
 // Main paragraph. The first sentence is always shown; the rest opens with the "keep reading" hint.
 const ABOUT_1 =
@@ -10,15 +11,18 @@ const ABOUT_1 =
 const ABOUT_REST =
   'A home deserves a design made only for it, and you are the one who will enjoy it for the rest of your life. For us, architecture is a commitment to perfection, and we carry that same standard into the studio. By managing design and construction as one team, we protect it at any level and at each stage of your project. That is our footprint: spatial harmony, at all times.';
 
-const aboutParaStyle: React.CSSProperties = {
+// Main paragraph look without its margin, shared by the first sentence and the faded
+// continuation below it.
+const aboutParaBaseStyle: React.CSSProperties = {
   fontSize: '16px',
   fontWeight: 400,
   color: 'var(--sov-white)',
   lineHeight: 1.7,
   letterSpacing: 'normal',
   maxWidth: '650px',
-  margin: '20px auto 0',
 };
+
+const aboutParaStyle: React.CSSProperties = { ...aboutParaBaseStyle, margin: '20px auto 0' };
 
 const ethosCards = [
   {
@@ -369,7 +373,7 @@ function DesktopPanel({
       >
         {card.desc}
       </p>
-      <div style={{ position: 'relative', zIndex: 1, marginTop: 14 }}>
+      <div style={{ position: 'relative', zIndex: 1, marginTop: 8 }}>
         <MoreHint
           variant="plus"
           expanded={open}
@@ -608,25 +612,23 @@ export default function AboutSovran() {
           {ABOUT_1}
         </motion.p>
 
-        <AnimatePresence initial={false}>
-          {bodyMore && (
-            <motion.p
-              key="about-more"
-              id="about-more"
-              className="sov-justify sov-justify-c"
-              lang="en-GB"
-              style={{ ...aboutParaStyle, marginTop: '12px', overflow: 'hidden' }}
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.45, ease: EASE }}
-            >
-              {ABOUT_REST}
-            </motion.p>
-          )}
-        </AnimatePresence>
+        {/* Centres the continuation under the first sentence (PeekText forces margin 0 on its
+            paragraph, so the paragraph's own auto margins cannot do it). */}
+        <div style={{ maxWidth: aboutParaBaseStyle.maxWidth, margin: '0 auto' }}>
+          <PeekText
+            id="about-more"
+            open={bodyMore}
+            lines={2}
+            marginTop={12}
+            className="sov-justify sov-justify-c"
+            lang="en-GB"
+            style={aboutParaBaseStyle}
+          >
+            {ABOUT_REST}
+          </PeekText>
+        </div>
 
-        <div style={{ maxWidth: 420, margin: '20px auto 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 0 }}>
           <MoreHint
             variant="rule"
             expanded={bodyMore}
