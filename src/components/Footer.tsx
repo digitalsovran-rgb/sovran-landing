@@ -1,464 +1,525 @@
-import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
+import { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const NAV_COLUMNS = [
+const SITE = 'https://www.sovranstudio.co.uk';
+const FONT = "'Inter', sans-serif";
+const W = (a: number) => `rgba(255,255,255,${a})`;
+
+const GROUPS = [
   {
-    label: 'Services',
+    title: 'Services',
     links: [
-      { text: 'Architecture', href: 'https://sovrangroup.co.uk/architecture' },
-      { text: 'Construction', href: 'https://sovrangroup.co.uk/construction' },
-      { text: 'Interiors', href: 'https://sovrangroup.co.uk/interiors' },
+      { label: 'Design and Build', href: `${SITE}/design-and-build` },
+      { label: 'Architecture', href: `${SITE}/architecture` },
+      { label: 'Construction', href: `${SITE}/construction` },
+      { label: 'House Extensions', href: `${SITE}/construction/house-extensions` },
+      { label: 'Loft Conversions', href: `${SITE}/construction/loft-conversions` },
+      { label: 'Basement Conversions', href: `${SITE}/construction/basement-conversions` },
+      { label: 'Interiors', href: `${SITE}/interiors` },
+      { label: 'Commercial', href: `${SITE}/commercial` },
+      { label: 'Hospitality', href: `${SITE}/commercial/hospitality` },
+      { label: 'Retail', href: `${SITE}/commercial/retail` },
+      { label: 'Multi-Unit Development', href: `${SITE}/commercial/multi-unit-development` },
     ],
   },
   {
-    label: 'Company',
+    title: 'Company',
     links: [
-      { text: 'About Us', href: 'https://sovrangroup.co.uk/about' },
-      { text: 'Contact', href: 'https://sovrangroup.co.uk/contact' },
-      { text: 'Resources', href: 'https://sovrangroup.co.uk/resources' },
+      { label: 'About Us', href: `${SITE}/about` },
+      { label: 'Contact', href: `${SITE}/contact` },
+      { label: 'Resources', href: `${SITE}/resources` },
     ],
   },
   {
-    label: 'Get Started',
+    title: 'Get started',
     links: [
-      { text: 'Cost Calculator', href: 'https://sovrangroup.co.uk/cost-calculator' },
-      { text: 'Email Us', href: 'mailto:info@sovrangroup.co.uk' },
-      { text: 'Call Us', href: 'tel:+442079460958' },
-      { text: 'WhatsApp Us', href: 'https://wa.me/442079460958' },
+      { label: 'Cost Calculator', href: `${SITE}/cost-calculator` },
+      { label: 'Email Us', href: 'mailto:info@sovranstudio.co.uk' },
+      { label: 'Call Us', href: 'tel:+447516100111' },
+      { label: 'WhatsApp Us', href: 'https://wa.me/447516100111?text=Hi%2C%20I%27d%20like%20to%20discuss%20a%20project' },
     ],
   },
   {
-    label: 'Legal',
+    title: 'Legal',
     links: [
-      { text: 'Privacy Policy', href: 'https://sovrangroup.co.uk/privacy-policy' },
-      { text: 'Terms of Service', href: 'https://sovrangroup.co.uk/terms' },
+      { label: 'Privacy Policy', href: `${SITE}/privacy-policy` },
+      { label: 'Terms of Service', href: `${SITE}/terms` },
     ],
   },
 ];
 
-const InstagramIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-  </svg>
-);
-
-const FacebookIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-  </svg>
-);
-
-const LinkedInIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-    <rect x="2" y="9" width="4" height="12" />
-    <circle cx="4" cy="4" r="2" />
-  </svg>
-);
-
-const HouzzIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-    <path d="M13.5 2L3 8.25V21h7.5v-6H13.5v6H21V8.25L13.5 2zm0 2.44L19.5 9v10.5H15v-6H12v6H7.5V9l6-4.56z" />
-  </svg>
-);
-
-const SOCIAL_LINKS = [
-  { label: 'Instagram', href: 'https://instagram.com/sovrangroup', Icon: InstagramIcon },
-  { label: 'Facebook', href: 'https://facebook.com/sovrangroup', Icon: FacebookIcon },
-  { label: 'LinkedIn', href: 'https://linkedin.com/company/sovrangroup', Icon: LinkedInIcon },
-  { label: 'Houzz', href: 'https://houzz.co.uk/sovrangroup', Icon: HouzzIcon },
+const SOCIALS = [
+  {
+    label: 'Instagram',
+    href: 'https://instagram.com/sovran_studio',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="2" width="20" height="20" rx="5" />
+        <circle cx="12" cy="12" r="5" />
+        <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Facebook',
+    href: 'https://facebook.com/sovranstudio',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
+      </svg>
+    ),
+  },
+  {
+    label: 'LinkedIn',
+    href: 'https://uk.linkedin.com/company/sovranstudio',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-4 0v7h-4v-7a6 6 0 016-6z" />
+        <rect x="2" y="9" width="4" height="12" />
+        <circle cx="4" cy="4" r="2" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Houzz',
+    href: 'https://houzz.co.uk/pro/sovranstudio',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12.5 3L7 6v5l5.5-3V3zm0 7.5L7 13.5v5l5.5-3v-5zm5.5-1L12.5 12.5v5L18 14.5v-5z" />
+      </svg>
+    ),
+  },
 ];
 
 export default function Footer() {
   const footerRef = useRef<HTMLElement>(null);
-  const topLineRef = useRef<HTMLDivElement>(null);
-  const sMonogramRef = useRef<HTMLImageElement>(null);
-  const logoRef = useRef<HTMLImageElement>(null);
-  const bottomLineRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    const footer = footerRef.current;
+    if (!footer) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
     const ctx = gsap.context(() => {
-      // Vertically center the S monogram via GSAP so it stays within GSAP's transform system
-      gsap.set(sMonogramRef.current, { yPercent: -50 });
+      const line = footer.querySelector('.ft-line');
+      if (line) {
+        gsap.from(line, {
+          scaleX: 0,
+          transformOrigin: 'left center',
+          duration: 1.5,
+          ease: 'power3.inOut',
+          scrollTrigger: { trigger: footer, start: 'top 90%', toggleActions: 'play none none none' },
+        });
+      }
 
-      // Top separator line reveal
-      gsap.from(topLineRef.current, {
-        scaleX: 0,
-        transformOrigin: 'left center',
-        duration: 1.5,
-        ease: 'power3.inOut',
-        scrollTrigger: {
-          trigger: topLineRef.current,
-          toggleActions: 'play none none none',
-        },
-      });
+      const monoS = footer.querySelector('.ft-mono-s');
+      if (monoS) {
+        gsap.from(monoS, {
+          opacity: 0,
+          scale: 0.85,
+          rotation: -5,
+          duration: 2.5,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: footer, start: 'top 85%', toggleActions: 'play none none none' },
+        });
+        gsap.to(monoS, {
+          y: isMobile ? '-35%' : '-55%',
+          ease: 'none',
+          scrollTrigger: { trigger: footer, start: 'top bottom', end: 'bottom bottom', scrub: true },
+        });
+        gsap.to(monoS, {
+          opacity: isMobile ? 0.09 : 0.12,
+          duration: 3,
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+        });
+      }
 
-      // S monogram: entrance + continuous pulse after
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: footerRef.current,
-          toggleActions: 'play none none none',
-        },
-        onComplete() {
-          gsap.to(sMonogramRef.current, {
-            opacity: 0.12,
-            duration: 3,
-            repeat: -1,
-            yoyo: true,
-            ease: 'sine.inOut',
-          });
-        },
-      }).from(sMonogramRef.current, {
-        opacity: 0,
-        scale: 0.85,
-        rotation: -5,
-        duration: 2.5,
-        ease: 'power3.out',
-      });
-
-      // S monogram: parallax on scroll
-      gsap.to(sMonogramRef.current, {
-        y: -80,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: footerRef.current,
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: true,
-        },
-      });
-
-      // Logo: clip-path left-to-right reveal
-      gsap.fromTo(
-        logoRef.current,
-        { clipPath: 'inset(0 100% 0 0)' },
-        {
-          clipPath: 'inset(0 0% 0 0)',
+      const brandImg = footer.querySelector('.ft-brand-img');
+      if (brandImg) {
+        gsap.set(brandImg, { clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)' });
+        gsap.to(brandImg, {
+          clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
           duration: 1.4,
           ease: 'power4.inOut',
-          scrollTrigger: {
-            trigger: logoRef.current,
-            toggleActions: 'play none none none',
-          },
-        },
-      );
+          scrollTrigger: { trigger: footer, start: 'top 85%', toggleActions: 'play none none none' },
+        });
+      }
 
-      // Nav labels, links, tagline — staggered fade + slide up
-      gsap.from('.footer-animate', {
+      const reveals = footer.querySelectorAll('.ft-up');
+      gsap.from(reveals, {
         opacity: 0,
         y: 20,
         stagger: 0.05,
         duration: 0.7,
         ease: 'power3.out',
-        scrollTrigger: {
-          trigger: footerRef.current,
-          toggleActions: 'play none none none',
-        },
+        scrollTrigger: { trigger: footer, start: 'top 80%', toggleActions: 'play none none none' },
       });
 
-      // Bottom separator line reveal
-      gsap.from(bottomLineRef.current, {
-        scaleX: 0,
-        transformOrigin: 'left center',
-        duration: 1,
-        delay: 0.3,
-        ease: 'power3.inOut',
-        scrollTrigger: {
-          trigger: bottomLineRef.current,
-          toggleActions: 'play none none none',
-        },
-      });
-    }, footerRef);
+      const bottomLine = footer.querySelector('.ft-bottom-line');
+      if (bottomLine) {
+        gsap.from(bottomLine, {
+          scaleX: 0,
+          transformOrigin: 'left center',
+          duration: 1.2,
+          delay: 0.3,
+          ease: 'power3.inOut',
+          scrollTrigger: { trigger: bottomLine, start: 'top 98%', toggleActions: 'play none none none' },
+        });
+      }
+    }, footer);
 
     return () => ctx.revert();
-  }, []);
+  }, [isMobile]);
+
+  const padX = isMobile ? '20px' : 'clamp(32px, 6vw, 120px)';
+  const isHttp = (href: string) => href.startsWith('http');
 
   return (
-    <>
-      <style>{`
-        .footer-link {
-          display: block;
-          font-family: Inter, sans-serif;
-          font-weight: 300;
-          font-size: clamp(15px, 1.1vw, 19px);
-          color: rgba(255,255,255,0.45);
-          text-decoration: none;
-          margin-bottom: clamp(12px, 1.5vh, 20px);
-          transition: color 0.3s ease, transform 0.3s ease;
-          will-change: transform;
-        }
-        .footer-link:hover {
-          color: #FFFFFF;
-          transform: translateX(8px);
-        }
-        .footer-social-icon {
-          display: flex;
-          align-items: center;
-          color: rgba(255,255,255,0.35);
-          transition: color 0.3s ease;
-          text-decoration: none;
-        }
-        .footer-social-icon:hover { color: #FFFFFF; }
-        .footer-backtop-btn {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          border: 1px solid rgba(255,255,255,0.15);
-          background: transparent;
-          color: rgba(255,255,255,0.5);
-          font-family: Inter, sans-serif;
-          font-weight: 300;
-          font-size: clamp(10px, 0.75vw, 12px);
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          padding: 10px 20px;
-          cursor: pointer;
-          transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
-        }
-        .footer-backtop-btn:hover {
-          color: #FFFFFF;
-          border-color: rgba(255,255,255,0.4);
-          background-color: rgba(255,255,255,0.05);
-        }
-        @media (max-width: 768px) {
-          .footer-top-row {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-          }
-          .footer-tagline {
-            text-align: left !important;
-            margin-top: 24px !important;
-          }
-          .footer-nav-grid {
-            grid-template-columns: 1fr 1fr !important;
-            gap: 40px !important;
-          }
-          .footer-bottom-bar {
-            flex-direction: column !important;
-            gap: 16px !important;
-          }
-        }
-      `}</style>
-
-      <footer
-        ref={footerRef}
-        id="site-footer"
-        data-bg="dark"
+    <footer
+      id="site-footer"
+      data-bg="dark"
+      ref={footerRef}
+      style={{ position: 'relative', zIndex: 20, background: '#0A0A0A', overflow: 'hidden' }}
+    >
+      <div
+        className="ft-mono-s"
         style={{
-          backgroundColor: '#0a0a0a',
-          position: 'relative',
-          overflow: 'hidden',
+          position: 'absolute',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          right: isMobile ? '-10px' : 'clamp(20px, 5vw, 100px)',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: isMobile ? '220px' : 'clamp(400px, 50vw, 800px)',
+          height: isMobile ? '220px' : 'clamp(400px, 50vw, 800px)',
+          opacity: isMobile ? 0.06 : 0.08,
         }}
       >
-        {/* S monogram background */}
         <img
-          ref={sMonogramRef}
           src="/media/logo-s-white.webp"
           alt=""
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            right: '-5%',
-            top: '50%',
-            width: 'clamp(400px, 50vw, 800px)',
-            opacity: 0.08,
-            pointerEvents: 'none',
-            userSelect: 'none',
-            zIndex: 0,
-          }}
+          style={{ display: 'block', width: '100%', height: '100%', objectFit: 'contain' }}
+          loading="lazy"
+          decoding="async"
         />
+      </div>
 
-        {/* Top separator line */}
-        <div
-          ref={topLineRef}
-          style={{
-            height: '1px',
-            backgroundColor: 'rgba(255,255,255,0.08)',
-            marginLeft: 'clamp(32px, 6vw, 120px)',
-            marginRight: 'clamp(32px, 6vw, 120px)',
-            position: 'relative',
-            zIndex: 1,
-          }}
-        />
+      <div style={{ padding: `0 ${padX}` }}>
+        <div className="ft-line" style={{ height: '1px', background: W(0.08) }} />
+      </div>
 
-        {/* TOP SECTION — logo + tagline */}
-        <div
-          className="footer-top-row"
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-end',
-            padding: 'clamp(60px, 8vh, 120px) clamp(32px, 6vw, 120px) clamp(48px, 6vh, 80px)',
-            position: 'relative',
-            zIndex: 1,
-          }}
-        >
+      <div
+        style={{
+          padding: isMobile
+            ? `44px ${padX} 36px`
+            : 'clamp(60px, 8vh, 120px) clamp(32px, 6vw, 120px) clamp(48px, 6vh, 80px)',
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          justifyContent: 'space-between',
+          alignItems: isMobile ? 'flex-start' : 'flex-end',
+          gap: isMobile ? '24px' : 'clamp(32px, 4vw, 80px)',
+        }}
+      >
+        <div style={{ overflow: 'hidden' }}>
           <img
-            ref={logoRef}
             src="/media/logo-sovran-white.webp"
             alt="Sovran"
+            className="ft-brand-img"
             style={{
-              height: 'clamp(40px, 5vw, 90px)',
+              height: isMobile ? 'clamp(28px, 9vw, 42px)' : 'clamp(40px, 5vw, 90px)',
+              width: 'auto',
               display: 'block',
             }}
+            loading="lazy"
+            decoding="async"
           />
-          <p
-            className="footer-tagline footer-animate"
-            style={{
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 300,
-              fontSize: 'clamp(12px, 0.9vw, 15px)',
-              color: 'rgba(255,255,255,0.3)',
-              maxWidth: '280px',
-              textAlign: 'right',
-              lineHeight: 1.7,
-              margin: 0,
-            }}
-          >
-            Bespoke architecture, build, and interiors — extending London homes, done properly.
-          </p>
         </div>
 
-        {/* MIDDLE SECTION — 4 column nav */}
-        <div
+        <p
+          className="ft-up"
           style={{
-            borderTop: '1px solid rgba(255,255,255,0.05)',
-            padding: 'clamp(48px, 6vh, 80px) clamp(32px, 6vw, 120px)',
-            position: 'relative',
-            zIndex: 1,
+            margin: 0,
+            fontFamily: FONT,
+            fontSize: isMobile ? '12px' : 'clamp(12px, 0.9vw, 15px)',
+            lineHeight: isMobile ? 1.75 : 1.7,
+            color: W(0.3),
+            fontWeight: 300,
+            maxWidth: isMobile ? '220px' : '280px',
+            textAlign: isMobile ? 'left' : 'right',
+            paddingBottom: isMobile ? '0' : '0.3em',
           }}
         >
-          <div
-            className="footer-nav-grid"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-            }}
-          >
-            {NAV_COLUMNS.map((col, ci) => (
-              <div
-                key={col.label}
+          Bespoke architecture, build, and interiors. Let&apos;s Build It Together.
+        </p>
+      </div>
+
+      <div
+        style={{
+          padding: `0 ${padX}`,
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr 1fr 1fr 1fr',
+          borderTop: `1px solid ${W(0.05)}`,
+        }}
+      >
+        {GROUPS.map((group, i) => {
+          const isRightColMobile = isMobile && i % 2 === 1;
+          const isTopRowMobile = isMobile && i < 2;
+          return (
+            <div
+              key={group.title}
+              style={{
+                paddingTop: isMobile ? '28px' : 'clamp(32px, 4vh, 56px)',
+                paddingBottom: isMobile ? '28px' : 'clamp(32px, 4vh, 56px)',
+                paddingLeft: !isMobile ? (i === 0 ? '0' : 'clamp(24px, 3vw, 60px)') : isRightColMobile ? '18px' : '0',
+                paddingRight: !isMobile ? (i === 0 ? 'clamp(24px, 3vw, 60px)' : '0') : isRightColMobile ? '0' : '18px',
+                borderRight: !isMobile && i !== 3 ? `1px solid ${W(0.05)}` : 'none',
+                borderLeft: isMobile && isRightColMobile ? `1px solid ${W(0.05)}` : 'none',
+                borderBottom: isMobile && isTopRowMobile ? `1px solid ${W(0.05)}` : 'none',
+              }}
+            >
+              <span
+                className="ft-up"
                 style={{
-                  borderLeft: ci > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                  paddingLeft: ci > 0 ? 'clamp(24px, 3vw, 48px)' : 0,
-                  paddingRight: ci < NAV_COLUMNS.length - 1 ? 'clamp(24px, 3vw, 48px)' : 0,
+                  display: 'block',
+                  textTransform: 'uppercase',
+                  fontFamily: FONT,
+                  fontSize: isMobile ? '9px' : 'clamp(9px, 0.7vw, 11px)',
+                  letterSpacing: '0.2em',
+                  color: W(0.2),
+                  fontWeight: 400,
+                  marginBottom: isMobile ? '18px' : 'clamp(20px, 2.5vh, 36px)',
                 }}
               >
-                <p
-                  className="footer-animate"
-                  style={{
-                    fontFamily: 'Inter, sans-serif',
-                    fontWeight: 400,
-                    fontSize: 'clamp(9px, 0.7vw, 11px)',
-                    letterSpacing: '0.2em',
-                    textTransform: 'uppercase',
-                    color: 'rgba(255,255,255,0.2)',
-                    margin: '0 0 clamp(20px, 2.5vh, 36px) 0',
-                  }}
-                >
-                  {col.label}
-                </p>
-                {col.links.map((link) => (
+                {group.title}
+              </span>
+
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : 'clamp(12px, 1.4vh, 20px)' }}>
+                {group.links.map((link) => (
                   <a
-                    key={link.text}
+                    key={link.label}
                     href={link.href}
-                    className="footer-link footer-animate"
-                    target={link.href.startsWith('http') ? '_blank' : undefined}
-                    rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                    {...(isHttp(link.href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    className="ft-up"
+                    style={{
+                      fontFamily: FONT,
+                      fontSize: isMobile ? '14px' : 'clamp(15px, 1.1vw, 19px)',
+                      color: W(0.45),
+                      fontWeight: 300,
+                      textDecoration: 'none',
+                      transition: 'color 0.3s ease, transform 0.3s ease',
+                      display: 'inline-block',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isMobile) {
+                        e.currentTarget.style.color = '#FFFFFF';
+                        e.currentTarget.style.transform = 'translateX(8px)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isMobile) {
+                        e.currentTarget.style.color = W(0.45);
+                        e.currentTarget.style.transform = 'translateX(0)';
+                      }
+                    }}
                   >
-                    {link.text}
+                    {link.label}
                   </a>
                 ))}
-              </div>
+              </nav>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{ padding: `0 ${padX}`, borderTop: `1px solid ${W(0.05)}` }}>
+        <div
+          style={{
+            display: 'flex',
+            padding: isMobile ? '20px 0' : 'clamp(20px, 2.5vh, 36px) 0',
+            gap: isMobile ? '12px' : 'clamp(24px, 3vw, 48px)',
+            flexDirection: isMobile ? 'column' : 'row',
+            alignItems: isMobile ? 'flex-start' : 'center',
+          }}
+        >
+          <span
+            className="ft-up"
+            style={{
+              textTransform: 'uppercase',
+              fontFamily: FONT,
+              fontSize: 'clamp(9px, 0.7vw, 11px)',
+              letterSpacing: '0.2em',
+              color: W(0.2),
+              fontWeight: 400,
+              marginRight: isMobile ? '0' : 'auto',
+            }}
+          >
+            Follow us
+          </span>
+
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: isMobile ? '10px 18px' : '0 clamp(24px, 3vw, 48px)',
+              alignItems: 'center',
+            }}
+          >
+            {SOCIALS.map((social) => (
+              <a
+                key={social.label}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={social.label}
+                className="ft-up"
+                style={{
+                  color: W(0.35),
+                  textDecoration: 'none',
+                  transition: 'color 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isMobile) e.currentTarget.style.color = '#FFFFFF';
+                }}
+                onMouseLeave={(e) => {
+                  if (!isMobile) e.currentTarget.style.color = W(0.35);
+                }}
+              >
+                {social.icon}
+              </a>
             ))}
           </div>
         </div>
+      </div>
 
-        {/* SOCIAL LINKS ROW */}
+      <div style={{ padding: `0 ${padX} ${isMobile ? '24px' : 'clamp(28px, 3.5vh, 44px)'}` }}>
         <div
-          style={{
-            borderTop: '1px solid rgba(255,255,255,0.05)',
-            padding: 'clamp(24px, 3vh, 40px) clamp(32px, 6vw, 120px)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '32px',
-            position: 'relative',
-            zIndex: 1,
-          }}
-        >
-          <p
-            className="footer-animate"
-            style={{
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 400,
-              fontSize: 'clamp(9px, 0.7vw, 11px)',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.2)',
-              margin: 0,
-              marginRight: 'auto',
-            }}
-          >
-            Follow Us
-          </p>
-          {SOCIAL_LINKS.map(({ label, href, Icon }) => (
-            <a
-              key={label}
-              href={href}
-              className="footer-social-icon footer-animate"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={label}
-            >
-              <Icon />
-            </a>
-          ))}
-        </div>
-
-        {/* Bottom separator line */}
-        <div
-          ref={bottomLineRef}
+          className="ft-bottom-line"
           style={{
             height: '1px',
-            backgroundColor: 'rgba(255,255,255,0.05)',
-            marginLeft: 'clamp(32px, 6vw, 120px)',
-            marginRight: 'clamp(32px, 6vw, 120px)',
-            position: 'relative',
-            zIndex: 1,
+            background: W(0.05),
+            marginBottom: isMobile ? '18px' : 'clamp(20px, 2.5vh, 32px)',
           }}
         />
 
-        {/* BOTTOM BAR */}
+        <address
+          className="ft-up"
+          style={{
+            fontStyle: 'normal',
+            fontFamily: FONT,
+            fontSize: isMobile ? '10px' : 'clamp(10px, 0.75vw, 12px)',
+            lineHeight: 1.8,
+            color: W(0.32),
+            fontWeight: 300,
+            marginBottom: isMobile ? '14px' : 'clamp(14px, 1.8vh, 22px)',
+          }}
+        >
+          Sovran Global Ltd, Saracen House, 2nd Floor, Swan Street, Isleworth, United Kingdom TW7 6RJ
+          {' · '}
+          <a
+            href="mailto:info@sovranstudio.co.uk"
+            style={{ color: 'inherit', textDecoration: 'none' }}
+            onMouseEnter={(e) => {
+              if (!isMobile) e.currentTarget.style.color = '#FFFFFF';
+            }}
+            onMouseLeave={(e) => {
+              if (!isMobile) e.currentTarget.style.color = 'inherit';
+            }}
+          >
+            info@sovranstudio.co.uk
+          </a>
+          {' · '}
+          <a
+            href="tel:+447516100111"
+            style={{ color: 'inherit', textDecoration: 'none' }}
+            onMouseEnter={(e) => {
+              if (!isMobile) e.currentTarget.style.color = '#FFFFFF';
+            }}
+            onMouseLeave={(e) => {
+              if (!isMobile) e.currentTarget.style.color = 'inherit';
+            }}
+          >
+            07516 100111
+          </a>
+        </address>
+
         <div
-          className="footer-bottom-bar"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: 'clamp(20px, 2.5vh, 32px) clamp(32px, 6vw, 120px)',
-            position: 'relative',
-            zIndex: 1,
+            alignItems: isMobile ? 'flex-start' : 'center',
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? '14px' : '0',
           }}
         >
-          <p
-            className="footer-animate"
+          <span
+            className="ft-up"
             style={{
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: FONT,
+              fontSize: isMobile ? '10px' : 'clamp(10px, 0.75vw, 12px)',
+              color: W(0.18),
               fontWeight: 300,
-              fontSize: 'clamp(10px, 0.75vw, 12px)',
-              color: 'rgba(255,255,255,0.18)',
-              margin: 0,
             }}
           >
-            &copy; 2026 Sovran Group Ltd. All rights reserved.
-          </p>
+            &copy; {new Date().getFullYear()} Sovran Global Ltd. All rights reserved.
+          </span>
+
+          <button
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="ft-up"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: isMobile ? '10px' : 'clamp(10px, 1vw, 16px)',
+              background: 'none',
+              border: `1px solid ${W(0.15)}`,
+              padding: isMobile ? '10px 16px' : 'clamp(10px, 1.2vh, 16px) clamp(18px, 1.8vw, 28px)',
+              fontFamily: FONT,
+              fontSize: isMobile ? '9px' : 'clamp(9px, 0.7vw, 11px)',
+              letterSpacing: '0.2em',
+              color: W(0.5),
+              fontWeight: 400,
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              transition: 'all 0.35s ease',
+            }}
+            onMouseEnter={(e) => {
+              if (!isMobile) {
+                e.currentTarget.style.color = '#FFFFFF';
+                e.currentTarget.style.borderColor = W(0.4);
+                e.currentTarget.style.background = W(0.05);
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isMobile) {
+                e.currentTarget.style.color = W(0.5);
+                e.currentTarget.style.borderColor = W(0.15);
+                e.currentTarget.style.background = 'none';
+              }
+            }}
+          >
+            Back to top
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M12 19V5M5 12l7-7 7 7" />
+            </svg>
+          </button>
         </div>
-      </footer>
-    </>
+      </div>
+    </footer>
   );
 }

@@ -10,6 +10,11 @@ const ABOUT_1 =
   'Our evolved approach to architecture creates places people remember, and our mission is to shape how you experience your home through every design decision.';
 const ABOUT_REST =
   'A home deserves a design made only for it, and you are the one who will enjoy it for the rest of your life. For us, architecture is a commitment to perfection, and we carry that same standard into the studio. By managing design and construction as one team, we protect it at any level and at each stage of your project. That is our footprint: spatial harmony, at all times.';
+// Mobile splits the rest into two paragraphs. ABOUT_P2 + ' ' + ABOUT_P3 is exactly ABOUT_REST.
+const ABOUT_P2 =
+  'A home deserves a design made only for it, and you are the one who will enjoy it for the rest of your life. For us, architecture is a commitment to perfection, and we carry that same standard into the studio.';
+const ABOUT_P3 =
+  'By managing design and construction as one team, we protect it at any level and at each stage of your project. That is our footprint: spatial harmony, at all times.';
 
 // Main paragraph look without its margin, shared by the first sentence and the faded
 // continuation below it.
@@ -602,7 +607,7 @@ export default function AboutSovran() {
         </motion.h2>
 
         <motion.p
-          className="sov-justify sov-justify-c"
+          className="sov-justify sov-justify-l sov-nohyph"
           lang="en-GB"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
@@ -615,17 +620,51 @@ export default function AboutSovran() {
         {/* Centres the continuation under the first sentence (PeekText forces margin 0 on its
             paragraph, so the paragraph's own auto margins cannot do it). */}
         <div style={{ maxWidth: aboutParaBaseStyle.maxWidth, margin: '0 auto' }}>
-          <PeekText
-            id="about-more"
-            open={bodyMore}
-            lines={2}
-            marginTop={12}
-            className="sov-justify sov-justify-c"
-            lang="en-GB"
-            style={aboutParaBaseStyle}
-          >
-            {ABOUT_REST}
-          </PeekText>
+          {isMobile ? (
+            <>
+              {/* Mobile: paragraph two peeks, paragraph three follows once it is opened. */}
+              <PeekText
+                id="about-more"
+                open={bodyMore}
+                lines={2}
+                marginTop={12}
+                className="sov-justify sov-justify-l sov-nohyph"
+                lang="en-GB"
+                style={aboutParaBaseStyle}
+              >
+                {ABOUT_P2}
+              </PeekText>
+              <AnimatePresence initial={false}>
+                {bodyMore && (
+                  <motion.p
+                    key="about-more-3"
+                    id="about-more-3"
+                    className="sov-justify sov-justify-l sov-nohyph"
+                    lang="en-GB"
+                    style={{ ...aboutParaBaseStyle, margin: 0, overflow: 'hidden' }}
+                    initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                    animate={{ height: 'auto', opacity: 1, marginTop: 12 }}
+                    exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                    transition={{ duration: 0.45, delay: 0.12, ease: EASE }}
+                  >
+                    {ABOUT_P3}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </>
+          ) : (
+            <PeekText
+              id="about-more"
+              open={bodyMore}
+              lines={2}
+              marginTop={12}
+              className="sov-justify sov-justify-l sov-nohyph"
+              lang="en-GB"
+              style={aboutParaBaseStyle}
+            >
+              {ABOUT_REST}
+            </PeekText>
+          )}
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 0 }}>
@@ -636,7 +675,7 @@ export default function AboutSovran() {
               setBodyMore((v) => !v);
               setBodySeen(true);
             }}
-            controlsId="about-more"
+            controlsId={isMobile ? 'about-more about-more-3' : 'about-more'}
             label="Keep reading"
             pulse={!bodySeen}
           />

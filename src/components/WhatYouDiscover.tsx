@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { Home, TrendingUp, ClipboardCheck, Wallet, LayoutGrid, ShieldAlert } from 'lucide-react';
 import PulseRing from './PulseRing';
@@ -40,6 +40,9 @@ const tiles = [
 
 type TileData = (typeof tiles)[0];
 
+// Fade applied to a clamped desktop description that is cut off.
+const DESC_MASK = 'linear-gradient(to bottom, #000 0%, #000 40%, rgba(0,0,0,0.2) 100%)';
+
 const descStyle: React.CSSProperties = {
   fontSize: '13px',
   fontWeight: 400,
@@ -55,6 +58,8 @@ function Tile({
   isInView,
   descOpen,
   onToggleDesc,
+  descRef,
+  truncated,
 }: {
   tile: TileData;
   index: number;
@@ -62,6 +67,8 @@ function Tile({
   isInView: boolean;
   descOpen: boolean;
   onToggleDesc: () => void;
+  descRef: (el: HTMLParagraphElement | null) => void;
+  truncated: boolean;
 }) {
   const Icon = tile.icon;
   const descId = `wyd-desc-${index}`;
@@ -87,6 +94,7 @@ function Tile({
       </h3>
       <p
         id={descId}
+        ref={descRef}
         onClick={onToggleDesc}
         style={{
           ...descStyle,
@@ -94,6 +102,8 @@ function Tile({
           ...(descOpen
             ? {}
             : { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }),
+          // Fade the clamped preview, but only when the text really is cut off.
+          ...(!descOpen && truncated ? { WebkitMaskImage: DESC_MASK, maskImage: DESC_MASK } : {}),
         }}
       >
         {tile.desc}
@@ -207,6 +217,9 @@ export default function WhatYouDiscover() {
   const [handHint, setHandHint] = useState<'idle' | 'show' | 'done'>('idle');
   // Desktop only: which tile descriptions are expanded past their two line preview.
   const [descOpen, setDescOpen] = useState<Set<number>>(() => new Set());
+  // Desktop only: which clamped descriptions actually overflow their two lines (only those fade).
+  const descRefs = useRef<(HTMLParagraphElement | null)[]>([]);
+  const [truncated, setTruncated] = useState<boolean[]>([]);
   const firstTileRef = useRef<HTMLDivElement>(null);
   const firstTileInView = useInView(firstTileRef, { once: true, amount: 0.8 });
 
@@ -215,6 +228,20 @@ export default function WhatYouDiscover() {
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
+
+  useLayoutEffect(() => {
+    const measure = () =>
+      setTruncated((prev) => {
+        const next = descRefs.current.map((el, i) =>
+          descOpen.has(i) ? (prev[i] ?? false) : !!el && el.scrollHeight > el.clientHeight + 1
+        );
+        return next.length === prev.length && next.every((v, i) => v === prev[i]) ? prev : next;
+      });
+    // Reading layout to decide which previews need the fade is the purpose of this effect.
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [isMobile, descOpen]);
 
   // Mobile only: one tap-hint hand over the first tile's icon, a second after that tile
   // scrolls into view, unless a tile has been opened by then.
@@ -339,6 +366,10 @@ export default function WhatYouDiscover() {
                 isInView={isInView}
                 descOpen={descOpen.has(i)}
                 onToggleDesc={() => toggleDesc(i)}
+                descRef={(el) => {
+                  descRefs.current[i] = el;
+                }}
+                truncated={truncated[i] ?? false}
               />
             )
           )}

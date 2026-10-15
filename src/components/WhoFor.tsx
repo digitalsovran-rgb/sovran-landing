@@ -98,7 +98,7 @@ export default function WhoFor() {
       </h2>
       {isMobile ? (
         <>
-          <p className="sov-justify sov-justify-c" lang="en-GB" style={introStyle}>
+          <p className="sov-justify sov-justify-l sov-nohyph" lang="en-GB" style={introStyle}>
             {INTRO_1}
           </p>
           <AnimatePresence initial={false}>
@@ -106,7 +106,7 @@ export default function WhoFor() {
               <motion.p
                 key="who-intro-more"
                 id="who-intro-more"
-                className="sov-justify sov-justify-c"
+                className="sov-justify sov-justify-l sov-nohyph"
                 lang="en-GB"
                 style={{ ...introStyle, marginTop: '8px', overflow: 'hidden' }}
                 initial={{ height: 0, opacity: 0 }}

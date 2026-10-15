@@ -446,7 +446,7 @@ export default function Hero() {
           {/* Not Framer Motion-animated (unlike its siblings): this paragraph is the confirmed
               LCP element on mobile, and animating it delays the final paint LCP measures. */}
           <p
-            className="hero-desc hero-desc-desktop sov-justify sov-justify-c"
+            className="hero-desc hero-desc-desktop sov-justify sov-justify-l sov-nohyph"
             lang="en-GB"
             style={{
               fontSize: '17px',
@@ -465,7 +465,7 @@ export default function Hero() {
           {/* Not Framer Motion-animated (unlike its siblings): this paragraph is the confirmed
               LCP element on mobile, and animating it delays the final paint LCP measures. */}
           <p
-            className="hero-desc hero-desc-mobile sov-justify sov-justify-c"
+            className="hero-desc hero-desc-mobile sov-justify sov-justify-l sov-nohyph"
             lang="en-GB"
             style={mobileParaStyle}
           >
@@ -480,7 +480,7 @@ export default function Hero() {
               open={heroMore}
               lines={2}
               marginTop={8}
-              className="hero-desc sov-justify sov-justify-c"
+              className="hero-desc sov-justify sov-justify-l sov-nohyph"
               lang="en-GB"
               style={mobileParaBaseStyle}
             >

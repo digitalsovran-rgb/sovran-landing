@@ -206,3 +206,7 @@ img {
 @keyframes sov-dot { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
 .sov-dot { animation: sov-dot 1.4s ease-in-out infinite; animation-delay: var(--sov-delay, 0s); }
 .sov-more:focus-visible { outline: 2px solid #C2B2A0; outline-offset: 3px; }
+
+/* Justified copy whose last line sits left, and no automatic hyphenation */
+.sov-nohyph { hyphens: none; -webkit-hyphens: none; overflow-wrap: normal; word-break: normal; }
+.sov-justify-l { text-align-last: left; }
