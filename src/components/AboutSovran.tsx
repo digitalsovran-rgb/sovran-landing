@@ -2,6 +2,23 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Compass, ShieldCheck, Users } from 'lucide-react';
 import HouseMark from './HouseMark';
+import MoreHint from './MoreHint';
+
+// Main paragraph. The first sentence is always shown; the rest opens with the "keep reading" hint.
+const ABOUT_1 =
+  'Our evolved approach to architecture creates places people remember, and our mission is to shape how you experience your home through every design decision.';
+const ABOUT_REST =
+  'A home deserves a design made only for it, and you are the one who will enjoy it for the rest of your life. For us, architecture is a commitment to perfection, and we carry that same standard into the studio. By managing design and construction as one team, we protect it at any level and at each stage of your project. That is our footprint: spatial harmony, at all times.';
+
+const aboutParaStyle: React.CSSProperties = {
+  fontSize: '16px',
+  fontWeight: 400,
+  color: 'var(--sov-white)',
+  lineHeight: 1.7,
+  letterSpacing: 'normal',
+  maxWidth: '650px',
+  margin: '20px auto 0',
+};
 
 const ethosCards = [
   {
@@ -270,6 +287,8 @@ function MobilePanel({
       >
         <span
           ref={descRef}
+          className="sov-justify"
+          lang="en-GB"
           style={{
             ...descTextStyle,
             ...(clamped
@@ -314,7 +333,18 @@ function MobilePanel({
   );
 }
 
-function DesktopPanel({ card, index }: { card: EthosCard; index: number }) {
+function DesktopPanel({
+  card,
+  index,
+  open,
+  onToggle,
+}: {
+  card: EthosCard;
+  index: number;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  const descId = `about-pillar-${index}`;
   return (
     <motion.article
       initial={{ opacity: 0, y: 40 }}
@@ -326,7 +356,28 @@ function DesktopPanel({ card, index }: { card: EthosCard; index: number }) {
       <PanelIcons icon={card.icon} index={index} />
       <h3 style={titleStyle}>{card.label}</h3>
       <div style={ruleStyle} />
-      <p style={descTextStyle}>{card.desc}</p>
+      <p
+        id={descId}
+        className="sov-justify"
+        lang="en-GB"
+        style={{
+          ...descTextStyle,
+          ...(open
+            ? {}
+            : { display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }),
+        }}
+      >
+        {card.desc}
+      </p>
+      <div style={{ position: 'relative', zIndex: 1, marginTop: 14 }}>
+        <MoreHint
+          variant="plus"
+          expanded={open}
+          onToggle={onToggle}
+          controlsId={descId}
+          label="Show full description"
+        />
+      </div>
     </motion.article>
   );
 }
@@ -409,6 +460,19 @@ export default function AboutSovran() {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const [statsRevealed, setStatsRevealed] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
+  const [bodyMore, setBodyMore] = useState(false);
+  const [bodySeen, setBodySeen] = useState(false);
+  // Desktop only: which pillar descriptions are expanded past their three line preview.
+  const [pillarOpen, setPillarOpen] = useState<Set<number>>(() => new Set());
+
+  const togglePillar = (i: number) => {
+    setPillarOpen((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) next.delete(i);
+      else next.add(i);
+      return next;
+    });
+  };
 
   const ringRef = useRef<SVGCircleElement>(null);
   const houseRef = useRef<SVGGElement>(null);
@@ -521,43 +585,60 @@ export default function AboutSovran() {
         </motion.p>
 
         <motion.h2
+          className="sov-h2"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8, delay: 0.1, ease: 'easeOut' }}
           style={{
             textAlign: 'center',
-            fontSize: 'clamp(30px, 3.5vw, 44px)',
-            fontWeight: 900,
             color: 'var(--sov-white)',
-            letterSpacing: '-0.005em',
-            lineHeight: 1.1,
           }}
         >
           Design And Build Studio.
         </motion.h2>
 
         <motion.p
+          className="sov-justify sov-justify-c"
+          lang="en-GB"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
-          style={{
-            textAlign: 'center',
-            fontSize: '16px',
-            fontWeight: 400,
-            color: 'var(--sov-white)',
-            lineHeight: 1.7,
-            letterSpacing: 'normal',
-            maxWidth: '650px',
-            margin: '20px auto 0',
-          }}
+          style={aboutParaStyle}
         >
-          Our evolved approach to architecture creates places people remember, and our mission is to
-          shape how you experience your home through every design decision. A home deserves a design
-          made only for it, and you are the one who will enjoy it for the rest of your life. For us,
-          architecture is a commitment to perfection, and we carry that same standard into the studio.
-          By managing design and construction as one team, we protect it at any level and at each
-          stage of your project. That is our footprint: spatial harmony, at all times.
+          {ABOUT_1}
         </motion.p>
+
+        <AnimatePresence initial={false}>
+          {bodyMore && (
+            <motion.p
+              key="about-more"
+              id="about-more"
+              className="sov-justify sov-justify-c"
+              lang="en-GB"
+              style={{ ...aboutParaStyle, marginTop: '12px', overflow: 'hidden' }}
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.45, ease: EASE }}
+            >
+              {ABOUT_REST}
+            </motion.p>
+          )}
+        </AnimatePresence>
+
+        <div style={{ maxWidth: 420, margin: '20px auto 0' }}>
+          <MoreHint
+            variant="rule"
+            expanded={bodyMore}
+            onToggle={() => {
+              setBodyMore((v) => !v);
+              setBodySeen(true);
+            }}
+            controlsId="about-more"
+            label="Keep reading"
+            pulse={!bodySeen}
+          />
+        </div>
 
         {isMobile ? (
           <div
@@ -591,7 +672,13 @@ export default function AboutSovran() {
             }}
           >
             {ethosCards.map((card, i) => (
-              <DesktopPanel key={card.label} card={card} index={i} />
+              <DesktopPanel
+                key={card.label}
+                card={card}
+                index={i}
+                open={pillarOpen.has(i)}
+                onToggle={() => togglePillar(i)}
+              />
             ))}
           </div>
         )}

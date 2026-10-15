@@ -3,6 +3,7 @@ import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { Home, TrendingUp, ClipboardCheck, Wallet, LayoutGrid, ShieldAlert } from 'lucide-react';
 import PulseRing from './PulseRing';
 import HandHint from './HandHint';
+import MoreHint from './MoreHint';
 
 const tiles = [
   {
@@ -49,14 +50,21 @@ const descStyle: React.CSSProperties = {
 
 function Tile({
   tile,
+  index,
   delay,
   isInView,
+  descOpen,
+  onToggleDesc,
 }: {
   tile: TileData;
+  index: number;
   delay: number;
   isInView: boolean;
+  descOpen: boolean;
+  onToggleDesc: () => void;
 }) {
   const Icon = tile.icon;
+  const descId = `wyd-desc-${index}`;
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -77,7 +85,28 @@ function Tile({
       >
         {tile.label}
       </h3>
-      <p style={descStyle}>{tile.desc}</p>
+      <p
+        id={descId}
+        onClick={onToggleDesc}
+        style={{
+          ...descStyle,
+          cursor: 'pointer',
+          ...(descOpen
+            ? {}
+            : { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }),
+        }}
+      >
+        {tile.desc}
+      </p>
+      <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center' }}>
+        <MoreHint
+          variant="plus"
+          expanded={descOpen}
+          onToggle={onToggleDesc}
+          controlsId={descId}
+          label="Show full description"
+        />
+      </div>
     </motion.div>
   );
 }
@@ -176,6 +205,8 @@ export default function WhatYouDiscover() {
   const [expanded, setExpanded] = useState<Set<number>>(() => new Set());
   const [opened, setOpened] = useState<Set<number>>(() => new Set());
   const [handHint, setHandHint] = useState<'idle' | 'show' | 'done'>('idle');
+  // Desktop only: which tile descriptions are expanded past their two line preview.
+  const [descOpen, setDescOpen] = useState<Set<number>>(() => new Set());
   const firstTileRef = useRef<HTMLDivElement>(null);
   const firstTileInView = useInView(firstTileRef, { once: true, amount: 0.8 });
 
@@ -198,6 +229,15 @@ export default function WhatYouDiscover() {
     const timer = window.setTimeout(() => setHandHint('done'), 3400);
     return () => window.clearTimeout(timer);
   }, [handHint]);
+
+  const toggleDesc = (i: number) => {
+    setDescOpen((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) next.delete(i);
+      else next.add(i);
+      return next;
+    });
+  };
 
   const toggle = (i: number) => {
     setHandHint('done');
@@ -231,27 +271,25 @@ export default function WhatYouDiscover() {
         </motion.p>
 
         <motion.h2
+          className="sov-h2"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8, delay: 0.1, ease: 'easeOut' }}
           style={{
             textAlign: 'center',
-            fontSize: 'clamp(32px, 3.85vw, 48px)',
-            fontWeight: 900,
             color: 'var(--sov-white)',
-            letterSpacing: '-0.005em',
-            lineHeight: 1.1,
           }}
         >
           The Life You Want, Drawn First.
         </motion.h2>
 
         <motion.p
+          className="sov-justify sov-justify-c"
+          lang="en-GB"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
           style={{
-            textAlign: 'center',
             fontSize: '16px',
             fontWeight: 400,
             color: 'rgba(255,255,255,0.6)',
@@ -275,7 +313,7 @@ export default function WhatYouDiscover() {
             gridTemplateColumns: 'repeat(3, 1fr)',
             columnGap: '24px',
             rowGap: '40px',
-            ...(isMobile ? { alignItems: 'flex-start' } : {}),
+            alignItems: isMobile ? 'flex-start' : 'start',
           }}
         >
           {tiles.map((tile, i) =>
@@ -293,7 +331,15 @@ export default function WhatYouDiscover() {
                 showHand={i === 0 && handHint === 'show'}
               />
             ) : (
-              <Tile key={tile.label} tile={tile} delay={i * 0.08} isInView={isInView} />
+              <Tile
+                key={tile.label}
+                tile={tile}
+                index={i}
+                delay={i * 0.08}
+                isInView={isInView}
+                descOpen={descOpen.has(i)}
+                onToggleDesc={() => toggleDesc(i)}
+              />
             )
           )}
         </div>

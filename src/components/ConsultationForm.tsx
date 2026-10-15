@@ -125,17 +125,18 @@ function validateEmail(value: string): boolean {
   return emailRegex.test(value.trim());
 }
 
-// Reduces whatever was typed or pasted to the 10 national digits after +44. So
-// "07123 456789", "+44 7123 456789" and "7123456789" all become "7123456789".
+// Reduces whatever was typed or pasted to digits only, dropping a leading 44 country code and
+// capping at 11 digits. A leading 0 is kept: "07123 456789" stays 11 digits, while
+// "+44 7123 456789" and "7123456789" both become the 10 digit "7123456789".
 function normalisePhone(raw: string): string {
   let digits = raw.replace(/\D/g, '');
   if (digits.startsWith('44')) digits = digits.slice(2);
-  if (digits.startsWith('0')) digits = digits.slice(1);
-  return digits.slice(0, 10);
+  return digits.slice(0, 11);
 }
 
+// Valid forms: 11 digits with a leading 0, or 10 digits starting 1 to 9.
 function validatePhone(value: string): boolean {
-  return /^\d{10}$/.test(value);
+  return /^0\d{10}$/.test(value) || /^[1-9]\d{9}$/.test(value);
 }
 
 const optionNoteStyle: React.CSSProperties = {
@@ -659,7 +660,7 @@ export default function ConsultationForm() {
     const result = await submitToMonday({
       name: formData.name,
       email: formData.email,
-      phone: '0' + formData.phone,
+      phone: formData.phone.length === 10 ? '0' + formData.phone : formData.phone,
       extension: extensionTypeMap[selectedType] ?? selectedType,
       budget: budgetMap[selectedBudget] ?? selectedBudget,
       timeline: selectedType === 'Basements' ? `${selectedTimeline} | Project type: Basements` : selectedTimeline,

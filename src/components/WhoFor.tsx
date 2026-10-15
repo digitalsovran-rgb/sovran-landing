@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Check, Minus } from 'lucide-react';
+import MoreHint from './MoreHint';
+
+// Intro copy. Desktop shows both parts together; mobile shows the first and reveals the second.
+const INTRO_1 = "We take pride in creating spaces that meet our clients' expectations and go beyond them.";
+const INTRO_2 =
+  "As an extension of that commitment, the architectural package is offered to clients who have chosen Sovran's design and build or construction service. Here is how to tell if yours is one of them.";
 
 type TabId = 'for' | 'not';
 
@@ -32,6 +38,8 @@ const EASE: [number, number, number, number] = [0.2, 0.7, 0.2, 1];
 export default function WhoFor() {
   const [tab, setTab] = useState<TabId>('for');
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+  const [introMore, setIntroMore] = useState(false);
+  const [introSeen, setIntroSeen] = useState(false);
   const reduced = useReducedMotion();
   const tabRefs = useRef<Record<TabId, HTMLButtonElement | null>>({ for: null, not: null });
 
@@ -56,6 +64,14 @@ export default function WhoFor() {
     tabRefs.current[next]?.focus();
   };
 
+  const introStyle: React.CSSProperties = {
+    fontSize: '16px',
+    lineHeight: 1.7,
+    color: 'rgba(255,255,255,0.82)',
+    maxWidth: '560px',
+    margin: isMobile ? '0 auto' : '0',
+  };
+
   const header = (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -77,30 +93,55 @@ export default function WhoFor() {
         Before You Enquire
       </p>
       <h2
+        className="sov-h2"
         style={{
           color: '#FFFFFF',
-          fontSize: 'clamp(30px, 3.85vw, 50px)',
-          fontWeight: 900,
-          letterSpacing: '-0.02em',
-          lineHeight: 1.05,
           margin: '0 0 18px',
         }}
       >
         Who This Is For.
       </h2>
-      <p
-        style={{
-          fontSize: '16px',
-          lineHeight: 1.7,
-          color: 'rgba(255,255,255,0.82)',
-          maxWidth: '560px',
-          margin: isMobile ? '0 auto' : '0',
-        }}
-      >
-        We take pride in creating spaces that meet our clients&apos; expectations and go beyond them. As an
-        extension of that commitment, the architectural package is offered to clients who have chosen
-        Sovran&apos;s design and build or construction service. Here is how to tell if yours is one of them.
-      </p>
+      {isMobile ? (
+        <>
+          <p className="sov-justify sov-justify-c" lang="en-GB" style={introStyle}>
+            {INTRO_1}
+          </p>
+          <AnimatePresence initial={false}>
+            {introMore && (
+              <motion.p
+                key="who-intro-more"
+                id="who-intro-more"
+                className="sov-justify sov-justify-c"
+                lang="en-GB"
+                style={{ ...introStyle, marginTop: '8px', overflow: 'hidden' }}
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.4, ease: EASE }}
+              >
+                {INTRO_2}
+              </motion.p>
+            )}
+          </AnimatePresence>
+          <div style={{ marginTop: 14, display: 'flex', justifyContent: 'center' }}>
+            <MoreHint
+              variant="dots"
+              expanded={introMore}
+              onToggle={() => {
+                setIntroMore((v) => !v);
+                setIntroSeen(true);
+              }}
+              controlsId="who-intro-more"
+              label="Keep reading"
+              pulse={!introSeen}
+            />
+          </div>
+        </>
+      ) : (
+        <p className="sov-justify" lang="en-GB" style={introStyle}>
+          {INTRO_1} {INTRO_2}
+        </p>
+      )}
     </motion.div>
   );
 
@@ -118,8 +159,7 @@ export default function WhoFor() {
         borderRadius: '4px',
         backgroundColor: '#2f2b26',
         width: '100%',
-        aspectRatio: isMobile ? '5 / 4' : '4 / 5',
-        ...(isMobile ? {} : { maxHeight: '640px' }),
+        aspectRatio: '16 / 9',
       }}
     >
       {(Object.keys(IMAGES) as TabId[]).map((id) => (

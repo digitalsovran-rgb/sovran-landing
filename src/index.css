@@ -183,7 +183,7 @@ img {
 @keyframes sov-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 .sov-beat { animation: sov-beat 2.4s ease-in-out infinite; }
 .sov-float { animation: sov-float 3.4s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) { .sov-beat, .sov-float { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .sov-beat, .sov-float, .sov-nudge, .sov-dot { animation: none; } }
 
 /* About section: pillar swipe track hides its scrollbar, hold-to-reveal control focus ring */
 .sov-track::-webkit-scrollbar { display: none; }
@@ -195,3 +195,13 @@ img {
 .sov-ghost-wrap { animation: sov-ghost-drift 9s ease-in-out infinite; animation-delay: var(--sov-delay, 0s); will-change: transform; }
 .sov-ghost * { stroke-dasharray: 100; stroke-dashoffset: 100; animation: sov-ghost-draw 8s ease-in-out infinite; animation-delay: var(--sov-delay, 0s); }
 @media (prefers-reduced-motion: reduce) { .sov-ghost-wrap, .sov-ghost * { animation: none; } .sov-ghost * { stroke-dasharray: none; stroke-dashoffset: 0; } }
+
+/* Shared section heading size, justified body text, and the "show more" hint animations */
+.sov-h2 { font-size: clamp(30px, 3.85vw, 50px); font-weight: 900; letter-spacing: -0.02em; line-height: 1.05; }
+.sov-justify { text-align: justify; text-justify: inter-word; hyphens: auto; -webkit-hyphens: auto; }
+.sov-justify-c { text-align-last: center; }
+@keyframes sov-nudge { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+.sov-nudge { animation: sov-nudge 1.8s ease-in-out infinite; }
+@keyframes sov-dot { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+.sov-dot { animation: sov-dot 1.4s ease-in-out infinite; animation-delay: var(--sov-delay, 0s); }
+.sov-more:focus-visible { outline: 2px solid #C2B2A0; outline-offset: 3px; }

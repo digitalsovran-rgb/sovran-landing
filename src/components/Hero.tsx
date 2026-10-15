@@ -1,5 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import MoreHint from './MoreHint';
+
+// Hero body copy. Desktop shows both parts; mobile shows the first and reveals the second.
+const HERO_P1 =
+  'The homes people never forget start with a drawing. Architecture decides how daylight crosses a room, how one space opens into the next, and how it feels to walk through your own front door.';
+const HERO_P2 =
+  'It is the refined decision behind every home worth remembering. That is why Sovran is offering a complimentary architectural package with every build: so your home feels like yours from the very first drawing.';
+
+// Fixed logo geometry. The image is 800 by 222, so its rendered height follows from its width.
+const LOGO_TOP = 24;
+const LOGO_RATIO = 222 / 800;
+// The hero content must start at least this far below the logo's bottom edge.
+const LOGO_CLEARANCE = 48;
+
+const mobileParaStyle: React.CSSProperties = {
+  fontSize: '17.6px',
+  fontWeight: 400,
+  color: 'rgba(255,255,255,0.92)',
+  maxWidth: '560px',
+  margin: '40px auto 0',
+  lineHeight: 1.75,
+  letterSpacing: 'normal',
+  textShadow: '0 2px 8px rgba(0,0,0,0.5)',
+};
 
 const desktopVideos = ['/media/vidher1.mp4', '/media/vidher2.mp4', '/media/vidher3.mp4'];
 const desktopPosters = ['/media/vidher1-poster.webp', '/media/vidher2-poster.webp', '/media/vidher3-poster.webp'];
@@ -33,6 +57,12 @@ export default function Hero() {
   const [failed, setFailed] = useState(false);
   const [ctaHovered, setCtaHovered] = useState(false);
   const [skipVideo] = useState(shouldSkipVideo);
+  const [heroMore, setHeroMore] = useState(false);
+  const [heroSeen, setHeroSeen] = useState(false);
+
+  const logoWidth = isMobile ? 120 : 150;
+  const logoBottom = LOGO_TOP + logoWidth * LOGO_RATIO;
+  const heroPaddingTop = Math.max(Math.ceil(logoBottom + LOGO_CLEARANCE), isMobile ? 96 : 140);
 
   const videos = isMobile ? mobileVideos : desktopVideos;
   const posters = isMobile ? mobilePosters : desktopPosters;
@@ -200,13 +230,16 @@ export default function Hero() {
     <>
       <style>{`
         .hero-desc-mobile { display: none; }
-        /* Full-screen hero. The !important on min-height beats the older mobile rule in
-           index.css (#hero min-height: max(78vh, 480px) !important), which this style block
-           follows in the cascade. */
+        /* Full-screen hero. There is deliberately no fixed height: tall content grows the section
+           instead of overflowing upward over the logo. The !important on min-height beats the
+           older mobile rule in index.css (#hero min-height: max(78vh, 480px) !important), which
+           this style block follows in the cascade. */
         #hero {
-          height: 100vh;
-          height: 100svh;
+          min-height: 100vh;
           min-height: 100svh !important;
+        }
+        @media (min-width: 768px) {
+          .hero-more-mobile { display: none !important; }
         }
         @media (max-width: 767px) {
           .hero-h1 { font-size: clamp(26px, 7.1vw, 35px) !important; font-weight: 900 !important; }
@@ -234,7 +267,7 @@ export default function Hero() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          paddingTop: isMobile ? '88px' : '96px',
+          paddingTop: `${heroPaddingTop}px`,
           paddingBottom: isMobile ? '56px' : '72px',
           boxSizing: 'border-box',
           backgroundColor: '#0a0a0a',
@@ -330,7 +363,7 @@ export default function Hero() {
         <div
           style={{
             position: 'absolute',
-            top: '24px',
+            top: `${LOGO_TOP}px`,
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 3,
@@ -344,7 +377,7 @@ export default function Hero() {
             transition={{ duration: 0.8 }}
             style={{
               display: 'block',
-              width: isMobile ? '120px' : '150px',
+              width: `${logoWidth}px`,
               height: 'auto',
             }}
           />
@@ -392,7 +425,7 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
             style={{
-              fontSize: 'clamp(39px, 6.3vw, 80px)',
+              fontSize: 'clamp(36px, 4.6vw, 62px)',
               fontWeight: 900,
               color: '#ffffff',
               margin: '0 auto',
@@ -409,38 +442,63 @@ export default function Hero() {
           {/* Not Framer Motion-animated (unlike its siblings): this paragraph is the confirmed
               LCP element on mobile, and animating it delays the final paint LCP measures. */}
           <p
-            className="hero-desc hero-desc-desktop"
+            className="hero-desc hero-desc-desktop sov-justify sov-justify-c"
+            lang="en-GB"
             style={{
-              fontSize: '17.6px',
+              fontSize: '17px',
               fontWeight: 400,
               color: 'rgba(255,255,255,0.92)',
-              maxWidth: '560px',
+              maxWidth: '800px',
               margin: '40px auto 0',
-              lineHeight: 1.75,
+              lineHeight: 1.7,
               letterSpacing: 'normal',
               textShadow: '0 2px 8px rgba(0,0,0,0.5)',
             }}
           >
-            The homes people never forget start with a drawing. Architecture decides how daylight crosses a room, how one space opens into the next, and how it feels to walk through your own front door. It is the refined decision behind every home worth remembering. That is why Sovran is offering a complimentary architectural package with every build: so your home feels like yours from the very first drawing.
+            {HERO_P1} {HERO_P2}
           </p>
 
           {/* Not Framer Motion-animated (unlike its siblings): this paragraph is the confirmed
               LCP element on mobile, and animating it delays the final paint LCP measures. */}
           <p
-            className="hero-desc hero-desc-mobile"
-            style={{
-              fontSize: '17.6px',
-              fontWeight: 400,
-              color: 'rgba(255,255,255,0.92)',
-              maxWidth: '560px',
-              margin: '40px auto 0',
-              lineHeight: 1.75,
-              letterSpacing: 'normal',
-              textShadow: '0 2px 8px rgba(0,0,0,0.5)',
-            }}
+            className="hero-desc hero-desc-mobile sov-justify sov-justify-c"
+            lang="en-GB"
+            style={mobileParaStyle}
           >
-            The homes people never forget start with a drawing. Architecture decides how daylight crosses a room, how one space opens into the next, and how it feels to walk through your own front door. It is the refined decision behind every home worth remembering. That is why Sovran is offering a complimentary architectural package with every build: so your home feels like yours from the very first drawing.
+            {HERO_P1}
           </p>
+
+          <AnimatePresence initial={false}>
+            {heroMore && (
+              <motion.p
+                key="hero-more"
+                id="hero-more"
+                className="hero-desc hero-desc-mobile sov-justify sov-justify-c"
+                lang="en-GB"
+                style={{ ...mobileParaStyle, marginTop: '8px', overflow: 'hidden' }}
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.4, ease: [0.2, 0.7, 0.2, 1] }}
+              >
+                {HERO_P2}
+              </motion.p>
+            )}
+          </AnimatePresence>
+
+          <div className="hero-more-mobile" style={{ marginTop: 14, display: 'flex', justifyContent: 'center' }}>
+            <MoreHint
+              variant="chevron"
+              expanded={heroMore}
+              onToggle={() => {
+                setHeroMore((v) => !v);
+                setHeroSeen(true);
+              }}
+              controlsId="hero-more"
+              label="Keep reading"
+              pulse={!heroSeen}
+            />
+          </div>
 
           <motion.div
             className="hero-cta-wrap"

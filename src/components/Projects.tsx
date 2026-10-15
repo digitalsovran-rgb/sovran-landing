@@ -54,8 +54,15 @@ const DEAL_DURATION = [1.1, 0.9, 0.8, 0.7, 0.6];
 
 const offscreen = () => (typeof window !== 'undefined' ? window.innerWidth * 1.1 : 1200);
 
+// Width of the details panel that opens beside the pile on desktop.
+const computePanelW = () => (typeof window !== 'undefined' ? Math.min(300, Math.max(240, window.innerWidth * 0.26)) : 280);
+
+// Gap between the pile and the details panel when it is open.
+const PANEL_GAP = 56;
+
 export default function Projects() {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+  const [panelW, setPanelW] = useState(computePanelW);
   const [order, setOrder] = useState<number[]>(() => PROJECTS.map((_, i) => i));
   const [exitingId, setExitingId] = useState<number | null>(null);
   const [exitDir, setExitDir] = useState<-1 | 1>(1);
@@ -80,7 +87,10 @@ export default function Projects() {
   const isDealt = Boolean(reduced) || dealt;
 
   useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768);
+    const handler = () => {
+      setIsMobile(window.innerWidth < 768);
+      setPanelW(computePanelW());
+    };
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
@@ -167,8 +177,210 @@ export default function Projects() {
   });
 
   const top = PROJECTS[order[0]];
-  const stackWidth = isMobile ? 'min(88vw, 460px)' : 'min(820px, 100%)';
+  const stackWidth = isMobile ? 'min(88vw, 460px)' : '100%';
   const showHint = isDealt && !hasInteracted && !open;
+
+  const closeOnKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setOpen(false);
+    }
+  };
+
+  // Caption text for the current top card, centred. Mobile shows it below the pile, desktop
+  // beside it.
+  const captionContent = (
+    <>
+      <p
+        style={{
+          textTransform: 'uppercase',
+          fontSize: '12px',
+          letterSpacing: '0.2em',
+          fontWeight: 500,
+          color: '#C2B2A0',
+          textAlign: 'center',
+        }}
+      >
+        {top.location}
+      </p>
+      <div style={{ width: '32px', height: '2px', backgroundColor: '#C2B2A0', margin: '14px auto' }} />
+      <h3
+        style={{
+          color: '#FFFFFF',
+          fontSize: isMobile ? '24px' : '30px',
+          fontWeight: 700,
+          lineHeight: 1.2,
+          letterSpacing: 'normal',
+          textAlign: 'center',
+        }}
+      >
+        {top.title}
+      </h3>
+      <p
+        style={{
+          marginTop: '10px',
+          fontSize: isMobile ? '15px' : '17px',
+          lineHeight: 1.6,
+          color: 'rgba(255,255,255,0.82)',
+          textAlign: 'center',
+        }}
+      >
+        {top.desc}
+      </p>
+    </>
+  );
+
+  // One line of instruction above the pile, shown until the visitor has used it.
+  const hintLine = (
+    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 14, minHeight: 18 }}>
+      <AnimatePresence>
+        {showHint && (
+          <motion.p
+            key="hint"
+            aria-hidden="true"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.8 } }}
+            exit={{ opacity: 0, transition: { duration: 0.3 } }}
+            style={{
+              margin: 0,
+              textAlign: 'right',
+              color: '#C2B2A0',
+              textTransform: 'uppercase',
+              fontSize: isMobile ? 11 : 12,
+              fontWeight: 600,
+              letterSpacing: '0.14em',
+              lineHeight: 1.4,
+              pointerEvents: 'none',
+            }}
+          >
+            {isMobile ? 'Swipe for more · Tap for details' : 'Drag for more · Click for details'}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+
+  const stack = (
+    <div
+      ref={stackRef}
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="Our projects"
+      style={{
+        position: 'relative',
+        width: '100%',
+        aspectRatio: '4 / 3',
+        touchAction: 'pan-y',
+      }}
+    >
+      {PROJECTS.map((project, idx) => {
+        const depth = order.indexOf(idx);
+        const isTop = depth === 0;
+        const isExiting = exitingId === idx;
+        const k = LAST_DEPTH - depth;
+        const side = k % 2 === 0 ? -1 : 1;
+        const start = { x: side * offscreen(), y: 0, rotate: side * 20, opacity: 1, scale: 1 };
+        const pose = poseFor(depth);
+
+        let target;
+        let transition;
+        if (isExiting) {
+          target = { x: exitDir * offscreen(), y: 20, rotate: exitDir * 16, opacity: 1, scale: 1 };
+          transition = { duration: EXIT_MS / 1000, ease: EXIT_EASE };
+        } else if (reduced) {
+          target = pose;
+          transition = { duration: 0 };
+        } else if (!dealInView) {
+          target = start;
+          transition = { duration: 0 };
+        } else if (!dealt) {
+          target = pose;
+          transition = { delay: DEAL_DELAY[k], duration: DEAL_DURATION[k], ease: EASE };
+        } else {
+          target = pose;
+          transition = { duration: 0.7, ease: EASE };
+        }
+
+        const canInteract = isTop && !isExiting && isDealt;
+
+        return (
+          <motion.div
+            key={idx}
+            initial={reduced ? pose : start}
+            animate={target}
+            transition={transition}
+            drag={canInteract ? 'x' : false}
+            dragSnapToOrigin
+            dragElastic={0.4}
+            dragMomentum={false}
+            onDragStart={
+              canInteract
+                ? () => {
+                    movedRef.current = true;
+                  }
+                : undefined
+            }
+            onDragEnd={canInteract ? handleDragEnd : undefined}
+            onPointerDown={canInteract ? handlePointerDown : undefined}
+            onPointerUp={canInteract ? handlePointerUp : undefined}
+            onPointerCancel={
+              canInteract
+                ? () => {
+                    downRef.current = null;
+                  }
+                : undefined
+            }
+            tabIndex={isTop ? 0 : undefined}
+            role={isTop ? 'button' : undefined}
+            aria-expanded={isTop ? open : undefined}
+            aria-label={isTop ? `${project.title}, ${project.location}` : undefined}
+            onKeyDown={
+              isTop
+                ? (e: React.KeyboardEvent) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggleCaption();
+                    }
+                  }
+                : undefined
+            }
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              aspectRatio: '4 / 3',
+              padding: isMobile ? '8px' : '12px',
+              backgroundColor: '#FFFFFF',
+              borderRadius: '3px',
+              boxShadow: '0 18px 40px rgba(0,0,0,0.45)',
+              boxSizing: 'border-box',
+              cursor: isTop ? 'pointer' : 'default',
+              userSelect: 'none',
+              willChange: 'transform',
+              zIndex: isExiting ? 20 : 10 - depth,
+              pointerEvents: isTop && !isExiting ? 'auto' : 'none',
+            }}
+          >
+            <img
+              src={project.img}
+              alt={project.title}
+              draggable={false}
+              decoding="async"
+              loading="eager"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center',
+                display: 'block',
+              }}
+            />
+          </motion.div>
+        );
+      })}
+    </div>
+  );
 
   return (
     <section
@@ -178,21 +390,19 @@ export default function Projects() {
     >
       <div className="inner">
         <motion.h2
+          className="sov-h2"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
           style={{
-            color: 'var(--sov-white)',
-            textTransform: 'uppercase',
-            fontSize: 'clamp(30px, 3.85vw, 50px)',
-            fontWeight: 900,
-            letterSpacing: '-0.02em',
+            color: '#FFFFFF',
+            textAlign: 'center',
             margin: '0 0 24px',
             fontFamily: 'Inter, sans-serif',
           }}
         >
-          Our Work
+          Our Work.
         </motion.h2>
         <div
           style={{
@@ -202,227 +412,85 @@ export default function Projects() {
           }}
         />
 
-        <div
-          ref={stackRef}
-          role="region"
-          aria-roledescription="carousel"
-          aria-label="Our projects"
-          style={{
-            position: 'relative',
-            width: stackWidth,
-            aspectRatio: '4 / 3',
-            margin: '0 auto 44px',
-            touchAction: 'pan-y',
-          }}
-        >
-          {PROJECTS.map((project, idx) => {
-            const depth = order.indexOf(idx);
-            const isTop = depth === 0;
-            const isExiting = exitingId === idx;
-            const k = LAST_DEPTH - depth;
-            const side = k % 2 === 0 ? -1 : 1;
-            const start = { x: side * offscreen(), y: 0, rotate: side * 20, opacity: 1, scale: 1 };
-            const pose = poseFor(depth);
+        {isMobile ? (
+          <>
+            <div style={{ width: stackWidth, margin: '0 auto 44px' }}>
+              {hintLine}
+              {stack}
+            </div>
 
-            let target;
-            let transition;
-            if (isExiting) {
-              target = { x: exitDir * offscreen(), y: 20, rotate: exitDir * 16, opacity: 1, scale: 1 };
-              transition = { duration: EXIT_MS / 1000, ease: EXIT_EASE };
-            } else if (reduced) {
-              target = pose;
-              transition = { duration: 0 };
-            } else if (!dealInView) {
-              target = start;
-              transition = { duration: 0 };
-            } else if (!dealt) {
-              target = pose;
-              transition = { delay: DEAL_DELAY[k], duration: DEAL_DURATION[k], ease: EASE };
-            } else {
-              target = pose;
-              transition = { duration: 0.7, ease: EASE };
-            }
-
-            const canInteract = isTop && !isExiting && isDealt;
-
-            return (
-              <motion.div
-                key={idx}
-                initial={reduced ? pose : start}
-                animate={target}
-                transition={transition}
-                drag={canInteract ? 'x' : false}
-                dragSnapToOrigin
-                dragElastic={0.4}
-                dragMomentum={false}
-                onDragStart={
-                  canInteract
-                    ? () => {
-                        movedRef.current = true;
-                      }
-                    : undefined
-                }
-                onDragEnd={canInteract ? handleDragEnd : undefined}
-                onPointerDown={canInteract ? handlePointerDown : undefined}
-                onPointerUp={canInteract ? handlePointerUp : undefined}
-                onPointerCancel={
-                  canInteract
-                    ? () => {
-                        downRef.current = null;
-                      }
-                    : undefined
-                }
-                tabIndex={isTop ? 0 : undefined}
-                role={isTop ? 'button' : undefined}
-                aria-expanded={isTop ? open : undefined}
-                aria-label={isTop ? `${project.title}, ${project.location}` : undefined}
-                onKeyDown={
-                  isTop
-                    ? (e: React.KeyboardEvent) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          toggleCaption();
-                        }
-                      }
-                    : undefined
-                }
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  aspectRatio: '4 / 3',
-                  padding: isMobile ? '8px' : '12px',
-                  backgroundColor: '#FFFFFF',
-                  borderRadius: '3px',
-                  boxShadow: '0 18px 40px rgba(0,0,0,0.45)',
-                  boxSizing: 'border-box',
-                  cursor: isTop ? 'pointer' : 'default',
-                  userSelect: 'none',
-                  willChange: 'transform',
-                  zIndex: isExiting ? 20 : 10 - depth,
-                  pointerEvents: isTop && !isExiting ? 'auto' : 'none',
-                }}
-              >
-                <img
-                  src={project.img}
-                  alt={project.title}
-                  draggable={false}
-                  decoding="async"
-                  loading="eager"
+            <AnimatePresence>
+              {open && (
+                <motion.div
+                  key="caption"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.4, ease: EASE }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Close details"
+                  onClick={() => setOpen(false)}
+                  onKeyDown={closeOnKey}
                   style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    objectPosition: 'center',
-                    display: 'block',
+                    width: stackWidth,
+                    margin: '0 auto',
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    textAlign: 'center',
                   }}
-                />
-              </motion.div>
-            );
-          })}
+                >
+                  <div style={{ padding: '22px 4px 0' }}>{captionContent}</div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </>
+        ) : (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              marginBottom: 44,
+            }}
+          >
+            <div style={{ flex: '0 1 754px', minWidth: 0 }}>
+              {hintLine}
+              {stack}
+            </div>
 
-          <AnimatePresence>
-            {showHint && (
-              <motion.div
-                key="hint"
-                aria-hidden="true"
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.8 } }}
-                exit={{ opacity: 0, transition: { duration: 0.3 } }}
-                style={{
-                  position: 'absolute',
-                  top: isMobile ? '14px' : '18px',
-                  right: isMobile ? '14px' : '18px',
-                  zIndex: 30,
-                  pointerEvents: 'none',
-                  backgroundColor: 'rgba(10,10,10,0.55)',
-                  backdropFilter: 'blur(6px)',
-                  WebkitBackdropFilter: 'blur(6px)',
-                  padding: '8px 12px',
-                  borderRadius: '10px',
-                  textAlign: 'right',
-                  color: '#FFFFFF',
-                  textTransform: 'uppercase',
-                  fontSize: '10.5px',
-                  fontWeight: 600,
-                  letterSpacing: '0.14em',
-                  lineHeight: 1.5,
-                }}
-              >
-                Swipe for more
-                <br />
-                Tap for details
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        <AnimatePresence>
-          {open && (
             <motion.div
-              key="caption"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.4, ease: EASE }}
-              role="button"
-              tabIndex={0}
-              aria-label="Close details"
-              onClick={() => setOpen(false)}
-              onKeyDown={(e: React.KeyboardEvent) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setOpen(false);
-                }
-              }}
+              initial={false}
+              animate={{ width: open ? panelW : 0, marginLeft: open ? PANEL_GAP : 0, opacity: open ? 1 : 0 }}
+              transition={{ duration: 0.6, ease: EASE }}
+              aria-hidden={!open}
               style={{
-                width: stackWidth,
-                margin: '0 auto',
                 overflow: 'hidden',
-                cursor: 'pointer',
-                textAlign: 'center',
+                flex: '0 0 auto',
+                alignSelf: 'center',
+                pointerEvents: open ? 'auto' : 'none',
               }}
             >
-              <div style={{ padding: isMobile ? '22px 4px 0' : '28px 4px 0' }}>
-                <p
-                  style={{
-                    textTransform: 'uppercase',
-                    fontSize: '12px',
-                    letterSpacing: '0.2em',
-                    fontWeight: 500,
-                    color: '#C2B2A0',
-                  }}
-                >
-                  {top.location}
-                </p>
-                <div style={{ width: '32px', height: '2px', backgroundColor: '#C2B2A0', margin: '14px auto' }} />
-                <h3
-                  style={{
-                    color: '#FFFFFF',
-                    fontSize: isMobile ? '24px' : '30px',
-                    fontWeight: 700,
-                    lineHeight: 1.2,
-                    letterSpacing: 'normal',
-                  }}
-                >
-                  {top.title}
-                </h3>
-                <p
-                  style={{
-                    marginTop: '10px',
-                    fontSize: isMobile ? '15px' : '17px',
-                    lineHeight: 1.6,
-                    color: 'rgba(255,255,255,0.82)',
-                    textAlign: 'left',
-                  }}
-                >
-                  {top.desc}
-                </p>
+              <div
+                role="button"
+                tabIndex={open ? 0 : -1}
+                aria-label="Close details"
+                onClick={() => setOpen(false)}
+                onKeyDown={closeOnKey}
+                style={{
+                  width: panelW,
+                  minWidth: panelW,
+                  boxSizing: 'border-box',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                }}
+              >
+                {captionContent}
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -206,7 +206,8 @@ function Row({ row, i, isMobile }: { row: (typeof rows)[0]; i: number; isMobile:
                   style={{ overflow: 'hidden' }}
                 >
                   <p
-                    className="hiw-desc"
+                    className="sov-justify"
+                    lang="en-GB"
                     style={{
                       fontSize: '14px',
                       fontWeight: 400,
@@ -214,7 +215,6 @@ function Row({ row, i, isMobile }: { row: (typeof rows)[0]; i: number; isMobile:
                       lineHeight: 1.65,
                       letterSpacing: 'normal',
                       maxWidth: '450px',
-                      textAlign: 'justify',
                       paddingTop: '14px',
                     }}
                   >
@@ -241,7 +241,8 @@ function Row({ row, i, isMobile }: { row: (typeof rows)[0]; i: number; isMobile:
               </span>
             </div>
             <p
-              className="hiw-desc"
+              className="sov-justify"
+              lang="en-GB"
               style={{
                 fontSize: '14px',
                 fontWeight: 400,
@@ -249,7 +250,6 @@ function Row({ row, i, isMobile }: { row: (typeof rows)[0]; i: number; isMobile:
                 lineHeight: 1.65,
                 letterSpacing: 'normal',
                 maxWidth: '450px',
-                textAlign: 'justify',
               }}
             >
               {row.desc}
@@ -293,16 +293,13 @@ export default function HowItWorks() {
         </motion.p>
 
         <motion.h2
+          className="sov-h2"
           initial={{ opacity: 0, y: 20 }}
           animate={isHeadingInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8, delay: 0.1, ease: 'easeOut' }}
           style={{
             textAlign: 'center',
-            fontSize: 'clamp(30px, 3.5vw, 44px)',
-            fontWeight: 900,
             color: '#0a0a0a',
-            letterSpacing: '-0.005em',
-            lineHeight: 1.15,
           }}
         >
           Start Your Architectural Journey.
