@@ -1,31 +1,31 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { FileSearch, PenTool, Video, ClipboardCheck, HardHat } from 'lucide-react';
+import { PhoneCall, Ruler, PenTool, ClipboardCheck, HardHat } from 'lucide-react';
 
 const rows = [
   {
     num: '01',
-    icon: FileSearch,
-    label: 'Brief',
+    icon: PhoneCall,
+    label: 'Discovery Call',
     image: '/media/sites.webp',
     imageLeft: true,
-    desc: 'We shape the plan around your goals. If a site survey is needed, it comes with your package.',
+    desc: 'We listen to your plans, your budget and how you want to live.',
   },
   {
     num: '02',
-    icon: PenTool,
-    label: 'Drawings',
+    icon: Ruler,
+    label: 'Site Survey',
     image: '/media/archdraw.webp',
     imageLeft: false,
-    desc: 'Floor plans built around you, already prepared for the 2027 energy standards.',
+    desc: 'We measure and assess your property, arranged as part of your package.',
   },
   {
     num: '03',
-    icon: Video,
-    label: 'Walkthrough',
+    icon: PenTool,
+    label: 'Design',
     image: '/media/renderw.webp?v=2',
     imageLeft: true,
-    desc: 'Walk through your home in 3D and adjust anything you like.',
+    desc: 'Floor plans, 3D visuals and a mood board, refined with you.',
   },
   {
     num: '04',
@@ -33,15 +33,15 @@ const rows = [
     label: 'Planning',
     image: '/media/plann.webp',
     imageLeft: false,
-    desc: 'We prepare and manage your application, so you are ready to build with us.',
+    desc: 'We prepare and manage your application, with a 97% approval record.',
   },
   {
     num: '05',
     icon: HardHat,
-    label: 'Build',
+    label: 'Construction',
     image: '/media/startb.webp',
     imageLeft: true,
-    desc: 'One project manager and one team take you from the first day to moving in.',
+    desc: 'One project manager and one team, from the first day on site to handover.',
   },
 ];
 
@@ -220,7 +220,7 @@ export default function HowItWorks() {
             marginBottom: '20px',
           }}
         >
-          The Process
+          How We Work
         </motion.p>
 
         <motion.h2
@@ -233,7 +233,7 @@ export default function HowItWorks() {
             color: '#0a0a0a',
           }}
         >
-          Five Steps To Your Front Door.
+          Our Client Journey.
         </motion.h2>
       </div>
 

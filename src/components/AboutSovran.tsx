@@ -1,121 +1,32 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import { Compass, ShieldCheck, Users } from 'lucide-react';
-import HouseMark from './HouseMark';
 
-// One statement under the heading, in place of the old long body copy.
+// One statement under the heading.
 const ABOUT_STATEMENT =
-  'Since 2011, the people who draw your home have sat at the same table as the people who build it. Nothing gets lost between the drawing and the door.';
+  'Since 2011, our designers, planners and builders have worked as one team. What you approve on paper is what arrives on site.';
 
 const ethosCards = [
   {
-    label: 'One Team',
+    label: 'One Point Of Contact',
     icon: Users,
-    desc: 'One project manager runs your build and is the only person you speak to.',
+    desc: 'One project manager runs your project from start to finish.',
   },
   {
-    label: 'Planning Expertise',
+    label: 'Planning Know-How',
     icon: Compass,
-    desc: 'Former planning officers on our team mean your application arrives prepared the way councils expect.',
+    desc: 'Former planning officers on our team prepare your application the way councils expect.',
   },
   {
-    label: 'Protected Investment',
+    label: 'A Price That Holds',
     icon: ShieldCheck,
-    desc: 'A fixed price, milestone payments and legal insurance protect your investment at every stage.',
+    desc: 'Fixed before work begins, paid in milestones, protected by contract and insurance.',
   },
-];
-
-const stats = [
-  { target: 15, decimals: 0, suffix: '+', label: 'Years' },
-  { target: 1000, decimals: 0, suffix: '+', label: 'Projects Delivered' },
-  { target: 97, decimals: 0, suffix: '%', label: 'Planning Success' },
-  { target: 4.9, decimals: 1, suffix: '', label: 'Google Rating' },
 ];
 
 const EASE: [number, number, number, number] = [0.2, 0.7, 0.2, 1];
-const COUNT_UP_MS = 1500;
-const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
-
-// Press and hold control: how long the hold lasts and the circumference of its progress ring
-// (2 * PI * r with r = 72).
-const HOLD_MS = 1600;
-// A hold is cancelled if the pointer wanders further than this from where it went down.
-const HOLD_MAX_DRIFT_PX = 80;
-const RING_CIRCUMFERENCE = 452.39;
 
 type EthosCard = (typeof ethosCards)[number];
-
-// Shared look of the two stacked hold messages (idle and "Keep holding...").
-const holdTextStyle: React.CSSProperties = {
-  position: 'absolute',
-  inset: 0,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  textAlign: 'center',
-  padding: '0 8px',
-  pointerEvents: 'none',
-  textTransform: 'uppercase',
-  fontSize: '13px',
-  letterSpacing: '0.18em',
-  fontWeight: 500,
-  color: 'rgba(255,255,255,0.7)',
-  transition: 'opacity 0.25s ease',
-};
-
-// Counts from 0 up to `target` once `active` becomes true, and stays latched (never restarts
-// on later re-triggers).
-function useCountUp(target: number, decimals: number, active: boolean) {
-  const [value, setValue] = useState(0);
-  const startedRef = useRef(false);
-
-  useEffect(() => {
-    if (!active || startedRef.current) return;
-    startedRef.current = true;
-
-    let rafId: number;
-    const startTime = performance.now();
-
-    const tick = (now: number) => {
-      const progress = Math.min((now - startTime) / COUNT_UP_MS, 1);
-      setValue(target * easeOutCubic(progress));
-      if (progress < 1) {
-        rafId = requestAnimationFrame(tick);
-      } else {
-        setValue(target);
-      }
-    };
-
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
-  }, [active, target]);
-
-  return decimals > 0 ? value.toFixed(decimals) : Math.round(value).toLocaleString('en-GB');
-}
-
-function StatNumber({
-  stat,
-  active,
-  numberSize,
-  suffixSize,
-}: {
-  stat: (typeof stats)[number];
-  active: boolean;
-  numberSize: string;
-  suffixSize: string;
-}) {
-  const display = useCountUp(stat.target, stat.decimals, active);
-  return (
-    <span style={{ whiteSpace: 'nowrap' }}>
-      <span style={{ fontSize: numberSize, fontWeight: 900, color: 'var(--sov-white)', lineHeight: 1 }}>
-        {display}
-      </span>
-      <span style={{ fontSize: suffixSize, fontWeight: 900, color: 'var(--sov-greige-light)', lineHeight: 1 }}>
-        {stat.suffix}
-      </span>
-    </span>
-  );
-}
 
 const panelStyle: React.CSSProperties = {
   position: 'relative',
@@ -255,174 +166,18 @@ function DesktopPanel({ card, index }: { card: EthosCard; index: number }) {
   );
 }
 
-function StatsBlock({ isMobile, active }: { isMobile: boolean; active: boolean }) {
-  const ruleLineStyle: React.CSSProperties = {
-    height: '1px',
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    transformOrigin: 'left',
-  };
-  const labelStyle: React.CSSProperties = {
-    textTransform: 'uppercase',
-    fontSize: '12px',
-    letterSpacing: '0.18em',
-    fontWeight: 500,
-    color: 'rgba(255,255,255,0.65)',
-  };
-  const ruleMotion = (delay: number) => ({
-    initial: { scaleX: 0 },
-    animate: { scaleX: 1 },
-    transition: { duration: 0.8, delay, ease: EASE },
-  });
-  const itemMotion = (i: number) => ({
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.7, delay: 0.15 + i * 0.14, ease: EASE },
-  });
-
-  if (isMobile) {
-    return (
-      <div style={{ marginTop: '40px', textAlign: 'left' }}>
-        {stats.map((stat, i) => (
-          <div key={stat.label}>
-            <motion.div style={ruleLineStyle} {...ruleMotion(0.15 + i * 0.14)} />
-            <motion.div
-              {...itemMotion(i)}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'baseline',
-                padding: '24px 0',
-              }}
-            >
-              <span style={labelStyle}>{stat.label}</span>
-              <StatNumber stat={stat} active={active} numberSize="52px" suffixSize="28px" />
-            </motion.div>
-          </div>
-        ))}
-        <motion.div style={ruleLineStyle} {...ruleMotion(0.15 + stats.length * 0.14)} />
-      </div>
-    );
-  }
-
-  return (
-    <div
-      style={{
-        marginTop: '48px',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '32px',
-        textAlign: 'left',
-      }}
-    >
-      {stats.map((stat, i) => (
-        <motion.div key={stat.label} {...itemMotion(i)}>
-          <StatNumber stat={stat} active={active} numberSize="60px" suffixSize="32px" />
-          <motion.div style={{ ...ruleLineStyle, margin: '20px 0 14px' }} {...ruleMotion(0.15 + i * 0.14)} />
-          <span style={labelStyle}>{stat.label}</span>
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
 export default function AboutSovran() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
   const trackRef = useRef<HTMLDivElement>(null);
   const trackInView = useInView(trackRef, { once: true, amount: 0.3 });
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
-  const [statsRevealed, setStatsRevealed] = useState(false);
-  const [isHolding, setIsHolding] = useState(false);
-
-  const ringRef = useRef<SVGCircleElement>(null);
-  const houseRef = useRef<SVGGElement>(null);
-  const downPosRef = useRef<{ x: number; y: number } | null>(null);
-  const holdingRef = useRef(false);
-  const completedRef = useRef(false);
-  const startTsRef = useRef(0);
-  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
-
-  useEffect(() => {
-    return () => {
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
-
-  const startHold = () => {
-    if (holdingRef.current || completedRef.current) return;
-    holdingRef.current = true;
-    if (ringRef.current) ringRef.current.style.transition = 'none';
-    if (houseRef.current) houseRef.current.style.transition = 'none';
-    setIsHolding(true);
-    startTsRef.current = performance.now();
-
-    const tick = (now: number) => {
-      const p = Math.min(1, (now - startTsRef.current) / HOLD_MS);
-      if (ringRef.current) ringRef.current.style.strokeDashoffset = String(RING_CIRCUMFERENCE * (1 - p));
-      if (houseRef.current) houseRef.current.style.strokeDashoffset = String(1 - p);
-      if (p >= 1) {
-        rafRef.current = null;
-        holdingRef.current = false;
-        completedRef.current = true;
-        navigator.vibrate?.(40);
-        setIsHolding(false);
-        setStatsRevealed(true);
-        return;
-      }
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    rafRef.current = requestAnimationFrame(tick);
-  };
-
-  const cancelHold = () => {
-    if (!holdingRef.current) return;
-    holdingRef.current = false;
-    if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
-    setIsHolding(false);
-    if (ringRef.current) {
-      ringRef.current.style.transition = 'stroke-dashoffset 0.4s ease';
-      ringRef.current.style.strokeDashoffset = String(RING_CIRCUMFERENCE);
-    }
-    if (houseRef.current) {
-      houseRef.current.style.transition = 'stroke-dashoffset 0.4s ease';
-      houseRef.current.style.strokeDashoffset = '1';
-    }
-  };
-
-  const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    downPosRef.current = { x: e.clientX, y: e.clientY };
-    startHold();
-  };
-
-  const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
-    const down = downPosRef.current;
-    if (!holdingRef.current || down === null) return;
-    if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > HOLD_MAX_DRIFT_PX) cancelHold();
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key !== 'Enter' && e.key !== ' ') return;
-    e.preventDefault();
-    if (e.repeat) return;
-    startHold();
-  };
-
-  const handleKeyUp = (e: React.KeyboardEvent) => {
-    if (e.key !== 'Enter' && e.key !== ' ') return;
-    cancelHold();
-  };
-
-  const holdSize = isMobile ? 148 : 160;
 
   return (
     <section ref={ref} data-bg="dark" style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}>
@@ -441,7 +196,7 @@ export default function AboutSovran() {
             marginBottom: '20px',
           }}
         >
-          About Sovran
+          The Studio
         </motion.p>
 
         <motion.h2
@@ -477,6 +232,7 @@ export default function AboutSovran() {
           {ABOUT_STATEMENT}
         </motion.p>
 
+        {/* The pillars are the section's last element; the section's own bottom padding closes it. */}
         {isMobile ? (
           <div
             ref={trackRef}
@@ -513,144 +269,6 @@ export default function AboutSovran() {
             ))}
           </div>
         )}
-
-        <div style={{ marginTop: '72px', textAlign: 'center' }}>
-          <p
-            style={{
-              fontSize: '13px',
-              fontWeight: 500,
-              letterSpacing: '0.2em',
-              color: 'var(--sov-greige-light)',
-              textTransform: 'uppercase',
-              marginBottom: '20px',
-            }}
-          >
-            Our Track Record
-          </p>
-          <h3
-            style={{
-              fontSize: 'clamp(22px, 2.6vw, 30px)',
-              fontWeight: 900,
-              color: 'var(--sov-white)',
-              letterSpacing: '-0.005em',
-            }}
-          >
-            See The Numbers Behind Our Work.
-          </h3>
-
-          <AnimatePresence mode="wait" initial={false}>
-            {statsRevealed ? (
-              <motion.div
-                key="stats"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <StatsBlock isMobile={isMobile} active={statsRevealed} />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="hold"
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.5 }}
-                style={{ overflow: 'hidden' }}
-              >
-                {/* Fixed-height slot: both messages are always laid out and only cross-fade, so
-                    the control below never shifts while holding. */}
-                <div
-                  aria-live="polite"
-                  style={{ position: 'relative', width: '100%', height: '52px', margin: '18px 0 22px' }}
-                >
-                  <span style={{ ...holdTextStyle, opacity: isHolding ? 0 : 1 }}>
-                    {isMobile ? 'Tap and hold to reveal our numbers' : 'Click and hold to reveal our numbers'}
-                  </span>
-                  <span style={{ ...holdTextStyle, opacity: isHolding ? 1 : 0 }}>Keep holding...</span>
-                </div>
-
-                <button
-                  type="button"
-                  aria-label="Press and hold to reveal our numbers"
-                  className="sov-hold-btn"
-                  onPointerDown={handlePointerDown}
-                  onPointerMove={handlePointerMove}
-                  onPointerUp={cancelHold}
-                  onPointerCancel={cancelHold}
-                  onLostPointerCapture={cancelHold}
-                  onKeyDown={handleKeyDown}
-                  onKeyUp={handleKeyUp}
-                  onContextMenu={(e) => e.preventDefault()}
-                  style={{
-                    width: `${holdSize}px`,
-                    height: `${holdSize}px`,
-                    borderRadius: '50%',
-                    position: 'relative',
-                    display: 'grid',
-                    placeItems: 'center',
-                    padding: 0,
-                    margin: '0 auto',
-                    backgroundColor: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(194,178,160,0.35)',
-                    cursor: 'pointer',
-                    color: '#C2B2A0',
-                    touchAction: 'none',
-                    userSelect: 'none',
-                    WebkitUserSelect: 'none',
-                    WebkitTouchCallout: 'none',
-                    WebkitTapHighlightColor: 'transparent',
-                    outline: 'none',
-                  }}
-                >
-                  <span
-                    className={isHolding ? undefined : 'sov-beat'}
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      borderRadius: '50%',
-                      border: '1px solid rgba(194,178,160,0.5)',
-                      pointerEvents: 'none',
-                      ...(isHolding ? { opacity: 0 } : {}),
-                    }}
-                  />
-                  <svg
-                    viewBox="0 0 148 148"
-                    aria-hidden="true"
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      width: '100%',
-                      height: '100%',
-                      transform: 'rotate(-90deg)',
-                      pointerEvents: 'none',
-                    }}
-                  >
-                    <circle
-                      ref={ringRef}
-                      cx="74"
-                      cy="74"
-                      r="72"
-                      fill="none"
-                      stroke="#C2B2A0"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeDasharray={RING_CIRCUMFERENCE}
-                      strokeDashoffset={RING_CIRCUMFERENCE}
-                    />
-                  </svg>
-                  <span
-                    style={{
-                      display: 'grid',
-                      placeItems: 'center',
-                      transform: isHolding ? 'scale(1.05)' : 'scale(1)',
-                      transition: 'transform 0.3s ease',
-                    }}
-                  >
-                    <HouseMark size={78} drawRef={houseRef} holding={isHolding} />
-                  </span>
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
       </div>
     </section>
   );

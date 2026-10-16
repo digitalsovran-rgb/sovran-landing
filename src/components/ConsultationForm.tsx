@@ -35,7 +35,7 @@ const screenHeadings: Record<Screen, string> = {
   invest: "I'm prepared to invest in a space that feels truly mine.",
   start: "I'm ready to start creating my new home.",
   loading: 'Checking Our Availability',
-  result: 'Good News: Your Architecture Package Is Available.',
+  result: 'Good News: Your Design Package Is Available.',
   contact: 'Enter your details and we will call you shortly.',
 };
 
@@ -714,7 +714,7 @@ export default function ConsultationForm() {
         return {
           back: () => goTo('invest', -1),
           primary: {
-            label: 'Request My Architecture Package',
+            label: 'Request My Design Package',
             onClick: () => goTo('loading', 1),
             disabled: selectedTimeline === '',
           },
@@ -728,7 +728,7 @@ export default function ConsultationForm() {
         return {
           back: () => goTo('result', -1),
           primary: {
-            label: submitting ? 'Submitting…' : 'Request My Architecture Design',
+            label: submitting ? 'Submitting…' : 'Request My Home Design',
             onClick: handleSubmit,
             disabled: !emailValid || !phoneValid || formData.email.trim() === '' || submitting,
             grow: true,
@@ -785,7 +785,7 @@ export default function ConsultationForm() {
             marginBottom: 0,
           }}
         >
-          Get My Architecture Package.
+          Get My Design Package.
         </h2>
         <p
           style={{
@@ -797,7 +797,20 @@ export default function ConsultationForm() {
             fontWeight: 400,
           }}
         >
-          The first step to your dream home.
+          The first step to your new home.
+        </p>
+        <p
+          style={{
+            fontSize: '12px',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: '#6B655C',
+            opacity: 0.85,
+            textAlign: 'center',
+            margin: '10px 0 0',
+          }}
+        >
+          Rated 4.9 on Google.
         </p>
 
         <div
@@ -1061,7 +1074,7 @@ export default function ConsultationForm() {
                           letterSpacing: 'normal',
                         }}
                       >
-                        Checking availability for your architecture package...
+                        Checking availability for your design package...
                       </p>
                     </div>
                   )}
@@ -1078,8 +1091,8 @@ export default function ConsultationForm() {
                           letterSpacing: 'normal',
                         }}
                       >
-                        One of our team will be in touch to begin your architecture package, with floor plans, 3D
-                        visuals and a full proposal built around your home.
+                        One of our team will be in touch to begin your design package, with floor plans, 3D
+                        visuals, a mood board and a full proposal built around your home.
                       </p>
                       <TextInput
                         label="Name"

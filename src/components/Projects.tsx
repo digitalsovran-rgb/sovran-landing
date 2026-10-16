@@ -416,6 +416,19 @@ export default function Projects() {
       style={{ backgroundColor: '#0A0A0A', overflow: 'hidden', padding: isMobile ? '72px 0' : '100px 0' }}
     >
       <div className="inner">
+        <p
+          style={{
+            textTransform: 'uppercase',
+            fontSize: '12px',
+            letterSpacing: '0.2em',
+            fontWeight: 600,
+            color: '#C2B2A0',
+            textAlign: 'center',
+            margin: '0 0 14px',
+          }}
+        >
+          Selected Projects
+        </p>
         <motion.h2
           className="sov-h2-lg"
           initial={{ opacity: 0, y: 40 }}
@@ -425,16 +438,30 @@ export default function Projects() {
           style={{
             color: '#FFFFFF',
             textAlign: 'center',
-            margin: '0 0 24px',
+            margin: 0,
             fontFamily: 'Inter, sans-serif',
           }}
         >
-          Our Architectural Work.
+          Homes We Have Shaped.
         </motion.h2>
+        <p
+          lang="en-GB"
+          style={{
+            color: 'rgba(255,255,255,0.72)',
+            fontSize: isMobile ? 15 : 17,
+            lineHeight: 1.6,
+            maxWidth: 620,
+            margin: '16px auto 0',
+            textAlign: 'center',
+          }}
+        >
+          A few of the more than 1,000 projects we have designed and built across London and the Home Counties.
+        </p>
         <div
           style={{
             height: '1px',
             backgroundColor: 'rgba(255,255,255,0.15)',
+            marginTop: '24px',
             marginBottom: isMobile ? '36px' : '48px',
           }}
         />

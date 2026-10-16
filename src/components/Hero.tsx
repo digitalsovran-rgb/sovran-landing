@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 // Hero body copy, shown in full on desktop and mobile.
 const HERO_BODY =
-  'For London homeowners planning a new build, extension, renovation or basement. See your floor plans, 3D walkthroughs and a full proposal shaped around how you live, then build knowing exactly what you will get.';
+  'Floor plans, 3D visuals, a mood board and a full proposal for your new build, extension, renovation or basement, included when Sovran builds it with you.';
 
 // Fixed logo geometry. The image is 800 by 222, so its rendered height follows from its width.
 const LOGO_TOP = 24;
@@ -428,7 +428,7 @@ export default function Hero() {
               fontFamily: 'Inter, sans-serif',
             }}
           >
-            Walk Through Your Home Before You Build It.
+            Your Home, Designed Before It Is Built.
           </motion.h1>
 
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', width: '100%' }}>
@@ -496,7 +496,7 @@ export default function Hero() {
                 transition: 'transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease',
               }}
             >
-              Get My Architecture Design
+              Get My Design Package
             </button>
           </motion.div>
           </div>
