@@ -1,13 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import MoreHint from './MoreHint';
-import PeekText from './PeekText';
 
-// Hero body copy. Desktop shows both parts; mobile shows the first and reveals the second.
-const HERO_P1 =
-  'The homes people never forget start with a drawing. Architecture decides how daylight crosses a room, how one space opens into the next, and how it feels to walk through your own front door.';
-const HERO_P2 =
-  'It is the refined decision behind every home worth remembering. That is why Sovran is offering a complimentary architectural package with every build: so your home feels like yours from the very first drawing.';
+// Hero body copy, shown in full on desktop and mobile.
+const HERO_BODY =
+  'For London homeowners planning a new build, extension, renovation or basement. See your floor plans, 3D walkthroughs and a full proposal shaped around how you live, then build knowing exactly what you will get.';
 
 // Fixed logo geometry. The image is 800 by 222, so its rendered height follows from its width.
 const LOGO_TOP = 24;
@@ -15,19 +11,17 @@ const LOGO_RATIO = 222 / 800;
 // The hero content must start at least this far below the logo's bottom edge.
 const LOGO_CLEARANCE = 48;
 
-// Mobile paragraph look without its margin, shared by the first paragraph and the faded
-// continuation below it.
-const mobileParaBaseStyle: React.CSSProperties = {
+// Mobile paragraph look. On phones the hero-desc class in the style block sets the actual size.
+const mobileParaStyle: React.CSSProperties = {
   fontSize: '17.6px',
   fontWeight: 400,
   color: 'rgba(255,255,255,0.92)',
   maxWidth: '560px',
+  margin: '40px auto 0',
   lineHeight: 1.75,
   letterSpacing: 'normal',
   textShadow: '0 2px 8px rgba(0,0,0,0.5)',
 };
-
-const mobileParaStyle: React.CSSProperties = { ...mobileParaBaseStyle, margin: '40px auto 0' };
 
 const desktopVideos = ['/media/vidher1.mp4', '/media/vidher2.mp4', '/media/vidher3.mp4'];
 const desktopPosters = ['/media/vidher1-poster.webp', '/media/vidher2-poster.webp', '/media/vidher3-poster.webp'];
@@ -61,8 +55,6 @@ export default function Hero() {
   const [failed, setFailed] = useState(false);
   const [ctaHovered, setCtaHovered] = useState(false);
   const [skipVideo] = useState(shouldSkipVideo);
-  const [heroMore, setHeroMore] = useState(false);
-  const [heroSeen, setHeroSeen] = useState(false);
 
   const logoWidth = isMobile ? 120 : 150;
   const logoBottom = LOGO_TOP + logoWidth * LOGO_RATIO;
@@ -242,13 +234,10 @@ export default function Hero() {
           min-height: 100vh;
           min-height: 100svh !important;
         }
-        @media (min-width: 768px) {
-          .hero-more-mobile { display: none !important; }
-        }
         @media (max-width: 767px) {
           .hero-h1 { font-size: clamp(30px, 8.4vw, 41px) !important; font-weight: 900 !important; }
-          .hero-label { font-size: 10px !important; margin-bottom: 24px !important; font-weight: 600 !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
-          .hero-desc { font-size: 13.5px !important; line-height: 1.6 !important; font-weight: 500 !important; text-shadow: 0 2px 8px rgba(0,0,0,0.5) !important; }
+          .hero-label { font-size: 11px !important; letter-spacing: 0.16em !important; line-height: 1.5 !important; margin-bottom: 24px !important; font-weight: 600 !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
+          .hero-desc { font-size: 15px !important; line-height: 1.65 !important; font-weight: 500 !important; text-shadow: 0 2px 8px rgba(0,0,0,0.5) !important; }
           .hero-desc-desktop { display: none !important; }
           .hero-desc-mobile { display: block !important; }
           .hero-cta-wrap { width: calc(100% + 16px) !important; margin-left: -8px !important; margin-right: -8px !important; }
@@ -419,7 +408,7 @@ export default function Hero() {
                 marginBottom: '40px',
               }}
             >
-              Complimentary Architectural Package
+              Complimentary With Every Construction Project
             </motion.p>
           </div>
 
@@ -439,7 +428,7 @@ export default function Hero() {
               fontFamily: 'Inter, sans-serif',
             }}
           >
-            Innovative Architecture Design For Your Home.
+            Walk Through Your Home Before You Build It.
           </motion.h1>
 
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', width: '100%' }}>
@@ -459,7 +448,7 @@ export default function Hero() {
               textShadow: '0 2px 8px rgba(0,0,0,0.5)',
             }}
           >
-            {HERO_P1} {HERO_P2}
+            {HERO_BODY}
           </p>
 
           {/* Not Framer Motion-animated (unlike its siblings): this paragraph is the confirmed
@@ -469,37 +458,8 @@ export default function Hero() {
             lang="en-GB"
             style={mobileParaStyle}
           >
-            {HERO_P1}
+            {HERO_BODY}
           </p>
-
-          {/* Mobile only: the rest of the copy shows as a faded two line preview and opens with
-              the arrow. Hidden on desktop, which already shows the full text above. */}
-          <div className="hero-more-mobile">
-            <PeekText
-              id="hero-more"
-              open={heroMore}
-              lines={2}
-              marginTop={8}
-              className="hero-desc sov-justify sov-justify-l sov-nohyph"
-              lang="en-GB"
-              style={mobileParaBaseStyle}
-            >
-              {HERO_P2}
-            </PeekText>
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 0 }}>
-              <MoreHint
-                variant="chevron"
-                expanded={heroMore}
-                onToggle={() => {
-                  setHeroMore((v) => !v);
-                  setHeroSeen(true);
-                }}
-                controlsId="hero-more"
-                label="Keep reading"
-                pulse={!heroSeen}
-              />
-            </div>
-          </div>
 
           <motion.div
             className="hero-cta-wrap"

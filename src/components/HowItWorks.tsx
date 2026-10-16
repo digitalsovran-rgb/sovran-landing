@@ -1,49 +1,47 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import { FileSearch, PenTool, Video, ClipboardCheck, HardHat } from 'lucide-react';
-import PulseRing from './PulseRing';
-import HandHint from './HandHint';
 
 const rows = [
   {
     num: '01',
     icon: FileSearch,
-    label: 'Brief Assessment',
+    label: 'Brief',
     image: '/media/sites.webp',
     imageLeft: true,
-    desc: 'Whether you are building a new home, extending or renovating, your plan is shaped around your goals and ambitions. If a site survey is needed, it comes as part of your package. Your project manager will walk you through the arrangements according to your location.',
+    desc: 'We shape the plan around your goals. If a site survey is needed, it comes with your package.',
   },
   {
     num: '02',
     icon: PenTool,
-    label: 'Architectural Drawings',
+    label: 'Drawings',
     image: '/media/archdraw.webp',
     imageLeft: false,
-    desc: 'This is where our commitment to design shows most. You receive floor plans developed around your brief and your property, already prepared for the energy standards arriving in 2027, so what is drawn today stands up tomorrow.',
+    desc: 'Floor plans built around you, already prepared for the 2027 energy standards.',
   },
   {
     num: '03',
     icon: Video,
-    label: '3D Render & Walkthrough',
+    label: 'Walkthrough',
     image: '/media/renderw.webp?v=2',
     imageLeft: true,
-    desc: 'Walk through your new home with our experts and live in it before it exists. Adjust any specification, ask for our advice, and let the renders show you what your home is about to become.',
+    desc: 'Walk through your home in 3D and adjust anything you like.',
   },
   {
     num: '04',
     icon: ClipboardCheck,
-    label: 'Planning Assessment',
+    label: 'Planning',
     image: '/media/plann.webp',
     imageLeft: false,
-    desc: 'A seamless process in which we prepare and manage the documentation and the application, so everything is in place when you are ready to build with us. We stay current with upcoming changes to permissions and regulations that could affect the performance standards your home must meet.',
+    desc: 'We prepare and manage your application, so you are ready to build with us.',
   },
   {
     num: '05',
     icon: HardHat,
-    label: 'Start Building',
+    label: 'Build',
     image: '/media/startb.webp',
     imageLeft: true,
-    desc: 'With everything in place, our construction team begins, led by a dedicated project manager who works from the same specification as the team that designed your home. As a design and build company, there are no extra contracts and no teams for you to manage. From the first day to the day you step inside, it feels easy.',
+    desc: 'One project manager and one team take you from the first day to moving in.',
   },
 ];
 
@@ -54,37 +52,9 @@ function Row({ row, i, isMobile }: { row: (typeof rows)[0]; i: number; isMobile:
   // everything stuck at opacity 0.
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px -100px 0px', amount: 0.2 });
-  const [open, setOpen] = useState(false);
-  const [opened, setOpened] = useState(false);
   const Icon = row.icon;
   const imgFromX = row.imageLeft ? -50 : 50;
   const textFromX = row.imageLeft ? 50 : -50;
-  const descId = `hiw-desc-${row.num}`;
-
-  // Mobile only, first row only: one tap-hint hand over the icon, a second after the header
-  // scrolls into view, unless the row has been opened by then.
-  const [handHint, setHandHint] = useState<'idle' | 'show' | 'done'>('idle');
-  const headerRef = useRef<HTMLButtonElement>(null);
-  const headerInView = useInView(headerRef, { once: true, amount: 0.8 });
-  const isHintRow = i === 0 && isMobile;
-
-  useEffect(() => {
-    if (!isHintRow || !headerInView) return;
-    const timer = window.setTimeout(() => setHandHint((h) => (h === 'idle' ? 'show' : h)), 1000);
-    return () => window.clearTimeout(timer);
-  }, [isHintRow, headerInView]);
-
-  useEffect(() => {
-    if (handHint !== 'show') return;
-    const timer = window.setTimeout(() => setHandHint('done'), 3400);
-    return () => window.clearTimeout(timer);
-  }, [handHint]);
-
-  const toggle = () => {
-    setOpen((o) => !o);
-    setOpened(true);
-    setHandHint('done');
-  };
 
   return (
     <div
@@ -158,31 +128,8 @@ function Row({ row, i, isMobile }: { row: (typeof rows)[0]; i: number; isMobile:
       >
         {isMobile ? (
           <div style={{ width: '100%' }}>
-            <button
-              ref={headerRef}
-              type="button"
-              onClick={toggle}
-              aria-expanded={open}
-              aria-controls={descId}
-              style={{
-                background: 'none',
-                border: 'none',
-                width: '100%',
-                textAlign: 'left',
-                padding: 0,
-                minHeight: '56px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-                cursor: 'pointer',
-              }}
-            >
-              <span style={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>
-                <PulseRing size={56} tone="light" pulse={!opened} delay={i * 0.3}>
-                  <Icon size={28} color="#4A443C" strokeWidth={1.75} />
-                </PulseRing>
-                {i === 0 && <HandHint show={handHint === 'show'} tone="light" />}
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginTop: '4px' }}>
+              <Icon size={28} color="#4A443C" strokeWidth={1.75} style={{ flexShrink: 0 }} />
               <span
                 style={{
                   fontSize: '18px',
@@ -194,35 +141,19 @@ function Row({ row, i, isMobile }: { row: (typeof rows)[0]; i: number; isMobile:
               >
                 {row.label}
               </span>
-            </button>
-            <AnimatePresence initial={false}>
-              {open && (
-                <motion.div
-                  id={descId}
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.35, ease: 'easeInOut' }}
-                  style={{ overflow: 'hidden' }}
-                >
-                  <p
-                    className="sov-justify"
-                    lang="en-GB"
-                    style={{
-                      fontSize: '14px',
-                      fontWeight: 400,
-                      color: 'var(--sov-grey)',
-                      lineHeight: 1.65,
-                      letterSpacing: 'normal',
-                      maxWidth: '450px',
-                      paddingTop: '14px',
-                    }}
-                  >
-                    {row.desc}
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            </div>
+            <p
+              lang="en-GB"
+              style={{
+                margin: '10px 0 0',
+                fontSize: '15px',
+                lineHeight: 1.6,
+                color: '#6B655C',
+                textAlign: 'left',
+              }}
+            >
+              {row.desc}
+            </p>
           </div>
         ) : (
           <div>
@@ -241,15 +172,15 @@ function Row({ row, i, isMobile }: { row: (typeof rows)[0]; i: number; isMobile:
               </span>
             </div>
             <p
-              className="sov-justify"
               lang="en-GB"
               style={{
-                fontSize: '14px',
+                fontSize: '17px',
                 fontWeight: 400,
                 color: 'var(--sov-grey)',
-                lineHeight: 1.65,
+                lineHeight: 1.6,
                 letterSpacing: 'normal',
                 maxWidth: '450px',
+                textAlign: 'left',
               }}
             >
               {row.desc}
@@ -302,7 +233,7 @@ export default function HowItWorks() {
             color: '#0a0a0a',
           }}
         >
-          Start Your Architectural Journey.
+          Five Steps To Your Front Door.
         </motion.h2>
       </div>
 

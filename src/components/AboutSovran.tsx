@@ -1,49 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Compass, ShieldCheck, Users } from 'lucide-react';
+import { Compass, ShieldCheck, Users } from 'lucide-react';
 import HouseMark from './HouseMark';
-import MoreHint from './MoreHint';
-import PeekText from './PeekText';
 
-// Main paragraph. The first sentence is always shown; the rest opens with the "keep reading" hint.
-const ABOUT_1 =
-  'Our evolved approach to architecture creates places people remember, and our mission is to shape how you experience your home through every design decision.';
-const ABOUT_REST =
-  'A home deserves a design made only for it, and you are the one who will enjoy it for the rest of your life. For us, architecture is a commitment to perfection, and we carry that same standard into the studio. By managing design and construction as one team, we protect it at any level and at each stage of your project. That is our footprint: spatial harmony, at all times.';
-// Mobile splits the rest into two paragraphs. ABOUT_P2 + ' ' + ABOUT_P3 is exactly ABOUT_REST.
-const ABOUT_P2 =
-  'A home deserves a design made only for it, and you are the one who will enjoy it for the rest of your life. For us, architecture is a commitment to perfection, and we carry that same standard into the studio.';
-const ABOUT_P3 =
-  'By managing design and construction as one team, we protect it at any level and at each stage of your project. That is our footprint: spatial harmony, at all times.';
-
-// Main paragraph look without its margin, shared by the first sentence and the faded
-// continuation below it.
-const aboutParaBaseStyle: React.CSSProperties = {
-  fontSize: '16px',
-  fontWeight: 400,
-  color: 'var(--sov-white)',
-  lineHeight: 1.7,
-  letterSpacing: 'normal',
-  maxWidth: '650px',
-};
-
-const aboutParaStyle: React.CSSProperties = { ...aboutParaBaseStyle, margin: '20px auto 0' };
+// One statement under the heading, in place of the old long body copy.
+const ABOUT_STATEMENT =
+  'Architecture and construction work as one team, so the home you see in the walkthrough is the home you walk into.';
 
 const ethosCards = [
   {
     label: 'One Team',
     icon: Users,
-    desc: 'One project manager runs your build. They are your single point of contact: you ask them, they answer, and they plan and coordinate every trade on site, so you never have to chase anyone.',
+    desc: 'One project manager runs your build and is the only person you speak to.',
   },
   {
     label: 'Planning Expertise',
     icon: Compass,
-    desc: 'We know what a council needs to see. Our team includes former planning officers, so your application arrives prepared the way the council expects it, with the right documents in the right order, ready to be approved the first time.',
+    desc: 'Former planning officers on our team mean your application arrives prepared the way councils expect.',
   },
   {
     label: 'Protected Investment',
     icon: ShieldCheck,
-    desc: 'Your price is fixed before work begins. Airtight contracts and milestone payments protect your investment at each stage, and Sovran backs it with legal insurance.',
+    desc: 'A fixed price, milestone payments and legal insurance protect your investment at every stage.',
   },
 ];
 
@@ -57,9 +35,6 @@ const stats = [
 const EASE: [number, number, number, number] = [0.2, 0.7, 0.2, 1];
 const COUNT_UP_MS = 1500;
 const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
-
-// Height of one collapsed description line: 14px font at line-height 1.6.
-const LINE_PX = 14 * 1.6;
 
 // Press and hold control: how long the hold lasts and the circumference of its progress ring
 // (2 * PI * r with r = 72).
@@ -179,6 +154,7 @@ const descTextStyle: React.CSSProperties = {
   fontSize: '14px',
   lineHeight: 1.6,
   color: 'rgba(255,255,255,0.72)',
+  textAlign: 'left',
 };
 
 // Large faint copy of the icon in the panel corner, plus the ringed icon at the top left.
@@ -227,6 +203,7 @@ function PanelIcons({ icon: Icon, index }: { icon: EthosCard['icon']; index: num
   );
 }
 
+// Mobile pillar card in the horizontal swipe track. The full description is always shown.
 function MobilePanel({
   card,
   index,
@@ -236,37 +213,8 @@ function MobilePanel({
   index: number;
   trackInView: boolean;
 }) {
-  const [open, setOpen] = useState(false);
-  // The one-line clamp comes off as soon as the panel opens and goes back on only after the
-  // collapse animation has finished, so the text never jumps while the height is animating.
-  const [clamped, setClamped] = useState(true);
-  const [fullHeight, setFullHeight] = useState(LINE_PX);
-  const descRef = useRef<HTMLSpanElement>(null);
-  const descId = `about-pillar-${index}`;
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = () => {
-      if (descRef.current) setFullHeight(descRef.current.scrollHeight);
-    };
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
-  }, [open]);
-
-  const toggle = () => {
-    if (!open) {
-      if (descRef.current) setFullHeight(descRef.current.scrollHeight);
-      setClamped(false);
-    }
-    setOpen(!open);
-  };
-
   return (
-    <motion.button
-      type="button"
-      onClick={toggle}
-      aria-expanded={open}
-      aria-controls={descId}
+    <motion.article
       initial={{ opacity: 0, x: 60 }}
       animate={trackInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 60 }}
       transition={{ duration: 0.8, delay: index * 0.18, ease: EASE }}
@@ -276,84 +224,19 @@ function MobilePanel({
         flex: '0 0 auto',
         width: 'min(76vw, 320px)',
         scrollSnapAlign: 'start',
-        cursor: 'pointer',
-        font: 'inherit',
       }}
     >
       <PanelIcons icon={card.icon} index={index} />
-      <span style={{ ...titleStyle, display: 'block' }}>{card.label}</span>
-      <span style={{ ...ruleStyle, display: 'block' }} />
-
-      <motion.span
-        id={descId}
-        initial={false}
-        animate={{ height: open ? fullHeight : LINE_PX }}
-        transition={{ duration: 0.35, ease: 'easeInOut' }}
-        onAnimationComplete={() => {
-          if (!open) setClamped(true);
-        }}
-        style={{ position: 'relative', zIndex: 1, display: 'block', overflow: 'hidden' }}
-      >
-        <span
-          ref={descRef}
-          className="sov-justify"
-          lang="en-GB"
-          style={{
-            ...descTextStyle,
-            ...(clamped
-              ? {
-                  display: '-webkit-box',
-                  WebkitLineClamp: 1,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                }
-              : { display: 'block' }),
-          }}
-        >
-          {card.desc}
-        </span>
-      </motion.span>
-
-      <span
-        style={{
-          position: 'relative',
-          zIndex: 1,
-          marginTop: '16px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          fontSize: '11px',
-          textTransform: 'uppercase',
-          letterSpacing: '0.16em',
-          fontWeight: 600,
-          color: 'var(--sov-greige-light)',
-        }}
-      >
-        {open ? 'Less' : 'Read more'}
-        <motion.span
-          animate={{ rotate: open ? 180 : 0 }}
-          transition={{ duration: 0.3 }}
-          style={{ display: 'inline-flex' }}
-        >
-          <ChevronDown size={16} color="#C2B2A0" />
-        </motion.span>
-      </span>
-    </motion.button>
+      <h3 style={titleStyle}>{card.label}</h3>
+      <div style={ruleStyle} />
+      <p lang="en-GB" style={descTextStyle}>
+        {card.desc}
+      </p>
+    </motion.article>
   );
 }
 
-function DesktopPanel({
-  card,
-  index,
-  open,
-  onToggle,
-}: {
-  card: EthosCard;
-  index: number;
-  open: boolean;
-  onToggle: () => void;
-}) {
-  const descId = `about-pillar-${index}`;
+function DesktopPanel({ card, index }: { card: EthosCard; index: number }) {
   return (
     <motion.article
       initial={{ opacity: 0, y: 40 }}
@@ -365,28 +248,9 @@ function DesktopPanel({
       <PanelIcons icon={card.icon} index={index} />
       <h3 style={titleStyle}>{card.label}</h3>
       <div style={ruleStyle} />
-      <p
-        id={descId}
-        className="sov-justify"
-        lang="en-GB"
-        style={{
-          ...descTextStyle,
-          ...(open
-            ? {}
-            : { display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }),
-        }}
-      >
+      <p lang="en-GB" style={descTextStyle}>
         {card.desc}
       </p>
-      <div style={{ position: 'relative', zIndex: 1, marginTop: 8 }}>
-        <MoreHint
-          variant="plus"
-          expanded={open}
-          onToggle={onToggle}
-          controlsId={descId}
-          label="Show full description"
-        />
-      </div>
     </motion.article>
   );
 }
@@ -469,19 +333,6 @@ export default function AboutSovran() {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const [statsRevealed, setStatsRevealed] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
-  const [bodyMore, setBodyMore] = useState(false);
-  const [bodySeen, setBodySeen] = useState(false);
-  // Desktop only: which pillar descriptions are expanded past their three line preview.
-  const [pillarOpen, setPillarOpen] = useState<Set<number>>(() => new Set());
-
-  const togglePillar = (i: number) => {
-    setPillarOpen((prev) => {
-      const next = new Set(prev);
-      if (next.has(i)) next.delete(i);
-      else next.add(i);
-      return next;
-    });
-  };
 
   const ringRef = useRef<SVGCircleElement>(null);
   const houseRef = useRef<SVGGElement>(null);
@@ -607,79 +458,23 @@ export default function AboutSovran() {
         </motion.h2>
 
         <motion.p
-          className="sov-justify sov-justify-l sov-nohyph"
           lang="en-GB"
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
-          style={aboutParaStyle}
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: EASE }}
+          style={{
+            color: '#FFFFFF',
+            fontSize: 'clamp(18px, 2vw, 24px)',
+            fontWeight: 400,
+            lineHeight: 1.6,
+            maxWidth: '720px',
+            margin: '0 auto',
+            textAlign: 'center',
+          }}
         >
-          {ABOUT_1}
+          {ABOUT_STATEMENT}
         </motion.p>
-
-        {/* Centres the continuation under the first sentence (PeekText forces margin 0 on its
-            paragraph, so the paragraph's own auto margins cannot do it). */}
-        <div style={{ maxWidth: aboutParaBaseStyle.maxWidth, margin: '0 auto' }}>
-          {isMobile ? (
-            <>
-              {/* Mobile: paragraph two peeks, paragraph three follows once it is opened. */}
-              <PeekText
-                id="about-more"
-                open={bodyMore}
-                lines={2}
-                marginTop={12}
-                className="sov-justify sov-justify-l sov-nohyph"
-                lang="en-GB"
-                style={aboutParaBaseStyle}
-              >
-                {ABOUT_P2}
-              </PeekText>
-              <AnimatePresence initial={false}>
-                {bodyMore && (
-                  <motion.p
-                    key="about-more-3"
-                    id="about-more-3"
-                    className="sov-justify sov-justify-l sov-nohyph"
-                    lang="en-GB"
-                    style={{ ...aboutParaBaseStyle, margin: 0, overflow: 'hidden' }}
-                    initial={{ height: 0, opacity: 0, marginTop: 0 }}
-                    animate={{ height: 'auto', opacity: 1, marginTop: 12 }}
-                    exit={{ height: 0, opacity: 0, marginTop: 0 }}
-                    transition={{ duration: 0.45, delay: 0.12, ease: EASE }}
-                  >
-                    {ABOUT_P3}
-                  </motion.p>
-                )}
-              </AnimatePresence>
-            </>
-          ) : (
-            <PeekText
-              id="about-more"
-              open={bodyMore}
-              lines={2}
-              marginTop={12}
-              className="sov-justify sov-justify-l sov-nohyph"
-              lang="en-GB"
-              style={aboutParaBaseStyle}
-            >
-              {ABOUT_REST}
-            </PeekText>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 0 }}>
-          <MoreHint
-            variant="rule"
-            expanded={bodyMore}
-            onToggle={() => {
-              setBodyMore((v) => !v);
-              setBodySeen(true);
-            }}
-            controlsId={isMobile ? 'about-more about-more-3' : 'about-more'}
-            label="Keep reading"
-            pulse={!bodySeen}
-          />
-        </div>
 
         {isMobile ? (
           <div
@@ -688,7 +483,7 @@ export default function AboutSovran() {
             style={{
               display: 'flex',
               gap: '14px',
-              alignItems: 'flex-start',
+              alignItems: 'stretch',
               overflowX: 'auto',
               scrollSnapType: 'x mandatory',
               scrollPaddingLeft: '24px',
@@ -709,17 +504,11 @@ export default function AboutSovran() {
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
               gap: '24px',
-              alignItems: 'start',
+              alignItems: 'stretch',
             }}
           >
             {ethosCards.map((card, i) => (
-              <DesktopPanel
-                key={card.label}
-                card={card}
-                index={i}
-                open={pillarOpen.has(i)}
-                onToggle={() => togglePillar(i)}
-              />
+              <DesktopPanel key={card.label} card={card} index={i} />
             ))}
           </div>
         )}

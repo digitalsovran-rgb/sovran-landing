@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Check, Minus } from 'lucide-react';
-import MoreHint from './MoreHint';
-
-// Intro copy. Desktop shows both parts together; mobile shows the first and reveals the second.
-const INTRO_1 = "We take pride in creating spaces that meet our clients' expectations and go beyond them.";
-const INTRO_2 =
-  "As an extension of that commitment, the architectural package is offered to clients who have chosen Sovran's design and build or construction service. Here is how to tell if yours is one of them.";
 
 type TabId = 'for' | 'not';
 
@@ -33,8 +27,6 @@ const EASE: [number, number, number, number] = [0.2, 0.7, 0.2, 1];
 export default function WhoFor() {
   const [tab, setTab] = useState<TabId>('for');
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
-  const [introMore, setIntroMore] = useState(false);
-  const [introSeen, setIntroSeen] = useState(false);
   const reduced = useReducedMotion();
   const tabRefs = useRef<Record<TabId, HTMLButtonElement | null>>({ for: null, not: null });
 
@@ -96,47 +88,9 @@ export default function WhoFor() {
       >
         Who This Is For.
       </h2>
-      {isMobile ? (
-        <>
-          <p className="sov-justify sov-justify-l sov-nohyph" lang="en-GB" style={introStyle}>
-            {INTRO_1}
-          </p>
-          <AnimatePresence initial={false}>
-            {introMore && (
-              <motion.p
-                key="who-intro-more"
-                id="who-intro-more"
-                className="sov-justify sov-justify-l sov-nohyph"
-                lang="en-GB"
-                style={{ ...introStyle, marginTop: '8px', overflow: 'hidden' }}
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.4, ease: EASE }}
-              >
-                {INTRO_2}
-              </motion.p>
-            )}
-          </AnimatePresence>
-          <div style={{ marginTop: 4, display: 'flex', justifyContent: 'center' }}>
-            <MoreHint
-              variant="dots"
-              expanded={introMore}
-              onToggle={() => {
-                setIntroMore((v) => !v);
-                setIntroSeen(true);
-              }}
-              controlsId="who-intro-more"
-              label="Keep reading"
-              pulse={!introSeen}
-            />
-          </div>
-        </>
-      ) : (
-        <p className="sov-justify" lang="en-GB" style={introStyle}>
-          {INTRO_1} {INTRO_2}
-        </p>
-      )}
+      <p lang="en-GB" style={{ ...introStyle, textAlign: isMobile ? 'center' : 'left' }}>
+        The architectural package comes with Sovran&apos;s design and build or construction service.
+      </p>
     </motion.div>
   );
 
