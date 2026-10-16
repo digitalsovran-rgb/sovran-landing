@@ -29,8 +29,8 @@ export default function App() {
       <HowItWorks />
       <Projects />
       <AboutSovran />
-      <Faq />
       <ConsultationForm />
+      <Faq />
       <Footer />
       <StickyOfferBar />
     </>

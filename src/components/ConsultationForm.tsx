@@ -11,7 +11,11 @@ type FormData = {
 
 type Screen = 'type' | 'invest' | 'start' | 'loading' | 'result' | 'contact';
 
-const projectTypeOptions = ['New Build', 'Home Extension', 'Home Renovation', 'Basements'];
+const projectTypeOptions = ['New Build', 'Home Extension', 'Home Renovation', 'Basements', 'Multiple Projects'];
+
+// Project types the Monday board has no label for: sent as "Other", with the real type
+// appended to the timeline text so it is not lost.
+const typesTaggedInTimeline = ['Basements', 'Multiple Projects'];
 
 const budgetOptions = ['£90K – £150K', '£150K – £500K', '£500K – £1M', '£1M+'];
 
@@ -45,6 +49,7 @@ const extensionTypeMap: Record<string, string> = {
   'Home Extension': 'Extension',
   'Home Renovation': 'Full Renovation',
   Basements: 'Other',
+  'Multiple Projects': 'Other',
 };
 
 // The server reads the first number and a trailing K from this text.
@@ -663,7 +668,9 @@ export default function ConsultationForm() {
       phone: formData.phone.length === 10 ? '0' + formData.phone : formData.phone,
       extension: extensionTypeMap[selectedType] ?? selectedType,
       budget: budgetMap[selectedBudget] ?? selectedBudget,
-      timeline: selectedType === 'Basements' ? `${selectedTimeline} | Project type: Basements` : selectedTimeline,
+      timeline: typesTaggedInTimeline.includes(selectedType)
+        ? `${selectedTimeline} | Project type: ${selectedType}`
+        : selectedTimeline,
     });
 
     setSubmitting(false);
@@ -970,14 +977,21 @@ export default function ConsultationForm() {
                           marginBottom: '40px',
                         }}
                       >
-                        {projectTypeOptions.map((opt) => (
-                          <SelectCard
-                            key={opt}
-                            label={opt}
-                            selected={selectedType === opt}
-                            onClick={() => setSelectedType(opt)}
-                          />
-                        ))}
+                        {projectTypeOptions.map((opt, i) => {
+                          // With an odd number of options in two columns, the last card spans
+                          // the full row instead of sitting alone in one column.
+                          const spansRow =
+                            projectTypeOptions.length % 2 === 1 && i === projectTypeOptions.length - 1;
+                          return (
+                            <div key={opt} style={spansRow ? { gridColumn: '1 / -1' } : undefined}>
+                              <SelectCard
+                                label={opt}
+                                selected={selectedType === opt}
+                                onClick={() => setSelectedType(opt)}
+                              />
+                            </div>
+                          );
+                        })}
                       </div>
                     ))}
 

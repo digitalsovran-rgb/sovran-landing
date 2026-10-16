@@ -428,7 +428,7 @@ export default function Hero() {
               fontFamily: 'Inter, sans-serif',
             }}
           >
-            Your Home, Designed Before It Is Built.
+            A Design Package For Your Next Project.
           </motion.h1>
 
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', width: '100%' }}>

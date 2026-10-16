@@ -9,13 +9,19 @@ const items = [
   { icon: FileText, title: 'Project Proposal', text: 'Scope, timeline and cost, set out in full.' },
 ];
 
-const FOR_YOU = [
-  'You are planning a new build, extension, renovation or basement',
-  'You own the property, or are close to completing on it',
-  'You want Sovran to design and build it',
+// Each qualifier row is plain text with one emphasised phrase: {before}<strong>{bold}</strong>{after}.
+type QualifierRow = { before: string; bold: string; after: string };
+
+const FOR_YOU: QualifierRow[] = [
+  { before: 'You are planning a ', bold: 'construction project', after: '' },
+  { before: 'You ', bold: 'own the property', after: ', or are close to completing' },
+  { before: 'You want Sovran to ', bold: 'design and build', after: ' it' },
 ];
 
-const NOT_FOR_YOU = ['You are looking for design only', 'You have no plans to build yet'];
+const NOT_FOR_YOU: QualifierRow[] = [
+  { before: 'You are looking for ', bold: 'design only', after: '' },
+  { before: 'You have ', bold: 'no plans to build', after: ' yet' },
+];
 
 const EASE: [number, number, number, number] = [0.2, 0.7, 0.2, 1];
 
@@ -29,12 +35,12 @@ const columnHeadingStyle: React.CSSProperties = {
 
 const rowBorder = '1px solid rgba(255,255,255,0.12)';
 
-function QualifierList({ rows, positive }: { rows: string[]; positive: boolean }) {
+function QualifierList({ rows, positive }: { rows: QualifierRow[]; positive: boolean }) {
   return (
     <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-      {rows.map((text, i) => (
+      {rows.map((row, i) => (
         <li
-          key={text}
+          key={row.bold}
           style={{
             display: 'flex',
             gap: '14px',
@@ -68,10 +74,12 @@ function QualifierList({ rows, positive }: { rows: string[]; positive: boolean }
               lineHeight: 1.55,
               margin: 0,
               textAlign: 'left',
-              color: positive ? '#FFFFFF' : 'rgba(255,255,255,0.72)',
+              color: 'rgba(255,255,255,0.72)',
             }}
           >
-            {text}
+            {row.before}
+            <strong style={{ fontWeight: 700, color: '#FFFFFF' }}>{row.bold}</strong>
+            {row.after}
           </p>
         </li>
       ))}

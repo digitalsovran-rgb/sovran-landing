@@ -427,7 +427,7 @@ export default function Projects() {
             margin: '0 0 14px',
           }}
         >
-          Selected Projects
+          Landmark Homes
         </p>
         <motion.h2
           className="sov-h2-lg"
@@ -442,7 +442,7 @@ export default function Projects() {
             fontFamily: 'Inter, sans-serif',
           }}
         >
-          Homes We Have Shaped.
+          Homes That Leave A Mark.
         </motion.h2>
         <p
           lang="en-GB"
@@ -455,7 +455,8 @@ export default function Projects() {
             textAlign: 'center',
           }}
         >
-          A few of the more than 1,000 projects we have designed and built across London and the Home Counties.
+          A handful of the more than 1,000 projects that carry the Sovran name, from London townhouses to country
+          estates across the UK, each one still telling the story of the people who live there.
         </p>
         <div
           style={{

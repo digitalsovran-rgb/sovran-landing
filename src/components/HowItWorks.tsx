@@ -6,10 +6,10 @@ const rows = [
   {
     num: '01',
     icon: PhoneCall,
-    label: 'Discovery Call',
+    label: 'First Conversation',
     image: '/media/sites.webp',
     imageLeft: true,
-    desc: 'We listen to your plans, your budget and how you want to live.',
+    desc: 'You share your plans, your budget and the way you want to live.',
   },
   {
     num: '02',
@@ -17,15 +17,15 @@ const rows = [
     label: 'Site Survey',
     image: '/media/archdraw.webp',
     imageLeft: false,
-    desc: 'We measure and assess your property, arranged as part of your package.',
+    desc: 'Your property is measured and understood, as part of your package.',
   },
   {
     num: '03',
     icon: PenTool,
-    label: 'Design',
+    label: 'Your Design',
     image: '/media/renderw.webp?v=2',
     imageLeft: true,
-    desc: 'Floor plans, 3D visuals and a mood board, refined with you.',
+    desc: 'You see your home in 3D and shape it until it feels right.',
   },
   {
     num: '04',
@@ -33,15 +33,15 @@ const rows = [
     label: 'Planning',
     image: '/media/plann.webp',
     imageLeft: false,
-    desc: 'We prepare and manage your application, with a 97% approval record.',
+    desc: 'Your application goes in prepared, with a 97% approval record behind it.',
   },
   {
     num: '05',
     icon: HardHat,
-    label: 'Construction',
+    label: 'Your Build',
     image: '/media/startb.webp',
     imageLeft: true,
-    desc: 'One project manager and one team, from the first day on site to handover.',
+    desc: 'One project manager, one team, and the home you approved taking shape.',
   },
 ];
 
@@ -220,7 +220,7 @@ export default function HowItWorks() {
             marginBottom: '20px',
           }}
         >
-          How We Work
+          From Idea To Home
         </motion.p>
 
         <motion.h2
@@ -233,7 +233,7 @@ export default function HowItWorks() {
             color: '#0a0a0a',
           }}
         >
-          Our Client Journey.
+          What Happens Next.
         </motion.h2>
       </div>
 
