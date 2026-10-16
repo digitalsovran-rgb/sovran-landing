@@ -5,7 +5,7 @@ import HouseMark from './HouseMark';
 
 // One statement under the heading, in place of the old long body copy.
 const ABOUT_STATEMENT =
-  'Architecture and construction work as one team, so the home you see in the walkthrough is the home you walk into.';
+  'Since 2011, the people who draw your home have sat at the same table as the people who build it. Nothing gets lost between the drawing and the door.';
 
 const ethosCards = [
   {
@@ -133,9 +133,9 @@ const titleStyle: React.CSSProperties = {
   zIndex: 1,
   marginTop: '24px',
   textTransform: 'uppercase',
-  fontSize: '15px',
+  fontSize: '13.5px',
   fontWeight: 700,
-  letterSpacing: '0.14em',
+  letterSpacing: '0.1em',
   color: 'var(--sov-white)',
 };
 
@@ -246,7 +246,7 @@ function DesktopPanel({ card, index }: { card: EthosCard; index: number }) {
       style={panelStyle}
     >
       <PanelIcons icon={card.icon} index={index} />
-      <h3 style={titleStyle}>{card.label}</h3>
+      <h3 style={{ ...titleStyle, whiteSpace: 'nowrap' }}>{card.label}</h3>
       <div style={ruleStyle} />
       <p lang="en-GB" style={descTextStyle}>
         {card.desc}
@@ -452,6 +452,7 @@ export default function AboutSovran() {
           style={{
             textAlign: 'center',
             color: 'var(--sov-white)',
+            marginBottom: 0,
           }}
         >
           Design And Build Studio.
@@ -469,7 +470,7 @@ export default function AboutSovran() {
             fontWeight: 400,
             lineHeight: 1.6,
             maxWidth: '720px',
-            margin: '0 auto',
+            margin: isMobile ? '20px auto 0' : '24px auto 0',
             textAlign: 'center',
           }}
         >

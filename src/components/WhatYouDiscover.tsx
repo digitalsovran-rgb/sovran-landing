@@ -51,7 +51,7 @@ export default function WhatYouDiscover() {
               marginBottom: '20px',
             }}
           >
-            What You Walk Away With
+            Your Architectural Package
           </motion.p>
 
           <motion.h2
@@ -62,10 +62,30 @@ export default function WhatYouDiscover() {
             style={{
               textAlign: 'center',
               color: 'var(--sov-white)',
+              marginBottom: 0,
             }}
           >
             Certainty, Before You Commit.
           </motion.h2>
+
+          <motion.p
+            lang="en-GB"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: EASE }}
+            style={{
+              color: 'rgba(255,255,255,0.78)',
+              fontSize: isMobile ? 15 : 17,
+              lineHeight: 1.7,
+              fontWeight: 400,
+              maxWidth: 600,
+              margin: '18px auto 0',
+              textAlign: 'center',
+            }}
+          >
+            Floor plans, 3D walkthroughs, a mood board and a full project proposal, all drawn around your
+            home. Here is what it gives you.
+          </motion.p>
         </div>
 
         <div
