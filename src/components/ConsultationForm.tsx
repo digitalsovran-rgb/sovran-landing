@@ -17,16 +17,16 @@ const projectTypeOptions = ['New Build', 'Home Extension', 'Home Renovation', 'B
 // appended to the timeline text so it is not lost.
 const typesTaggedInTimeline = ['Basements', 'Multiple Projects'];
 
-const budgetOptions = ['£90K – £150K', '£150K – £500K', '£500K – £1M', '£1M+'];
+const budgetOptions = ['£100K – £400K', '£400K – £1M', '£1M+'];
 
-const timelineOptions = ['Start ASAP', 'Within 1 Month', 'Within 3 Months'];
+const timelineOptions = ['ASAP', 'Within 1 Month', 'Within 3 Months'];
 
 const DEFAULT_TYPE = 'Home Extension';
-const DEFAULT_BUDGET = '£150K – £500K';
-const DEFAULT_TIMELINE = 'Start ASAP';
+const DEFAULT_BUDGET = '£100K – £400K';
+const DEFAULT_TIMELINE = 'ASAP';
 
 // Shown under an option's text as a second line. Display only: it is never part of a value.
-const budgetNotes: Record<string, string> = { '£90K – £150K': 'Minimum' };
+const budgetNotes: Record<string, string> = { '£100K – £400K': 'Minimum' };
 
 const progressMap: Partial<Record<Screen, string>> = {
   type: '33%',
@@ -36,10 +36,10 @@ const progressMap: Partial<Record<Screen, string>> = {
 
 const screenHeadings: Record<Screen, string> = {
   type: "I'm looking for:",
-  invest: "I'm prepared to invest in a space that feels truly mine.",
-  start: "I'm ready to start creating my new home.",
+  invest: 'My investment',
+  start: "I'm ready to hire.",
   loading: 'Checking Our Availability',
-  result: 'Good News: Your Design Package Is Available.',
+  result: 'Good News: Your Design Pack Is Available.',
   contact: 'Enter your details and we will call you shortly.',
 };
 
@@ -54,9 +54,8 @@ const extensionTypeMap: Record<string, string> = {
 
 // The server reads the first number and a trailing K from this text.
 const budgetMap: Record<string, string> = {
-  '£90K – £150K': '£90K',
-  '£150K – £500K': '£150K',
-  '£500K – £1M': '£500K',
+  '£100K – £400K': '£100K',
+  '£400K – £1M': '£400K',
   '£1M+': '£1000K',
 };
 
@@ -721,7 +720,7 @@ export default function ConsultationForm() {
         return {
           back: () => goTo('invest', -1),
           primary: {
-            label: 'Request My Design Package',
+            label: 'Request My Design Pack',
             onClick: () => goTo('loading', 1),
             disabled: selectedTimeline === '',
           },
@@ -792,7 +791,7 @@ export default function ConsultationForm() {
             marginBottom: 0,
           }}
         >
-          Get My Design Package.
+          Get My Design Pack.
         </h2>
         <p
           style={{
@@ -805,19 +804,6 @@ export default function ConsultationForm() {
           }}
         >
           The first step to your new home.
-        </p>
-        <p
-          style={{
-            fontSize: '12px',
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            color: '#6B655C',
-            opacity: 0.85,
-            textAlign: 'center',
-            margin: '10px 0 0',
-          }}
-        >
-          Rated 4.9 on Google.
         </p>
 
         <div
@@ -998,7 +984,6 @@ export default function ConsultationForm() {
                   {/* SCREEN 2: investment */}
                   {screen === 'invest' && (
                     <div style={{ marginBottom: '40px' }}>
-                      <p style={columnLabelStyle}>My investment</p>
                       {isMobile ? (
                         <WheelPicker
                           options={budgetOptions}
@@ -1010,7 +995,11 @@ export default function ConsultationForm() {
                       ) : (
                         <div
                           className="form-options-grid"
-                          style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: `repeat(${budgetOptions.length}, 1fr)`,
+                            gap: '12px',
+                          }}
                         >
                           {budgetOptions.map((opt) => (
                             <SelectCard
@@ -1040,7 +1029,11 @@ export default function ConsultationForm() {
                       ) : (
                         <div
                           className="form-options-grid"
-                          style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: `repeat(${timelineOptions.length}, 1fr)`,
+                            gap: '12px',
+                          }}
                         >
                           {timelineOptions.map((opt) => (
                             <SelectCard
@@ -1088,7 +1081,7 @@ export default function ConsultationForm() {
                           letterSpacing: 'normal',
                         }}
                       >
-                        Checking availability for your design package...
+                        Checking availability for your design pack...
                       </p>
                     </div>
                   )}
@@ -1105,7 +1098,7 @@ export default function ConsultationForm() {
                           letterSpacing: 'normal',
                         }}
                       >
-                        One of our team will be in touch to begin your design package, with floor plans, 3D
+                        One of our team will be in touch to begin your design pack, with floor plans, 3D
                         visuals, a mood board and a full proposal built around your home.
                       </p>
                       <TextInput

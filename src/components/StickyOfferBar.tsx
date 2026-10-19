@@ -99,7 +99,7 @@ export default function StickyOfferBar() {
               textShadow: '0 1px 2px rgba(74,68,60,0.85), 0 0 10px rgba(74,68,60,0.55)',
             }}
           >
-            Claim My Design Package
+            Claim My Design Pack
           </span>
           <span
             style={{

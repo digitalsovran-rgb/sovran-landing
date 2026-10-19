@@ -1,91 +1,31 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { LayoutGrid, Box, Palette, FileText, Check, Minus } from 'lucide-react';
+import { Compass, LayoutGrid, Box, Milestone } from 'lucide-react';
 
 const items = [
-  { icon: LayoutGrid, title: 'Floor Plans', text: 'Layouts drawn around how you live.' },
-  { icon: Box, title: '3D Visuals', text: 'See each room before work begins.' },
-  { icon: Palette, title: 'Mood Board', text: 'Materials, finishes and joinery, chosen together.' },
-  { icon: FileText, title: 'Project Proposal', text: 'Scope, timeline and cost, set out in full.' },
-];
-
-// Each qualifier row is plain text with one emphasised phrase: {before}<strong>{bold}</strong>{after}.
-type QualifierRow = { before: string; bold: string; after: string };
-
-const FOR_YOU: QualifierRow[] = [
-  { before: 'You are planning a ', bold: 'construction project', after: '' },
-  { before: 'You ', bold: 'own the property', after: ', or are close to completing' },
-  { before: 'You want Sovran to ', bold: 'design and build', after: ' it' },
-];
-
-const NOT_FOR_YOU: QualifierRow[] = [
-  { before: 'You are looking for ', bold: 'design only', after: '' },
-  { before: 'You have ', bold: 'no plans to build', after: ' yet' },
+  {
+    icon: Compass,
+    title: 'Know What Is Possible',
+    text: 'Learn early whether planning is likely to be approved, and what your property can allow.',
+  },
+  {
+    icon: LayoutGrid,
+    title: 'Choose Your Layout',
+    text: 'Compare layouts side by side, then choose or customise the one you want for your home.',
+  },
+  {
+    icon: Box,
+    title: 'See It Finished',
+    text: 'Immerse yourself in each space of your home in 3D, and adjust anything you like.',
+  },
+  {
+    icon: Milestone,
+    title: 'Move Forward With Confidence',
+    text: 'See the stages your project will go through and the investment each one involves.',
+  },
 ];
 
 const EASE: [number, number, number, number] = [0.2, 0.7, 0.2, 1];
-
-const columnHeadingStyle: React.CSSProperties = {
-  textTransform: 'uppercase',
-  fontSize: '12px',
-  letterSpacing: '0.2em',
-  fontWeight: 600,
-  margin: '0 0 16px',
-};
-
-const rowBorder = '1px solid rgba(255,255,255,0.12)';
-
-function QualifierList({ rows, positive }: { rows: QualifierRow[]; positive: boolean }) {
-  return (
-    <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-      {rows.map((row, i) => (
-        <li
-          key={row.bold}
-          style={{
-            display: 'flex',
-            gap: '14px',
-            alignItems: 'flex-start',
-            padding: '14px 0',
-            borderTop: rowBorder,
-            ...(i === rows.length - 1 ? { borderBottom: rowBorder } : {}),
-          }}
-        >
-          <span
-            style={{
-              width: '22px',
-              height: '22px',
-              borderRadius: '50%',
-              display: 'grid',
-              placeItems: 'center',
-              flex: '0 0 auto',
-              marginTop: '1px',
-              border: positive ? '1px solid #C2B2A0' : '1px solid rgba(255,255,255,0.35)',
-            }}
-          >
-            {positive ? (
-              <Check size={12} strokeWidth={1.8} color="#C2B2A0" />
-            ) : (
-              <Minus size={12} strokeWidth={1.8} color="rgba(255,255,255,0.6)" />
-            )}
-          </span>
-          <p
-            style={{
-              fontSize: '15px',
-              lineHeight: 1.55,
-              margin: 0,
-              textAlign: 'left',
-              color: 'rgba(255,255,255,0.72)',
-            }}
-          >
-            {row.before}
-            <strong style={{ fontWeight: 700, color: '#FFFFFF' }}>{row.bold}</strong>
-            {row.after}
-          </p>
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 export default function WhatYouDiscover() {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
@@ -117,18 +57,20 @@ export default function WhatYouDiscover() {
               marginBottom: '20px',
             }}
           >
-            The Design Package
+            Your Design Pack
           </p>
           <h2 className="sov-h2" style={{ color: '#FFFFFF', margin: 0 }}>
-            What Your Design Package Includes.
+            What Your Design Pack Helps You Decide.
           </h2>
         </motion.div>
 
+        {/* Cards in a row stretch to the same height, since titles may wrap on mobile. */}
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
             gap: isMobile ? '16px' : '24px',
+            alignItems: 'stretch',
           }}
         >
           {items.map((item, i) => {
@@ -141,6 +83,8 @@ export default function WhatYouDiscover() {
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.7, delay: i * 0.1, ease: EASE }}
                 style={{
+                  display: 'flex',
+                  flexDirection: 'column',
                   textAlign: 'center',
                   padding: isMobile ? '22px 12px' : '28px 18px',
                   border: '1px solid rgba(194,178,160,0.22)',
@@ -178,62 +122,6 @@ export default function WhatYouDiscover() {
             );
           })}
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: EASE }}
-          style={{
-            marginTop: isMobile ? '44px' : '56px',
-            maxWidth: '880px',
-            marginLeft: 'auto',
-            marginRight: 'auto',
-          }}
-        >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-              gap: isMobile ? '32px' : '48px',
-            }}
-          >
-            <div>
-              <p style={{ ...columnHeadingStyle, color: '#C2B2A0' }}>For you if</p>
-              <QualifierList rows={FOR_YOU} positive />
-            </div>
-            <div>
-              <p style={{ ...columnHeadingStyle, color: 'rgba(255,255,255,0.6)' }}>Not for you if</p>
-              <QualifierList rows={NOT_FOR_YOU} positive={false} />
-            </div>
-          </div>
-
-          <p
-            style={{
-              marginTop: '28px',
-              marginBottom: 0,
-              textAlign: 'center',
-              fontSize: '14px',
-              color: 'rgba(255,255,255,0.7)',
-            }}
-          >
-            Looking for design only?{' '}
-            <a
-              href="https://www.sovranstudio.co.uk/architecture"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                color: '#FFFFFF',
-                textDecoration: 'underline',
-                textDecorationColor: '#C2B2A0',
-                textUnderlineOffset: '3px',
-              }}
-            >
-              See our design services
-            </a>
-            .
-          </p>
-        </motion.div>
       </div>
     </section>
   );

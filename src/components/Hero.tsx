@@ -1,27 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { Check } from 'lucide-react';
 
-// Hero body copy, shown in full on desktop and mobile.
-const HERO_BODY =
-  'Floor plans, 3D visuals, a mood board and a full proposal for your new build, extension, renovation or basement, included when Sovran builds it with you.';
+// What the design pack contains, shown as a checklist under the headline.
+const HERO_CHECKLIST = ['Floor plans', '3D visuals', 'A mood board', 'A full project proposal'];
 
 // Fixed logo geometry. The image is 800 by 222, so its rendered height follows from its width.
 const LOGO_TOP = 24;
 const LOGO_RATIO = 222 / 800;
 // The hero content must start at least this far below the logo's bottom edge.
 const LOGO_CLEARANCE = 48;
-
-// Mobile paragraph look. On phones the hero-desc class in the style block sets the actual size.
-const mobileParaStyle: React.CSSProperties = {
-  fontSize: '17.6px',
-  fontWeight: 400,
-  color: 'rgba(255,255,255,0.92)',
-  maxWidth: '560px',
-  margin: '40px auto 0',
-  lineHeight: 1.75,
-  letterSpacing: 'normal',
-  textShadow: '0 2px 8px rgba(0,0,0,0.5)',
-};
 
 const desktopVideos = ['/media/vidher1.mp4', '/media/vidher2.mp4', '/media/vidher3.mp4'];
 const desktopPosters = ['/media/vidher1-poster.webp', '/media/vidher2-poster.webp', '/media/vidher3-poster.webp'];
@@ -225,7 +213,6 @@ export default function Hero() {
   return (
     <>
       <style>{`
-        .hero-desc-mobile { display: none; }
         /* Full-screen hero. There is deliberately no fixed height: tall content grows the section
            instead of overflowing upward over the logo. The !important on min-height beats the
            older mobile rule in index.css (#hero min-height: max(78vh, 480px) !important), which
@@ -236,10 +223,6 @@ export default function Hero() {
         }
         @media (max-width: 767px) {
           .hero-h1 { font-size: clamp(30px, 8.4vw, 41px) !important; font-weight: 900 !important; }
-          .hero-label { font-size: 11px !important; letter-spacing: 0.16em !important; line-height: 1.5 !important; margin-bottom: 24px !important; font-weight: 600 !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
-          .hero-desc { font-size: 15px !important; line-height: 1.65 !important; font-weight: 500 !important; text-shadow: 0 2px 8px rgba(0,0,0,0.5) !important; }
-          .hero-desc-desktop { display: none !important; }
-          .hero-desc-mobile { display: block !important; }
           .hero-cta-wrap { width: calc(100% + 16px) !important; margin-left: -8px !important; margin-right: -8px !important; }
           .hero-cta-btn {
             width: 100% !important;
@@ -393,25 +376,6 @@ export default function Hero() {
             alignItems: 'center',
           }}
         >
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', width: '100%' }}>
-            <motion.p
-              className="hero-label"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              style={{
-                fontSize: '12px',
-                fontWeight: 500,
-                letterSpacing: '0.2em',
-                color: 'var(--sov-greige-light)',
-                textTransform: 'uppercase',
-                marginBottom: '40px',
-              }}
-            >
-              Complimentary With Every Construction Project
-            </motion.p>
-          </div>
-
           <motion.h1
             className="hero-h1"
             initial={{ opacity: 0, y: 30 }}
@@ -428,37 +392,68 @@ export default function Hero() {
               fontFamily: 'Inter, sans-serif',
             }}
           >
-            A Design Package For Your Next Project.
+            A Complimentary Design Pack For Your Home.
           </motion.h1>
 
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', width: '100%' }}>
-          {/* Not Framer Motion-animated (unlike its siblings): this paragraph is the confirmed
-              LCP element on mobile, and animating it delays the final paint LCP measures. */}
+          {/* Not Framer Motion-animated (unlike its siblings): this checklist is the likely LCP
+              element on mobile, and animating it would delay the final paint LCP measures. */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: isMobile ? 22 : 28 }}>
+            <ul
+              style={{
+                listStyle: 'none',
+                margin: 0,
+                padding: 0,
+                display: 'grid',
+                gap: isMobile ? 10 : 12,
+                textAlign: 'left',
+              }}
+            >
+              {HERO_CHECKLIST.map((item) => (
+                <li
+                  key={item}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    color: '#FFFFFF',
+                    fontSize: isMobile ? 16 : 17,
+                    fontWeight: 500,
+                    lineHeight: 1.3,
+                    textShadow: '0 1px 3px rgba(0,0,0,0.5)',
+                  }}
+                >
+                  <span
+                    style={{
+                      flex: '0 0 auto',
+                      width: 26,
+                      height: 26,
+                      borderRadius: '50%',
+                      border: '1px solid rgba(194,178,160,0.65)',
+                      background: 'rgba(10,10,10,0.25)',
+                      display: 'grid',
+                      placeItems: 'center',
+                    }}
+                  >
+                    <Check size={15} strokeWidth={2} color="#C2B2A0" aria-hidden="true" />
+                  </span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+
           <p
-            className="hero-desc hero-desc-desktop sov-justify sov-justify-l sov-nohyph"
-            lang="en-GB"
             style={{
-              fontSize: '17px',
-              fontWeight: 400,
-              color: 'rgba(255,255,255,0.92)',
-              maxWidth: '800px',
-              margin: '40px auto 0',
-              lineHeight: 1.7,
-              letterSpacing: 'normal',
-              textShadow: '0 2px 8px rgba(0,0,0,0.5)',
+              textAlign: 'center',
+              margin: '20px 0 0',
+              fontSize: isMobile ? 12 : 12.5,
+              letterSpacing: '0.06em',
+              color: 'rgba(255,255,255,0.72)',
+              textShadow: '0 1px 3px rgba(0,0,0,0.5)',
             }}
           >
-            {HERO_BODY}
-          </p>
-
-          {/* Not Framer Motion-animated (unlike its siblings): this paragraph is the confirmed
-              LCP element on mobile, and animating it delays the final paint LCP measures. */}
-          <p
-            className="hero-desc hero-desc-mobile sov-justify sov-justify-l sov-nohyph"
-            lang="en-GB"
-            style={mobileParaStyle}
-          >
-            {HERO_BODY}
+            Included with every construction project over £100K.
           </p>
 
           <motion.div
@@ -466,7 +461,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.35 }}
-            style={{ marginTop: '40px' }}
+            style={{ marginTop: isMobile ? 24 : 28 }}
           >
             <button
               type="button"
@@ -496,7 +491,7 @@ export default function Hero() {
                 transition: 'transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease',
               }}
             >
-              Get My Design Package
+              Get My Design Pack
             </button>
           </motion.div>
           </div>

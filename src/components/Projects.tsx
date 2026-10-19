@@ -1,413 +1,119 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence, useInView, useReducedMotion } from 'framer-motion';
-import type { PanInfo } from 'framer-motion';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 
-// Public URL folder holding the project images (public/media).
-const URL_DIR = '/media';
-
+// Placeholder projects: three images each, shown in turn on the stage.
 const PROJECTS = [
   {
     title: 'New Build',
     location: 'Cobham, KT11',
     desc: 'A stone country house with an arched loggia, made for long summer evenings in the garden.',
-    img: `${URL_DIR}/country1.webp`,
-  },
-  {
-    title: 'Full Renovation',
-    location: 'Beaconsfield, HP9',
-    desc: 'A red brick Georgian house restored to full proportion, with a still pond along the approach.',
-    img: `${URL_DIR}/country2.webp`,
+    images: ['/media/country1.webp', '/media/country3.webp', '/media/country2.webp'],
   },
   {
     title: 'Townhouse Renovation',
     location: 'Chelsea, SW3',
     desc: 'A dark joinery kitchen with a marble island, opening onto the dining room and the light from the tall windows.',
-    img: `${URL_DIR}/centralone.webp`,
+    images: ['/media/centralone.webp', '/media/basement.webp', '/media/country1.webp'],
   },
   {
-    title: 'Basement Conversion',
-    location: 'Holland Park, W11',
-    desc: 'A pool and spa floor built below ground, with daylight reaching the water.',
-    img: `${URL_DIR}/basement.webp`,
-  },
-  {
-    title: 'New Build',
-    location: 'Virginia Water, GU25',
-    desc: 'A stone manor house that comes alive at dusk, with the pool and gardens framing the evening.',
-    img: `${URL_DIR}/country3.webp`,
+    title: 'Full Renovation',
+    location: 'Beaconsfield, HP9',
+    desc: 'A red brick Georgian house restored to full proportion, with a still pond along the approach.',
+    images: ['/media/country2.webp', '/media/country3.webp', '/media/centralone.webp'],
   },
 ];
 
+const SLIDE_MS = 3500;
 const EASE: [number, number, number, number] = [0.2, 0.7, 0.2, 1];
-const EXIT_EASE: [number, number, number, number] = [0.4, 0, 0.9, 0.4];
-const EXIT_MS = 650;
-const DEAL_DONE_MS = 3300;
-const AUTOPLAY_MS = 4500;
-const LAST_DEPTH = PROJECTS.length - 1;
-
-// How each card sits in the pile, by depth (0 is the top card).
-const POSE_ROTATE = [0, -3.5, 3, -5.5, 4.5];
-const POSE_X_MOBILE = [0, -8, 7, -12, 10];
-const POSE_X_DESKTOP = [0, -16, 14, -24, 20];
-const POSE_Y = [0, 5, 9, 13, 17];
-
-// Cards are dealt deepest first (k = 0) so the pile ends with the first project on top.
-const DEAL_DELAY = [0, 1.0, 1.6, 2.1, 2.5];
-const DEAL_DURATION = [1.1, 0.9, 0.8, 0.7, 0.6];
-
-const offscreen = () => (typeof window !== 'undefined' ? window.innerWidth * 1.1 : 1200);
-
-// Width of the details panel that opens beside the pile on desktop.
-const computePanelW = () => (typeof window !== 'undefined' ? Math.min(300, Math.max(240, window.innerWidth * 0.26)) : 280);
-
-// Gap between the pile and the details panel when it is open.
-const PANEL_GAP = 56;
-
-// Space kept clear at the bottom of the viewport for the sticky offer bar on mobile:
-// its 16px bottom offset + 56px mobile height + 20px breathing room.
-const STICKY_RESERVE = 92;
 
 export default function Projects() {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
-  const [panelW, setPanelW] = useState(computePanelW);
-  const [order, setOrder] = useState<number[]>(() => Array.from({ length: PROJECTS.length }, (_, i) => i));
-  const [exitingId, setExitingId] = useState<number | null>(null);
-  const [exitDir, setExitDir] = useState<-1 | 1>(1);
-  const [dealt, setDealt] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [p, setP] = useState(0);
+  const [i, setI] = useState(0);
+  const [reduced] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
 
-  const reduced = useReducedMotion();
-  const stackRef = useRef<HTMLDivElement>(null);
-  const captionRef = useRef<HTMLDivElement>(null);
-  const openRef = useRef(open);
-  const dealInView = useInView(stackRef, { amount: 0.35, once: true });
-  const liveInView = useInView(stackRef, { amount: 0.3 });
-  const cycleRef = useRef(0);
-  const exitTimerRef = useRef<number | null>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(wrapperRef, { amount: 0.3 });
+  const preloadedRef = useRef(false);
+  const downRef = useRef<{ x: number; y: number } | null>(null);
 
-  // Tap detection on the top card. A tap only counts if the pointer barely moved, was quick,
-  // no drag started, and it is not the tail end of a drag that just finished.
-  const downRef = useRef<{ x: number; y: number; t: number } | null>(null);
-  const movedRef = useRef(false);
-  const suppressUntilRef = useRef(0);
-
-  // With reduced motion there is no deal, so the pile counts as dealt from the start.
-  const isDealt = Boolean(reduced) || dealt;
+  const project = PROJECTS[p];
+  const imageCount = project.images.length;
 
   useEffect(() => {
-    const handler = () => {
-      setIsMobile(window.innerWidth < 768);
-      setPanelW(computePanelW());
-    };
+    const handler = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
 
+  // Fetch every project image once, the first time the showcase comes into view.
   useEffect(() => {
-    openRef.current = open;
-  }, [open]);
+    if (!inView || preloadedRef.current) return;
+    preloadedRef.current = true;
+    new Set(PROJECTS.flatMap((proj) => proj.images)).forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, [inView]);
 
-  useEffect(() => {
-    if (!dealInView || reduced) return;
-    const timer = window.setTimeout(() => setDealt(true), DEAL_DONE_MS);
-    return () => window.clearTimeout(timer);
-  }, [dealInView, reduced]);
-
-  useEffect(() => {
-    return () => {
-      if (exitTimerRef.current !== null) window.clearTimeout(exitTimerRef.current);
-    };
-  }, []);
-
-  const advance = (dir: -1 | 1) => {
-    setOpen(false);
-    if (exitingId !== null || !isDealt) return;
-    if (reduced) {
-      setOrder((prev) => [...prev.slice(1), prev[0]]);
-      return;
+  // Steps through the active project's images, then on to the next project.
+  const next = () => {
+    if (i < imageCount - 1) {
+      setI(i + 1);
+    } else {
+      setP((p + 1) % PROJECTS.length);
+      setI(0);
     }
-    setExitingId(order[0]);
-    setExitDir(dir);
-    exitTimerRef.current = window.setTimeout(() => {
-      setOrder((prev) => [...prev.slice(1), prev[0]]);
-      setExitingId(null);
-      exitTimerRef.current = null;
-    }, EXIT_MS);
   };
 
-  // Autoplay: the top card leaves every AUTOPLAY_MS while the pile is on screen and the
-  // caption is closed. The timer restarts from zero whenever any of these inputs change.
+  const prev = () => {
+    if (i > 0) {
+      setI(i - 1);
+    } else {
+      const before = (p + PROJECTS.length - 1) % PROJECTS.length;
+      setP(before);
+      setI(PROJECTS[before].images.length - 1);
+    }
+  };
+
+  // Autoplay only while the showcase is on screen. The timer restarts on every image change.
   useEffect(() => {
-    if (reduced || !isDealt || !liveInView || open || exitingId !== null) return;
-    const timer = window.setTimeout(() => {
-      advance(cycleRef.current++ % 2 === 0 ? -1 : 1);
-    }, AUTOPLAY_MS);
+    if (!inView || reduced) return;
+    const timer = window.setTimeout(next, SLIDE_MS);
     return () => window.clearTimeout(timer);
-    // advance reads the same state that is listed here
+    // next reads p and i, which are listed here
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [order, open, isDealt, liveInView, exitingId, reduced]);
+  }, [p, i, inView, reduced]);
 
-  const toggleCaption = () => {
-    if (!isDealt) return;
-    setOpen(!open);
-  };
-
-  // Mobile: once the caption has finished opening, scroll just enough to bring its bottom above
-  // the sticky offer bar, but never so far that the top of the pile leaves the screen.
-  const ensureCaptionVisible = () => {
-    const c = captionRef.current?.getBoundingClientRect();
-    const s = stackRef.current?.getBoundingClientRect();
-    if (!c || !s) return;
-    const limit = window.innerHeight - STICKY_RESERVE;
-    if (c.bottom <= limit) return;
-    const need = c.bottom - limit;
-    const room = Math.max(0, s.top - 24);
-    const amount = Math.min(need, room);
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (amount > 0) window.scrollBy({ top: amount, behavior: prefersReduced ? 'auto' : 'smooth' });
-  };
-
-  const handleDragEnd = (_: unknown, info: PanInfo) => {
-    suppressUntilRef.current = performance.now() + 400;
-    if (Math.abs(info.offset.x) > 90 || Math.abs(info.velocity.x) > 600) {
-      setOpen(false);
-      advance(info.offset.x < 0 ? -1 : 1);
-    }
+  const selectProject = (k: number) => {
+    setP(k);
+    setI(0);
+    (window as unknown as { dataLayer?: unknown[] }).dataLayer?.push({
+      event: 'project_select',
+      project: PROJECTS[k].title,
+    });
   };
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    downRef.current = { x: e.clientX, y: e.clientY, t: performance.now() };
-    movedRef.current = false;
+    downRef.current = { x: e.clientX, y: e.clientY };
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
-    const d = downRef.current;
+    const down = downRef.current;
     downRef.current = null;
-    if (d === null) return;
-    const dx = Math.abs(e.clientX - d.x);
-    const dy = Math.abs(e.clientY - d.y);
-    const now = performance.now();
-    const dt = now - d.t;
-    if (!movedRef.current && dx < 8 && dy < 8 && dt < 400 && now > suppressUntilRef.current) {
-      toggleCaption();
+    if (!down) return;
+    const dx = e.clientX - down.x;
+    const dy = e.clientY - down.y;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0) next();
+      else prev();
     }
   };
 
-  const poseFor = (depth: number) => ({
-    x: (isMobile ? POSE_X_MOBILE : POSE_X_DESKTOP)[depth],
-    y: POSE_Y[depth],
-    rotate: POSE_ROTATE[depth],
-    opacity: 1,
-    scale: 1,
-  });
-
-  const top = PROJECTS[order[0]];
-  const stackWidth = isMobile ? 'min(88vw, 460px)' : '100%';
-
-  const closeOnKey = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      setOpen(false);
-    }
-  };
-
-  // Caption text for the current top card, centred. Mobile shows it below the pile, desktop
-  // beside it.
-  const captionContent = (
-    <>
-      <p
-        style={{
-          textTransform: 'uppercase',
-          fontSize: '12px',
-          letterSpacing: '0.2em',
-          fontWeight: 500,
-          color: '#C2B2A0',
-          textAlign: 'center',
-        }}
-      >
-        {top.location}
-      </p>
-      <div style={{ width: '32px', height: '2px', backgroundColor: '#C2B2A0', margin: '14px auto' }} />
-      <h3
-        style={{
-          color: '#FFFFFF',
-          fontSize: isMobile ? '24px' : '30px',
-          fontWeight: 700,
-          lineHeight: 1.2,
-          letterSpacing: 'normal',
-          textAlign: 'center',
-        }}
-      >
-        {top.title}
-      </h3>
-      <p
-        style={{
-          marginTop: '10px',
-          fontSize: isMobile ? '15px' : '17px',
-          lineHeight: 1.6,
-          color: 'rgba(255,255,255,0.82)',
-          textAlign: 'center',
-        }}
-      >
-        {top.desc}
-      </p>
-    </>
-  );
-
-  // One permanent line of instruction above the pile. It nudges in from the right each time the
-  // top card changes.
-  const hintLine = (
-    <motion.div
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.6, delay: 0.4 }}
-      style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 14, minHeight: 18 }}
-    >
-      <motion.p
-        key={order[0]}
-        initial={{ x: reduced ? 0 : 10 }}
-        animate={{ x: 0 }}
-        transition={{ duration: 0.5, ease: EASE }}
-        aria-hidden="true"
-        style={{
-          margin: 0,
-          textAlign: 'right',
-          color: '#C2B2A0',
-          textTransform: 'uppercase',
-          fontSize: isMobile ? 11 : 12,
-          fontWeight: 600,
-          letterSpacing: '0.14em',
-          lineHeight: 1.4,
-          pointerEvents: 'none',
-        }}
-      >
-        {isMobile ? 'Swipe for more · Tap for details' : 'Drag for more · Click for details'}
-      </motion.p>
-    </motion.div>
-  );
-
-  const stack = (
-    <div
-      ref={stackRef}
-      role="region"
-      aria-roledescription="carousel"
-      aria-label="Our projects"
-      style={{
-        position: 'relative',
-        width: '100%',
-        aspectRatio: '4 / 3',
-        touchAction: 'pan-y',
-      }}
-    >
-      {PROJECTS.map((project, idx) => {
-        const depth = order.indexOf(idx);
-        const isTop = depth === 0;
-        const isExiting = exitingId === idx;
-        const k = LAST_DEPTH - depth;
-        const side = k % 2 === 0 ? -1 : 1;
-        const start = { x: side * offscreen(), y: 0, rotate: side * 20, opacity: 1, scale: 1 };
-        const pose = poseFor(depth);
-
-        let target;
-        let transition;
-        if (isExiting) {
-          target = { x: exitDir * offscreen(), y: 20, rotate: exitDir * 16, opacity: 1, scale: 1 };
-          transition = { duration: EXIT_MS / 1000, ease: EXIT_EASE };
-        } else if (reduced) {
-          target = pose;
-          transition = { duration: 0 };
-        } else if (!dealInView) {
-          target = start;
-          transition = { duration: 0 };
-        } else if (!dealt) {
-          target = pose;
-          transition = { delay: DEAL_DELAY[k], duration: DEAL_DURATION[k], ease: EASE };
-        } else {
-          target = pose;
-          transition = { duration: 0.7, ease: EASE };
-        }
-
-        const canInteract = isTop && !isExiting && isDealt;
-
-        return (
-          <motion.div
-            key={idx}
-            initial={reduced ? pose : start}
-            animate={target}
-            transition={transition}
-            drag={canInteract ? 'x' : false}
-            dragSnapToOrigin
-            dragElastic={0.4}
-            dragMomentum={false}
-            onDragStart={
-              canInteract
-                ? () => {
-                    movedRef.current = true;
-                  }
-                : undefined
-            }
-            onDragEnd={canInteract ? handleDragEnd : undefined}
-            onPointerDown={canInteract ? handlePointerDown : undefined}
-            onPointerUp={canInteract ? handlePointerUp : undefined}
-            onPointerCancel={
-              canInteract
-                ? () => {
-                    downRef.current = null;
-                  }
-                : undefined
-            }
-            tabIndex={isTop ? 0 : undefined}
-            role={isTop ? 'button' : undefined}
-            aria-expanded={isTop ? open : undefined}
-            aria-label={isTop ? `${project.title}, ${project.location}` : undefined}
-            onKeyDown={
-              isTop
-                ? (e: React.KeyboardEvent) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      toggleCaption();
-                    }
-                  }
-                : undefined
-            }
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              aspectRatio: '4 / 3',
-              padding: isMobile ? '8px' : '12px',
-              backgroundColor: '#FFFFFF',
-              borderRadius: '3px',
-              boxShadow: '0 18px 40px rgba(0,0,0,0.45)',
-              boxSizing: 'border-box',
-              cursor: isTop ? 'pointer' : 'default',
-              userSelect: 'none',
-              willChange: 'transform',
-              zIndex: isExiting ? 20 : 10 - depth,
-              pointerEvents: isTop && !isExiting ? 'auto' : 'none',
-            }}
-          >
-            <img
-              src={project.img}
-              alt={`${project.title}, ${project.location}`}
-              draggable={false}
-              decoding="async"
-              loading="eager"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center',
-                display: 'block',
-              }}
-            />
-          </motion.div>
-        );
-      })}
-    </div>
-  );
+  const progressFrom = `${(i / imageCount) * 100}%`;
+  const progressTo = inView && !reduced ? `${((i + 1) / imageCount) * 100}%` : progressFrom;
 
   return (
     <section
@@ -416,142 +122,269 @@ export default function Projects() {
       style={{ backgroundColor: '#0A0A0A', overflow: 'hidden', padding: isMobile ? '72px 0' : '100px 0' }}
     >
       <div className="inner">
-        <p
-          style={{
-            textTransform: 'uppercase',
-            fontSize: '12px',
-            letterSpacing: '0.2em',
-            fontWeight: 600,
-            color: '#C2B2A0',
-            textAlign: 'center',
-            margin: '0 0 14px',
-          }}
-        >
-          Landmark Homes
-        </p>
-        <motion.h2
-          className="sov-h2-lg"
-          initial={{ opacity: 0, y: 40 }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          style={{
-            color: '#FFFFFF',
-            textAlign: 'center',
-            margin: 0,
-            fontFamily: 'Inter, sans-serif',
-          }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: EASE }}
         >
-          Homes That Leave A Mark.
-        </motion.h2>
-        <p
-          lang="en-GB"
-          style={{
-            color: 'rgba(255,255,255,0.72)',
-            fontSize: isMobile ? 15 : 17,
-            lineHeight: 1.6,
-            maxWidth: 620,
-            margin: '16px auto 0',
-            textAlign: 'center',
-          }}
-        >
-          A handful of the more than 1,000 projects that carry the Sovran name, from London townhouses to country
-          estates across the UK, each one still telling the story of the people who live there.
-        </p>
-        <div
-          style={{
-            height: '1px',
-            backgroundColor: 'rgba(255,255,255,0.15)',
-            marginTop: '24px',
-            marginBottom: isMobile ? '36px' : '48px',
-          }}
-        />
-
-        {isMobile ? (
-          <>
-            <div style={{ width: stackWidth, margin: '0 auto 44px' }}>
-              {hintLine}
-              {stack}
-            </div>
-
-            <AnimatePresence>
-              {open && (
-                <motion.div
-                  key="caption"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.4, ease: EASE }}
-                  onAnimationComplete={() => {
-                    if (!isMobile || !openRef.current) return;
-                    ensureCaptionVisible();
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  aria-label="Close details"
-                  onClick={() => setOpen(false)}
-                  onKeyDown={closeOnKey}
-                  style={{
-                    width: stackWidth,
-                    margin: '0 auto',
-                    overflow: 'hidden',
-                    cursor: 'pointer',
-                    textAlign: 'center',
-                  }}
-                >
-                  <div ref={captionRef} style={{ padding: '22px 4px 0' }}>
-                    {captionContent}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </>
-        ) : (
-          <div
+          <p
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              marginBottom: 44,
+              textTransform: 'uppercase',
+              fontSize: '12px',
+              letterSpacing: '0.2em',
+              fontWeight: 600,
+              color: '#C2B2A0',
+              textAlign: 'center',
+              margin: '0 0 14px',
             }}
           >
-            <div style={{ flex: '0 1 678px', minWidth: 0 }}>
-              {hintLine}
-              {stack}
-            </div>
+            Landmark Homes
+          </p>
+          <h2
+            className="sov-h2-lg"
+            style={{
+              color: '#FFFFFF',
+              textAlign: 'center',
+              margin: 0,
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Spaces That Leave A Mark.
+          </h2>
+          <p
+            lang="en-GB"
+            style={{
+              color: 'rgba(255,255,255,0.72)',
+              fontSize: isMobile ? 15 : 17,
+              lineHeight: 1.65,
+              maxWidth: 640,
+              margin: '16px auto 0',
+              textAlign: 'center',
+            }}
+          >
+            Our standard lives in the projects delivered over the years. Working side by side with each
+            client, we turn the space they imagine into the space they deserve. Committed to creating
+            prestigious homes, we now bring that same design expertise to you.
+          </p>
+          <div
+            style={{
+              height: '1px',
+              backgroundColor: 'rgba(255,255,255,0.15)',
+              marginTop: '24px',
+              marginBottom: isMobile ? '32px' : '40px',
+            }}
+          />
+        </motion.div>
 
-            <motion.div
-              initial={false}
-              animate={{ width: open ? panelW : 0, marginLeft: open ? PANEL_GAP : 0, opacity: open ? 1 : 0 }}
-              transition={{ duration: 0.6, ease: EASE }}
-              aria-hidden={!open}
+        <div ref={wrapperRef} style={{ maxWidth: 1000, margin: '0 auto' }}>
+          {/* Project selector */}
+          <div
+            role="tablist"
+            aria-label="Featured projects"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: `repeat(${PROJECTS.length}, 1fr)`,
+              gap: isMobile ? 8 : 16,
+              marginBottom: isMobile ? 14 : 20,
+            }}
+          >
+            {PROJECTS.map((proj, k) => {
+              const active = k === p;
+              return (
+                <button
+                  key={proj.title}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  aria-controls="project-stage"
+                  onClick={() => selectProject(k)}
+                  style={{
+                    background: 'none',
+                    borderWidth: 1,
+                    borderStyle: 'solid',
+                    borderColor: active ? '#C2B2A0' : 'rgba(255,255,255,0.14)',
+                    borderRadius: 6,
+                    padding: isMobile ? 6 : 8,
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    opacity: active ? 1 : 0.55,
+                    transition: 'opacity 0.3s ease, border-color 0.3s ease',
+                    color: '#FFFFFF',
+                    WebkitTapHighlightColor: 'transparent',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8,
+                  }}
+                >
+                  <span
+                    style={{
+                      display: 'block',
+                      aspectRatio: '4 / 3',
+                      overflow: 'hidden',
+                      borderRadius: 3,
+                      background: '#141414',
+                    }}
+                  >
+                    <img
+                      src={proj.images[0]}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                  </span>
+                  <span
+                    style={{
+                      fontSize: isMobile ? 11 : 13,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em',
+                      lineHeight: 1.25,
+                    }}
+                  >
+                    {proj.title}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: isMobile ? 10 : 11,
+                      color: 'rgba(255,255,255,0.6)',
+                      letterSpacing: '0.04em',
+                    }}
+                  >
+                    {proj.location}
+                  </span>
+                  <span
+                    style={{
+                      display: 'block',
+                      height: 2,
+                      background: 'rgba(255,255,255,0.12)',
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {active && (
+                      <motion.span
+                        key={`${p}-${i}`}
+                        initial={{ width: progressFrom }}
+                        animate={{ width: progressTo }}
+                        transition={{ duration: SLIDE_MS / 1000, ease: 'linear' }}
+                        style={{ display: 'block', height: '100%', background: '#C2B2A0' }}
+                      />
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Stage: the active project's current image, with swipe to step through */}
+          <div
+            id="project-stage"
+            onPointerDown={handlePointerDown}
+            onPointerUp={handlePointerUp}
+            style={{
+              position: 'relative',
+              overflow: 'hidden',
+              borderRadius: 6,
+              background: '#141414',
+              aspectRatio: isMobile ? '4 / 3' : '16 / 9',
+              touchAction: 'pan-y',
+            }}
+          >
+            <AnimatePresence initial={false}>
+              <motion.img
+                key={`${p}-${i}`}
+                src={project.images[i]}
+                alt={`${project.title}, ${project.location}`}
+                draggable={false}
+                decoding="async"
+                initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 1.04 }}
+                animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={
+                  reduced
+                    ? { duration: 0.3 }
+                    : { opacity: { duration: 0.8 }, scale: { duration: 4, ease: 'easeOut' } }
+                }
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+            </AnimatePresence>
+
+            <div
+              aria-hidden="true"
               style={{
-                overflow: 'hidden',
-                flex: '0 0 auto',
-                alignSelf: 'center',
-                pointerEvents: open ? 'auto' : 'none',
+                position: 'absolute',
+                bottom: 12,
+                left: 0,
+                right: 0,
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 6,
+                pointerEvents: 'none',
+                zIndex: 1,
               }}
             >
-              <div
-                role="button"
-                tabIndex={open ? 0 : -1}
-                aria-label="Close details"
-                onClick={() => setOpen(false)}
-                onKeyDown={closeOnKey}
+              {project.images.map((src, k) => (
+                <span
+                  key={`${src}-${k}`}
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    background: k === i ? '#FFFFFF' : 'rgba(255,255,255,0.4)',
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Caption for the active project */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={p}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              style={{ textAlign: 'center', marginTop: isMobile ? 20 : 26 }}
+            >
+              <p
                 style={{
-                  width: panelW,
-                  minWidth: panelW,
-                  boxSizing: 'border-box',
-                  textAlign: 'center',
-                  cursor: 'pointer',
+                  textTransform: 'uppercase',
+                  fontSize: '12px',
+                  letterSpacing: '0.2em',
+                  fontWeight: 500,
+                  color: '#C2B2A0',
+                  margin: 0,
                 }}
               >
-                {captionContent}
-              </div>
+                {project.location}
+              </p>
+              <div style={{ width: 32, height: 2, background: '#C2B2A0', margin: '12px auto' }} />
+              <h3 style={{ color: '#FFFFFF', fontSize: isMobile ? 22 : 26, fontWeight: 700, margin: 0 }}>
+                {project.title}
+              </h3>
+              <p
+                style={{
+                  fontSize: isMobile ? 15 : 16,
+                  lineHeight: 1.6,
+                  color: 'rgba(255,255,255,0.78)',
+                  margin: '8px auto 0',
+                  maxWidth: 560,
+                }}
+              >
+                {project.desc}
+              </p>
             </motion.div>
-          </div>
-        )}
+          </AnimatePresence>
+        </div>
       </div>
     </section>
   );

@@ -1,32 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { Compass, ShieldCheck, Users } from 'lucide-react';
+import { PencilRuler, HeartHandshake } from 'lucide-react';
 
 // One statement under the heading.
 const ABOUT_STATEMENT =
-  'Since 2011, our designers, planners and builders have worked as one team. What you approve on paper is what arrives on site.';
+  'We believe in timeless design and prestigious homes built to last. Across architecture and construction, we pursue design excellence and let the projects we deliver show it.';
 
-const ethosCards = [
+const cards = [
   {
-    label: 'One Point Of Contact',
-    icon: Users,
-    desc: 'One project manager runs your project from start to finish.',
+    label: 'Decisions Made On Paper',
+    icon: PencilRuler,
+    desc: 'Each choice is tested in drawings and 3D first, where changing your mind is simple.',
   },
   {
-    label: 'Planning Know-How',
-    icon: Compass,
-    desc: 'Former planning officers on our team prepare your application the way councils expect.',
-  },
-  {
-    label: 'A Price That Holds',
-    icon: ShieldCheck,
-    desc: 'Fixed before work begins, paid in milestones, protected by contract and insurance.',
+    label: 'A Home You Will Not Second-Guess',
+    icon: HeartHandshake,
+    desc: 'By the time work begins, you already know you will love what is being built.',
   },
 ];
 
 const EASE: [number, number, number, number] = [0.2, 0.7, 0.2, 1];
 
-type EthosCard = (typeof ethosCards)[number];
+type Card = (typeof cards)[number];
 
 const panelStyle: React.CSSProperties = {
   position: 'relative',
@@ -59,19 +54,10 @@ const ruleStyle: React.CSSProperties = {
   margin: '14px 0',
 };
 
-const descTextStyle: React.CSSProperties = {
-  position: 'relative',
-  zIndex: 1,
-  fontSize: '14px',
-  lineHeight: 1.6,
-  color: 'rgba(255,255,255,0.72)',
-  textAlign: 'left',
-};
-
-// Large faint copy of the icon in the panel corner, plus the ringed icon at the top left.
+// Large faint copy of the icon in the card corner, plus the ringed icon at the top left.
 // The ghost icon drifts and redraws itself (sov-ghost classes in index.css), staggered per
-// pillar through --sov-delay.
-function PanelIcons({ icon: Icon, index }: { icon: EthosCard['icon']; index: number }) {
+// card through --sov-delay.
+function PanelIcons({ icon: Icon, index }: { icon: Card['icon']; index: number }) {
   return (
     <>
       <span
@@ -114,40 +100,7 @@ function PanelIcons({ icon: Icon, index }: { icon: EthosCard['icon']; index: num
   );
 }
 
-// Mobile pillar card in the horizontal swipe track. The full description is always shown.
-function MobilePanel({
-  card,
-  index,
-  trackInView,
-}: {
-  card: EthosCard;
-  index: number;
-  trackInView: boolean;
-}) {
-  return (
-    <motion.article
-      initial={{ opacity: 0, x: 60 }}
-      animate={trackInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 60 }}
-      transition={{ duration: 0.8, delay: index * 0.18, ease: EASE }}
-      style={{
-        ...panelStyle,
-        display: 'block',
-        flex: '0 0 auto',
-        width: 'min(76vw, 320px)',
-        scrollSnapAlign: 'start',
-      }}
-    >
-      <PanelIcons icon={card.icon} index={index} />
-      <h3 style={titleStyle}>{card.label}</h3>
-      <div style={ruleStyle} />
-      <p lang="en-GB" style={descTextStyle}>
-        {card.desc}
-      </p>
-    </motion.article>
-  );
-}
-
-function DesktopPanel({ card, index }: { card: EthosCard; index: number }) {
+function ReasonCard({ card, index, isMobile }: { card: Card; index: number; isMobile: boolean }) {
   return (
     <motion.article
       initial={{ opacity: 0, y: 40 }}
@@ -157,9 +110,19 @@ function DesktopPanel({ card, index }: { card: EthosCard; index: number }) {
       style={panelStyle}
     >
       <PanelIcons icon={card.icon} index={index} />
-      <h3 style={{ ...titleStyle, whiteSpace: 'nowrap' }}>{card.label}</h3>
+      <h3 style={titleStyle}>{card.label}</h3>
       <div style={ruleStyle} />
-      <p lang="en-GB" style={descTextStyle}>
+      <p
+        lang="en-GB"
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          fontSize: isMobile ? 14 : 15,
+          lineHeight: 1.6,
+          color: 'rgba(255,255,255,0.72)',
+          textAlign: 'left',
+        }}
+      >
         {card.desc}
       </p>
     </motion.article>
@@ -169,8 +132,6 @@ function DesktopPanel({ card, index }: { card: EthosCard; index: number }) {
 export default function AboutSovran() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
-  const trackRef = useRef<HTMLDivElement>(null);
-  const trackInView = useInView(trackRef, { once: true, amount: 0.3 });
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
 
   useEffect(() => {
@@ -196,7 +157,7 @@ export default function AboutSovran() {
             marginBottom: '20px',
           }}
         >
-          The Studio
+          What We Stand For
         </motion.p>
 
         <motion.h2
@@ -210,7 +171,7 @@ export default function AboutSovran() {
             marginBottom: 0,
           }}
         >
-          Design And Build Studio.
+          Homes Built To Endure.
         </motion.h2>
 
         <motion.p
@@ -232,43 +193,66 @@ export default function AboutSovran() {
           {ABOUT_STATEMENT}
         </motion.p>
 
-        {/* The pillars are the section's last element; the section's own bottom padding closes it. */}
-        {isMobile ? (
-          <div
-            ref={trackRef}
-            className="sov-track"
-            style={{
-              display: 'flex',
-              gap: '14px',
-              alignItems: 'stretch',
-              overflowX: 'auto',
-              scrollSnapType: 'x mandatory',
-              scrollPaddingLeft: '24px',
-              padding: '4px 24px 12px',
-              margin: '56px -24px 0',
-              scrollbarWidth: 'none',
-              WebkitOverflowScrolling: 'touch',
-            }}
-          >
-            {ethosCards.map((card, i) => (
-              <MobilePanel key={card.label} card={card} index={i} trackInView={trackInView} />
-            ))}
-          </div>
-        ) : (
-          <div
-            style={{
-              marginTop: '56px',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '24px',
-              alignItems: 'stretch',
-            }}
-          >
-            {ethosCards.map((card, i) => (
-              <DesktopPanel key={card.label} card={card} index={i} />
-            ))}
-          </div>
-        )}
+        <div
+          aria-hidden="true"
+          style={{
+            height: '1px',
+            width: '80px',
+            background: 'rgba(194,178,160,0.5)',
+            margin: isMobile ? '44px auto 28px' : '56px auto 36px',
+          }}
+        />
+
+        <h3
+          style={{
+            textAlign: 'center',
+            color: '#FFFFFF',
+            fontSize: 'clamp(22px, 2.4vw, 30px)',
+            fontWeight: 800,
+            letterSpacing: '-0.01em',
+            lineHeight: 1.2,
+            margin: 0,
+          }}
+        >
+          Why Your Design Pack Comes First.
+        </h3>
+
+        <p
+          lang="en-GB"
+          style={{
+            textAlign: 'center',
+            color: 'rgba(255,255,255,0.88)',
+            fontSize: 'clamp(17px, 1.8vw, 21px)',
+            lineHeight: 1.6,
+            maxWidth: '720px',
+            margin: '18px auto 0',
+          }}
+        >
+          We stand against homeowners spending thousands on a home they end up unhappy with, regretting a
+          decision that should have been one of their best. The design pack exists so that never becomes
+          your story.
+        </p>
+
+        <div
+          style={
+            isMobile
+              ? { display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '32px' }
+              : {
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '24px',
+                  maxWidth: '880px',
+                  marginTop: '40px',
+                  marginLeft: 'auto',
+                  marginRight: 'auto',
+                  alignItems: 'stretch',
+                }
+          }
+        >
+          {cards.map((card, i) => (
+            <ReasonCard key={card.label} card={card} index={i} isMobile={isMobile} />
+          ))}
+        </div>
       </div>
     </section>
   );

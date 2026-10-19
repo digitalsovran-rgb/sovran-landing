@@ -4,24 +4,28 @@ import { Plus } from 'lucide-react';
 
 const FAQS = [
   {
-    q: 'What is included in the design package?',
-    a: 'Floor plans, 3D visuals, a mood board and a full project proposal, all drawn around your home.',
+    q: 'Why is the design pack complimentary?',
+    a: 'Because too many homeowners spend thousands on a home they end up regretting. We would rather you see your home, question it and fall in love with it before construction begins. When Sovran builds your project, the design pack is how we make sure the home you get is the one you wanted.',
   },
   {
-    q: 'Is the design package complimentary?',
-    a: 'Yes, when Sovran carries out the construction of your project. If you are looking for design only, our design services are available separately.',
+    q: 'What will I have in my hands?',
+    a: 'Floor plans, 3D visuals of each room, a mood board of materials and finishes, and a full project proposal. Everything you need to see your home clearly and move forward with confidence.',
+  },
+  {
+    q: 'Who is the design pack for?',
+    a: 'Homeowners planning a new build, extension, renovation or basement of £100K or more, who want Sovran to design and build it with them.',
+  },
+  {
+    q: 'Can I shape the design to my taste?',
+    a: 'Completely. You compare layouts, walk through each space in 3D and adjust anything until it feels like yours.',
   },
   {
     q: 'Do I need a site survey?',
-    a: 'Most projects need one. Your project manager arranges it and talks you through the details for your location.',
-  },
-  {
-    q: 'Can I change the design?',
-    a: 'Yes. You review the 3D visuals with our team and adjust anything before the design is final.',
+    a: 'If your project needs one, it comes as part of your pack. Your project manager will walk you through the arrangements for your location.',
   },
   {
     q: 'What happens after I enquire?',
-    a: 'A member of our team calls you to talk through your project. If it is the right fit, we book your site survey and begin your design.',
+    a: 'A member of our team calls you to hear about your plans. If it is the right fit, your design begins, and so does the journey to your new home.',
   },
 ];
 
