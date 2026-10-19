@@ -13,7 +13,8 @@ const cards = [
     desc: 'Each choice is tested in drawings and 3D first, where changing your mind is simple.',
   },
   {
-    label: 'A Home You Will Not Second-Guess',
+    // U+2011 non-breaking hyphen, so the title never wraps after "Second".
+    label: 'A Home You Will Not Second‑Guess',
     icon: HeartHandshake,
     desc: 'By the time work begins, you already know you will love what is being built.',
   },
@@ -30,8 +31,8 @@ const panelStyle: React.CSSProperties = {
   color: 'var(--sov-white)',
   padding: '28px 24px 22px',
   borderRadius: '4px',
-  border: '1px solid rgba(194,178,160,0.28)',
-  background: 'linear-gradient(165deg, rgba(194,178,160,0.16) 0%, rgba(255,255,255,0.03) 60%)',
+  border: '1px solid rgba(194,178,160,0.35)',
+  background: 'linear-gradient(165deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 60%)',
 };
 
 const titleStyle: React.CSSProperties = {
@@ -76,7 +77,7 @@ function PanelIcons({ icon: Icon, index }: { icon: Card['icon']; index: number }
         <Icon
           size={150}
           strokeWidth={0.6}
-          color="rgba(194,178,160,0.12)"
+          color="rgba(194,178,160,0.16)"
           aria-hidden="true"
           className="sov-ghost"
         />
@@ -110,7 +111,7 @@ function ReasonCard({ card, index, isMobile }: { card: Card; index: number; isMo
       style={panelStyle}
     >
       <PanelIcons icon={card.icon} index={index} />
-      <h3 style={titleStyle}>{card.label}</h3>
+      <h3 style={{ ...titleStyle, fontSize: isMobile ? '13px' : titleStyle.fontSize }}>{card.label}</h3>
       <div style={ruleStyle} />
       <p
         lang="en-GB"
@@ -141,7 +142,7 @@ export default function AboutSovran() {
   }, []);
 
   return (
-    <section ref={ref} data-bg="dark" style={{ backgroundColor: '#0a0a0a', padding: '100px 0' }}>
+    <section ref={ref} data-bg="dark" style={{ backgroundColor: '#4A443C', padding: '100px 0' }}>
       <div className="inner" style={{ maxWidth: '900px' }}>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -182,10 +183,10 @@ export default function AboutSovran() {
           transition={{ duration: 0.8, ease: EASE }}
           style={{
             color: '#FFFFFF',
-            fontSize: 'clamp(18px, 2vw, 24px)',
+            fontSize: isMobile ? 16 : 20,
             fontWeight: 400,
-            lineHeight: 1.6,
-            maxWidth: '720px',
+            lineHeight: 1.65,
+            maxWidth: isMobile ? 340 : 640,
             margin: isMobile ? '20px auto 0' : '24px auto 0',
             textAlign: 'center',
           }}
@@ -207,7 +208,7 @@ export default function AboutSovran() {
           style={{
             textAlign: 'center',
             color: '#FFFFFF',
-            fontSize: 'clamp(22px, 2.4vw, 30px)',
+            fontSize: isMobile ? 20 : 'clamp(22px, 2.4vw, 28px)',
             fontWeight: 800,
             letterSpacing: '-0.01em',
             lineHeight: 1.2,
@@ -221,10 +222,10 @@ export default function AboutSovran() {
           lang="en-GB"
           style={{
             textAlign: 'center',
-            color: 'rgba(255,255,255,0.88)',
-            fontSize: 'clamp(17px, 1.8vw, 21px)',
-            lineHeight: 1.6,
-            maxWidth: '720px',
+            color: 'rgba(255,255,255,0.82)',
+            fontSize: isMobile ? 15 : 18,
+            lineHeight: 1.65,
+            maxWidth: isMobile ? 340 : 640,
             margin: '18px auto 0',
           }}
         >

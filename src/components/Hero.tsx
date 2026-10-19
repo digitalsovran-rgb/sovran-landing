@@ -223,7 +223,7 @@ export default function Hero() {
         }
         @media (max-width: 767px) {
           .hero-h1 { font-size: clamp(30px, 8.4vw, 41px) !important; font-weight: 900 !important; }
-          .hero-cta-wrap { width: calc(100% + 16px) !important; margin-left: -8px !important; margin-right: -8px !important; }
+          .hero-cta-wrap { width: 100% !important; }
           .hero-cta-btn {
             width: 100% !important;
             min-height: 48px !important;
@@ -313,8 +313,8 @@ export default function Hero() {
             inset: 0,
             pointerEvents: 'none',
             background: isMobile
-              ? 'radial-gradient(ellipse 120% 40% at 50% 50%, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.38) 40%, rgba(0,0,0,0) 100%)'
-              : 'radial-gradient(ellipse 70% 45% at 50% 50%, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.38) 35%, rgba(0,0,0,0) 100%)',
+              ? 'radial-gradient(ellipse 120% 40% at 40% 55%, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.38) 40%, rgba(0,0,0,0) 100%)'
+              : 'radial-gradient(ellipse 70% 45% at 30% 55%, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.38) 35%, rgba(0,0,0,0) 100%)',
           }}
         />
 
@@ -359,21 +359,21 @@ export default function Hero() {
           />
         </div>
 
-        {/* Content: the section is a centered flex column with its own top and bottom padding
+        {/* Content: the section is a centred flex column with its own top and bottom padding
             (room for the logo above, breathing space below), so this block sits in the
-            vertical middle of the full-height hero. */}
+            vertical middle of the full-height hero. The .inner wrapper gives it the same left
+            inset as every other section (40px in a centred 1200px container, 24px on mobile),
+            and the text inside is left-aligned. */}
+        <div className="inner" style={{ position: 'relative', zIndex: 2, width: '100%' }}>
         <div
           className="hero-content"
           style={{
-            position: 'relative',
-            zIndex: 2,
-            textAlign: 'center',
-            padding: '0 24px',
+            textAlign: 'left',
             width: '100%',
-            maxWidth: '1000px',
+            maxWidth: isMobile ? '100%' : 720,
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center',
+            alignItems: 'flex-start',
           }}
         >
           <motion.h1
@@ -385,7 +385,8 @@ export default function Hero() {
               fontSize: 'clamp(36px, 4.6vw, 62px)',
               fontWeight: 900,
               color: '#ffffff',
-              margin: '0 auto',
+              margin: 0,
+              textAlign: 'left',
               lineHeight: 1.05,
               letterSpacing: '-0.015em',
               textTransform: 'uppercase',
@@ -395,10 +396,10 @@ export default function Hero() {
             A Complimentary Design Pack For Your Home.
           </motion.h1>
 
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', width: '100%' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', width: '100%' }}>
           {/* Not Framer Motion-animated (unlike its siblings): this checklist is the likely LCP
               element on mobile, and animating it would delay the final paint LCP measures. */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: isMobile ? 22 : 28 }}>
+          <div style={{ marginTop: isMobile ? 22 : 28 }}>
             <ul
               style={{
                 listStyle: 'none',
@@ -415,7 +416,7 @@ export default function Hero() {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 12,
+                    gap: 10,
                     color: '#FFFFFF',
                     fontSize: isMobile ? 16 : 17,
                     fontWeight: 500,
@@ -423,20 +424,13 @@ export default function Hero() {
                     textShadow: '0 1px 3px rgba(0,0,0,0.5)',
                   }}
                 >
-                  <span
-                    style={{
-                      flex: '0 0 auto',
-                      width: 26,
-                      height: 26,
-                      borderRadius: '50%',
-                      border: '1px solid rgba(194,178,160,0.65)',
-                      background: 'rgba(10,10,10,0.25)',
-                      display: 'grid',
-                      placeItems: 'center',
-                    }}
-                  >
-                    <Check size={15} strokeWidth={2} color="#C2B2A0" aria-hidden="true" />
-                  </span>
+                  <Check
+                    size={isMobile ? 17 : 18}
+                    strokeWidth={2.2}
+                    color="#C2B2A0"
+                    aria-hidden="true"
+                    style={{ flex: '0 0 auto', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }}
+                  />
                   {item}
                 </li>
               ))}
@@ -445,7 +439,7 @@ export default function Hero() {
 
           <p
             style={{
-              textAlign: 'center',
+              textAlign: 'left',
               margin: '20px 0 0',
               fontSize: isMobile ? 12 : 12.5,
               letterSpacing: '0.06em',
@@ -495,6 +489,7 @@ export default function Hero() {
             </button>
           </motion.div>
           </div>
+        </div>
         </div>
       </section>
     </>

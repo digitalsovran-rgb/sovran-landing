@@ -156,9 +156,9 @@ export default function Projects() {
             lang="en-GB"
             style={{
               color: 'rgba(255,255,255,0.72)',
-              fontSize: isMobile ? 15 : 17,
+              fontSize: isMobile ? 14 : 16,
               lineHeight: 1.65,
-              maxWidth: 640,
+              maxWidth: isMobile ? 340 : 600,
               margin: '16px auto 0',
               textAlign: 'center',
             }}
