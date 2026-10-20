@@ -153,6 +153,7 @@ export default function Projects() {
             Spaces That Leave A Mark.
           </h2>
           <p
+            className="sov-justify sov-justify-l sov-nohyph"
             lang="en-GB"
             style={{
               color: 'rgba(255,255,255,0.72)',
@@ -160,7 +161,6 @@ export default function Projects() {
               lineHeight: 1.65,
               maxWidth: isMobile ? 340 : 600,
               margin: '16px auto 0',
-              textAlign: 'center',
             }}
           >
             A standard proven across years of delivered projects. Working side by side with each client,

@@ -109,6 +109,8 @@ export default function WhatYouDiscover() {
                   {item.title}
                 </h3>
                 <p
+                  className="sov-justify sov-justify-l sov-nohyph"
+                  lang="en-GB"
                   style={{
                     fontSize: isMobile ? '13px' : '14px',
                     lineHeight: 1.55,

@@ -63,6 +63,7 @@ export default function AboutSovran() {
         </motion.h2>
 
         <motion.p
+          className="sov-justify sov-justify-l sov-nohyph"
           lang="en-GB"
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -75,51 +76,55 @@ export default function AboutSovran() {
             lineHeight: 1.65,
             maxWidth: isMobile ? 340 : 640,
             margin: isMobile ? '20px auto 0' : '24px auto 0',
-            textAlign: 'center',
           }}
         >
           {ABOUT_STATEMENT}
         </motion.p>
 
-        <div
-          aria-hidden="true"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: EASE }}
           style={{
-            height: '1px',
-            width: '80px',
-            background: 'rgba(194,178,160,0.5)',
-            margin: isMobile ? '44px auto 28px' : '56px auto 36px',
-          }}
-        />
-
-        <h3
-          style={{
-            textAlign: 'center',
-            color: '#FFFFFF',
-            fontSize: isMobile ? 20 : 'clamp(22px, 2.4vw, 28px)',
-            fontWeight: 800,
-            letterSpacing: '-0.01em',
-            lineHeight: 1.2,
-            margin: 0,
+            marginTop: isMobile ? 36 : 48,
+            maxWidth: 720,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            textAlign: 'left',
+            background: 'rgba(255,255,255,0.06)',
+            borderRadius: 4,
+            padding: isMobile ? '22px 20px' : '28px 32px',
           }}
         >
-          Why Your Design Pack Is Complimentary.
-        </h3>
-
-        <p
-          lang="en-GB"
-          style={{
-            textAlign: 'center',
-            color: 'rgba(255,255,255,0.82)',
-            fontSize: isMobile ? 15 : 18,
-            lineHeight: 1.65,
-            maxWidth: isMobile ? 340 : 640,
-            margin: '18px auto 0',
-          }}
-        >
-          We stand against homeowners spending thousands on a home they end up unhappy with, regretting a
-          decision that should have been one of their best. The design pack exists so that never becomes
-          your story.
-        </p>
+          <div style={{ width: 36, height: 2, background: '#C2B2A0', margin: '0 0 16px' }} />
+          <h3
+            style={{
+              margin: 0,
+              color: '#FFFFFF',
+              fontSize: 14,
+              fontWeight: 800,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+            }}
+          >
+            Why Complimentary
+          </h3>
+          <p
+            className="sov-justify sov-justify-l sov-nohyph"
+            lang="en-GB"
+            style={{
+              margin: '10px 0 0',
+              fontSize: isMobile ? 14 : 15,
+              lineHeight: 1.65,
+              color: 'rgba(255,255,255,0.72)',
+            }}
+          >
+            We stand against homeowners spending thousands on a home they end up unhappy with, regretting a
+            decision that should have been one of their best. The design pack exists so that never becomes
+            your story.
+          </p>
+        </motion.div>
 
         {SHOW_REVIEW && (
           <motion.figure

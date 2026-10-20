@@ -313,8 +313,8 @@ export default function Hero() {
             inset: 0,
             pointerEvents: 'none',
             background: isMobile
-              ? 'radial-gradient(ellipse 120% 40% at 40% 55%, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.38) 40%, rgba(0,0,0,0) 100%)'
-              : 'radial-gradient(ellipse 70% 45% at 30% 55%, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.38) 35%, rgba(0,0,0,0) 100%)',
+              ? 'radial-gradient(ellipse 120% 40% at 50% 50%, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.38) 40%, rgba(0,0,0,0) 100%)'
+              : 'radial-gradient(ellipse 70% 45% at 50% 50%, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.38) 35%, rgba(0,0,0,0) 100%)',
           }}
         />
 
@@ -361,19 +361,19 @@ export default function Hero() {
 
         {/* Content: the section is a centred flex column with its own top and bottom padding
             (room for the logo above, breathing space below), so this block sits in the
-            vertical middle of the full-height hero. The .inner wrapper gives it the same left
-            inset as every other section (40px in a centred 1200px container, 24px on mobile),
-            and the text inside is left-aligned. */}
+            vertical middle of the full-height hero. The .inner wrapper keeps the page's side
+            padding (24px on mobile), and the block itself is centred horizontally. */}
         <div className="inner" style={{ position: 'relative', zIndex: 2, width: '100%' }}>
         <div
           className="hero-content"
           style={{
-            textAlign: 'left',
+            textAlign: 'center',
             width: '100%',
-            maxWidth: isMobile ? '100%' : 720,
+            maxWidth: isMobile ? '100%' : 760,
+            margin: '0 auto',
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'flex-start',
+            alignItems: 'center',
           }}
         >
           <motion.h1
@@ -386,9 +386,10 @@ export default function Hero() {
               fontWeight: 900,
               color: '#ffffff',
               margin: 0,
-              textAlign: 'left',
+              textAlign: 'center',
               lineHeight: 1.05,
               letterSpacing: '-0.015em',
+              wordSpacing: '0.12em',
               textTransform: 'uppercase',
               fontFamily: 'Inter, sans-serif',
             }}
@@ -396,10 +397,11 @@ export default function Hero() {
             A Complimentary Design Pack For Your Home.
           </motion.h1>
 
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', width: '100%' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', width: '100%' }}>
           {/* Not Framer Motion-animated (unlike its siblings): this checklist is the likely LCP
-              element on mobile, and animating it would delay the final paint LCP measures. */}
-          <div style={{ marginTop: isMobile ? 22 : 28 }}>
+              element on mobile, and animating it would delay the final paint LCP measures.
+              The group is centred while the ticks inside stay left-aligned under each other. */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: isMobile ? 22 : 28 }}>
             <ul
               style={{
                 listStyle: 'none',
@@ -439,7 +441,7 @@ export default function Hero() {
 
           <p
             style={{
-              textAlign: 'left',
+              textAlign: 'center',
               margin: '20px 0 0',
               fontSize: isMobile ? 12 : 12.5,
               letterSpacing: '0.06em',
@@ -455,7 +457,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.35 }}
-            style={{ marginTop: isMobile ? 24 : 28 }}
+            style={{ marginTop: isMobile ? 24 : 28, alignSelf: 'center' }}
           >
             <button
               type="button"

@@ -1,6 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Check } from 'lucide-react';
 import { getSlotCount } from '../utils/slotCount';
+
+// TEST MODE: while true, the form does not send leads to Monday and does not push form_complete or booking events. Set to false before running ad traffic.
+const TEST_MODE = true;
+
+// After the lead is sent: confirmation, consultation type, the Calendly calendar, booked.
+type AfterView = 'sent' | 'choose' | 'calendly' | 'booked';
+type MeetingType = 'virtual' | 'studio';
+
+const CALENDLY_URLS: Record<MeetingType, string> = {
+  virtual: 'https://calendly.com/sovranstudio-info/30min',
+  studio: 'https://calendly.com/sovranstudio-info/showroom-visit',
+};
 
 type FormData = {
   name: string;
@@ -335,16 +348,84 @@ const navBtnBase: React.CSSProperties = {
   transition: 'background-color 0.3s, border-color 0.3s',
 };
 
+// Same look as the step headings above the form questions.
+const stepHeadingStyle: React.CSSProperties = {
+  fontSize: 'clamp(20px, 2.2vw, 28px)',
+  fontWeight: 900,
+  color: '#0a0a0a',
+  letterSpacing: '-0.02em',
+  marginBottom: '36px',
+};
+
+const backLinkStyle: React.CSSProperties = {
+  background: 'none',
+  border: 'none',
+  fontSize: '12px',
+  fontWeight: 500,
+  color: 'rgba(0,0,0,0.4)',
+  cursor: 'pointer',
+  letterSpacing: '0.05em',
+  padding: '0',
+  transition: 'color 0.2s',
+  whiteSpace: 'nowrap',
+  flex: '0 0 auto',
+};
+
+function BackLink({ onClick, style }: { onClick: () => void; style?: React.CSSProperties }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{ ...backLinkStyle, ...style }}
+      onMouseEnter={(e) => (e.currentTarget.style.color = '#0a0a0a')}
+      onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(0,0,0,0.4)')}
+    >
+      ← Back
+    </button>
+  );
+}
+
+// The 64px tick circle shown on the "sent" and "booked" views.
+function TickCircle() {
+  return (
+    <div
+      style={{
+        width: 64,
+        height: 64,
+        borderRadius: '50%',
+        border: '1px solid #4A443C',
+        display: 'grid',
+        placeItems: 'center',
+        margin: '0 auto 14px',
+      }}
+    >
+      <Check size={26} strokeWidth={1.6} color="#4A443C" />
+    </div>
+  );
+}
+
+const afterBodyStyle: React.CSSProperties = {
+  textAlign: 'center',
+  fontSize: 15,
+  lineHeight: 1.65,
+  color: '#6B655C',
+  margin: '14px auto 0',
+  maxWidth: 520,
+};
+
 function NavButton({
   label,
   onClick,
   disabled,
   grow,
+  block,
 }: {
   label: string;
   onClick: () => void;
   disabled: boolean;
   grow?: boolean;
+  // Full width, used for the post-submit button on mobile.
+  block?: boolean;
 }) {
   return (
     <button
@@ -356,6 +437,7 @@ function NavButton({
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.3 : 1,
         ...(grow ? { flex: '1 1 auto' } : {}),
+        ...(block ? { width: '100%' } : {}),
       }}
       onMouseEnter={(e) => {
         if (!disabled) {
@@ -628,15 +710,38 @@ export default function ConsultationForm() {
   const [formData, setFormData] = useState<FormData>({ name: '', email: '', phone: '' });
   const [emailBlurred, setEmailBlurred] = useState(false);
   const [phoneBlurred, setPhoneBlurred] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+  // null while the visitor is still in the form; set once the request has been sent.
+  const [after, setAfter] = useState<AfterView | null>(null);
+  const [meetingType, setMeetingType] = useState<MeetingType | null>(null);
+  // The Calendly message listener is added once, so it reads the meeting type from a ref.
+  const meetingTypeRef = useRef<MeetingType | null>(null);
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  // Calendly tells the embedding page when a booking is made.
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== 'https://calendly.com') return;
+      const data = event.data as { event?: string } | null;
+      if (!data || data.event !== 'calendly.event_scheduled') return;
+      setDirection(1);
+      setAfter('booked');
+      if (!TEST_MODE) {
+        (window as unknown as { dataLayer?: unknown[] }).dataLayer?.push({
+          event: 'consultation_booked',
+          meeting_type: meetingTypeRef.current,
+        });
+      }
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
   }, []);
 
   // The availability check is only a short pause before the result screen.
@@ -661,7 +766,7 @@ export default function ConsultationForm() {
     setSubmitting(true);
     setSubmitError('');
 
-    const result = await submitToMonday({
+    const payload: MondaySubmission = {
       name: formData.name,
       email: formData.email,
       phone: formData.phone.length === 10 ? '0' + formData.phone : formData.phone,
@@ -670,7 +775,19 @@ export default function ConsultationForm() {
       timeline: typesTaggedInTimeline.includes(selectedType)
         ? `${selectedTimeline} | Project type: ${selectedType}`
         : selectedTimeline,
-    });
+    };
+
+    // Test mode: nothing is sent and no form_complete is pushed; the flow continues as if it worked.
+    if (TEST_MODE) {
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      console.info('[TEST_MODE] Submission skipped', payload);
+      setSubmitting(false);
+      setDirection(1);
+      setAfter('sent');
+      return;
+    }
+
+    const result = await submitToMonday(payload);
 
     setSubmitting(false);
 
@@ -681,7 +798,8 @@ export default function ConsultationForm() {
       return;
     }
 
-    setSubmitted(true);
+    setDirection(1);
+    setAfter('sent');
     if (typeof window !== 'undefined' && (window as any).dataLayer) {
       (window as any).dataLayer.push({
         event: 'form_complete',
@@ -690,18 +808,29 @@ export default function ConsultationForm() {
     }
   };
 
-  const resetForm = () => {
-    setSubmitted(false);
-    setScreen('type');
-    setDirection(1);
-    setSelectedType(DEFAULT_TYPE);
-    setSelectedBudget(DEFAULT_BUDGET);
-    setSelectedTimeline(DEFAULT_TIMELINE);
-    setFormData({ name: '', email: '', phone: '' });
-    setEmailBlurred(false);
-    setPhoneBlurred(false);
-    setSubmitError('');
+  const goAfter = (next: AfterView, dir: number) => {
+    setDirection(dir);
+    setAfter(next);
   };
+
+  const chooseMeeting = (type: MeetingType) => {
+    meetingTypeRef.current = type;
+    setMeetingType(type);
+    goAfter('calendly', 1);
+  };
+
+  const calendlySrc = (() => {
+    if (!meetingType || typeof window === 'undefined') return '';
+    const params = new URLSearchParams({
+      embed_domain: window.location.hostname,
+      embed_type: 'Inline',
+      hide_event_type_details: '1',
+      hide_gdpr_banner: '1',
+      name: formData.name,
+      email: formData.email,
+    });
+    return `${CALENDLY_URLS[meetingType]}?${params.toString()}`;
+  })();
 
   // Bottom row: which buttons each screen shows and what they do.
   const nav: {
@@ -749,7 +878,14 @@ export default function ConsultationForm() {
 
   return (
     <>
-      <style>{`.wheel-scroll::-webkit-scrollbar { display: none; }`}</style>
+      <style>{`
+        .wheel-scroll::-webkit-scrollbar { display: none; }
+        /* Calendar view on mobile: narrow side padding so the embedded calendar has room. Two
+           classes so it outranks the .form-inner mobile padding rule in index.css. */
+        @media (max-width: 767px) {
+          .form-inner.form-inner-tight { padding-left: 8px !important; padding-right: 8px !important; }
+        }
+      `}</style>
       <section
         id="consultation"
         data-bg="light"
@@ -807,7 +943,7 @@ export default function ConsultationForm() {
         </p>
 
         <div
-          className="form-inner"
+          className={after === 'calendly' ? 'form-inner form-inner-tight' : 'form-inner'}
           style={{
             maxWidth: '860px',
             margin: '60px auto 0',
@@ -816,82 +952,134 @@ export default function ConsultationForm() {
             padding: '60px 80px',
           }}
         >
-          {submitted ? (
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              style={{ textAlign: 'center', padding: '40px 0' }}
-            >
-              <svg
-                width="56"
-                height="56"
-                viewBox="0 0 56 56"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                style={{ margin: '0 auto 32px' }}
+          {after !== null ? (
+            // Post-submit flow. Same slide transition as the form steps; no progress bar.
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={after}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3 }}
               >
-                <circle cx="28" cy="28" r="27" stroke="#4A443C" strokeWidth="1.5" />
-                <path
-                  d="M17 28L24 35L39 20"
-                  stroke="#4A443C"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <h2
-                style={{
-                  fontSize: 'clamp(34px, 4vw, 52px)',
-                  fontWeight: 900,
-                  color: '#0a0a0a',
-                  letterSpacing: '-0.02em',
-                  marginBottom: '24px',
-                }}
-              >
-                Thank You.
-              </h2>
-              <p
-                style={{
-                  fontSize: '15px',
-                  fontWeight: 400,
-                  color: 'var(--sov-grey)',
-                  lineHeight: 1.7,
-                  maxWidth: '500px',
-                  margin: '0 auto 40px',
-                  letterSpacing: 'normal',
-                }}
-              >
-                A member of our team will be in touch shortly to talk through your project and arrange your first
-                conversation. Until then, take a look at our recent work.
-              </p>
-              <button
-                type="button"
-                onClick={resetForm}
-                style={{
-                  backgroundColor: 'var(--sov-greige-dark)',
-                  color: 'var(--sov-white)',
-                  border: '1px solid var(--sov-greige-dark)',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  padding: '16px 40px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#0A0A0A';
-                  e.currentTarget.style.borderColor = '#0A0A0A';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--sov-greige-dark)';
-                  e.currentTarget.style.borderColor = 'var(--sov-greige-dark)';
-                }}
-              >
-                Submit Another Enquiry
-              </button>
-            </motion.div>
+                {after === 'sent' && (
+                  <div style={{ textAlign: 'center' }}>
+                    <TickCircle />
+                    <p
+                      style={{
+                        textTransform: 'uppercase',
+                        fontSize: 13,
+                        letterSpacing: '0.18em',
+                        fontWeight: 600,
+                        color: '#0A0A0A',
+                        margin: '0 0 18px',
+                      }}
+                    >
+                      Sent
+                    </p>
+                    <h3 style={{ ...stepHeadingStyle, textAlign: 'center', marginBottom: 0 }}>
+                      Your Design Pack Request Has Been Received.
+                    </h3>
+                    <p style={afterBodyStyle}>
+                      Our team will call you shortly to talk through your project. Alternatively, if you would
+                      like to discuss your ideas with one of our design and build specialists, you can book a
+                      consultation now.
+                    </p>
+                    <div style={{ marginTop: 28, display: 'flex', justifyContent: 'center' }}>
+                      <NavButton
+                        label="Next Step →"
+                        onClick={() => goAfter('choose', 1)}
+                        disabled={false}
+                        block={isMobile}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {after === 'choose' && (
+                  <div style={{ textAlign: 'left' }}>
+                    <h3 style={{ ...stepHeadingStyle, marginBottom: 0 }}>Consultation Type</h3>
+                    <p style={{ ...columnLabelStyle, margin: '18px 0 12px' }}>I&apos;m interested in:</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      {(
+                        [
+                          { type: 'virtual', label: 'Virtual Meeting' },
+                          { type: 'studio', label: 'Visit Our Studio' },
+                        ] as { type: MeetingType; label: string }[]
+                      ).map((option) => (
+                        <button
+                          key={option.type}
+                          type="button"
+                          onClick={() => chooseMeeting(option.type)}
+                          onMouseEnter={(e) => {
+                            if (!isMobile) e.currentTarget.style.borderColor = '#4A443C';
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isMobile) e.currentTarget.style.borderColor = 'rgba(10,10,10,0.15)';
+                          }}
+                          style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 14,
+                            padding: '18px 20px',
+                            background: '#FFFFFF',
+                            border: '1px solid rgba(10,10,10,0.15)',
+                            borderRadius: 0,
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            fontSize: 16,
+                            color: '#0A0A0A',
+                            transition: 'border-color 0.2s',
+                          }}
+                        >
+                          <span
+                            aria-hidden="true"
+                            style={{
+                              flex: '0 0 auto',
+                              width: 18,
+                              height: 18,
+                              borderRadius: '50%',
+                              border: '1.5px solid #6B655C',
+                            }}
+                          />
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                    <BackLink onClick={() => goAfter('sent', -1)} style={{ marginTop: 20 }} />
+                  </div>
+                )}
+
+                {after === 'calendly' && (
+                  <div>
+                    <BackLink onClick={() => goAfter('choose', -1)} style={{ marginBottom: 12 }} />
+                    <iframe
+                      title="Book your consultation"
+                      src={calendlySrc}
+                      width="100%"
+                      height={isMobile ? 760 : 700}
+                      loading="lazy"
+                      style={{ border: 0, display: 'block', width: '100%' }}
+                    />
+                  </div>
+                )}
+
+                {after === 'booked' && (
+                  <div style={{ textAlign: 'center' }}>
+                    <TickCircle />
+                    <h3 style={{ ...stepHeadingStyle, textAlign: 'center', marginBottom: 0 }}>
+                      You&apos;re Booked In.
+                    </h3>
+                    <p style={afterBodyStyle}>
+                      A confirmation is on its way to your inbox. We look forward to meeting you.
+                    </p>
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
           ) : (
             <>
               {/* Progress bar: only on the three question screens */}
@@ -919,17 +1107,7 @@ export default function ConsultationForm() {
               )}
 
               {/* Heading */}
-              <h3
-                style={{
-                  fontSize: 'clamp(20px, 2.2vw, 28px)',
-                  fontWeight: 900,
-                  color: '#0a0a0a',
-                  letterSpacing: '-0.02em',
-                  marginBottom: '36px',
-                }}
-              >
-                {screenHeadings[screen]}
-              </h3>
+              <h3 style={stepHeadingStyle}>{screenHeadings[screen]}</h3>
 
               {/* Animated screen content */}
               <AnimatePresence mode="wait" custom={direction}>
@@ -1181,29 +1359,7 @@ export default function ConsultationForm() {
                     marginTop: '8px',
                   }}
                 >
-                  {nav.back && (
-                    <button
-                      type="button"
-                      onClick={nav.back}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        fontSize: '12px',
-                        fontWeight: 500,
-                        color: 'rgba(0,0,0,0.4)',
-                        cursor: 'pointer',
-                        letterSpacing: '0.05em',
-                        padding: '0',
-                        transition: 'color 0.2s',
-                        whiteSpace: 'nowrap',
-                        flex: '0 0 auto',
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.color = '#0a0a0a')}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(0,0,0,0.4)')}
-                    >
-                      ← Back
-                    </button>
-                  )}
+                  {nav.back && <BackLink onClick={nav.back} />}
 
                   {nav.primary && (
                     <NavButton
