@@ -163,9 +163,9 @@ export default function Projects() {
               textAlign: 'center',
             }}
           >
-            Our standard lives in the projects delivered over the years. Working side by side with each
-            client, we turn the space they imagine into the space they deserve. Committed to creating
-            prestigious homes, we now bring that same design expertise to you.
+            A standard proven across years of delivered projects. Working side by side with each client,
+            Sovran turns what they imagine into remarkable homes. With a commitment to prestigious
+            property, that same design expertise now comes to you.
           </p>
           <div
             style={{

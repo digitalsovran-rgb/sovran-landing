@@ -72,21 +72,8 @@ export default function Faq() {
             transition={{ duration: 0.8, ease: EASE }}
             style={{ textAlign: 'center' }}
           >
-            <p
-              style={{
-                textAlign: 'center',
-                fontSize: '13px',
-                fontWeight: 500,
-                letterSpacing: '0.2em',
-                color: '#C2B2A0',
-                textTransform: 'uppercase',
-                marginBottom: '20px',
-              }}
-            >
-              Questions
-            </p>
             <h2 className="sov-h2" style={{ color: '#FFFFFF', margin: '0 0 40px' }}>
-              Before You Enquire.
+              Still Have Questions?
             </h2>
           </motion.div>
 

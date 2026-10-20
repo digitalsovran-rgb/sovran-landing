@@ -5,23 +5,23 @@ import { Compass, LayoutGrid, Box, Milestone } from 'lucide-react';
 const items = [
   {
     icon: Compass,
-    title: 'Know What Is Possible',
-    text: 'Learn early whether planning is likely to be approved, and what your property can allow.',
+    title: 'Your Planning Potential',
+    text: 'An early read on what your property can gain approval for.',
   },
   {
     icon: LayoutGrid,
-    title: 'Choose Your Layout',
-    text: 'Compare layouts side by side, then choose or customise the one you want for your home.',
+    title: 'Layout Selection',
+    text: 'Options drawn for your space, ready to compare and refine.',
   },
   {
     icon: Box,
-    title: 'See It Finished',
-    text: 'Immerse yourself in each space of your home in 3D, and adjust anything you like.',
+    title: 'Realistic Renders',
+    text: "A true picture of what you're investing in, through 3D illustrations.",
   },
   {
     icon: Milestone,
-    title: 'Move Forward With Confidence',
-    text: 'See the stages your project will go through and the investment each one involves.',
+    title: 'Your Project Roadmap',
+    text: 'Each stage and its investment, with expert guidance.',
   },
 ];
 
@@ -60,7 +60,7 @@ export default function WhatYouDiscover() {
             Your Design Pack
           </p>
           <h2 className="sov-h2" style={{ color: '#FFFFFF', margin: 0 }}>
-            What Your Design Pack Helps You Decide.
+            Clarity For Your Biggest Decision.
           </h2>
         </motion.div>
 

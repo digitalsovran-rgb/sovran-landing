@@ -1,134 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { PencilRuler, HeartHandshake } from 'lucide-react';
+
+// PLACEHOLDER review. Replace with the real client review and photo, or set SHOW_REVIEW to false, before running ad traffic.
+const SHOW_REVIEW = true;
+const REVIEW = {
+  image: '/media/centralone.webp',
+  alt: 'A Sovran home',
+  quote:
+    'From the first drawing to the day we moved in, nothing was left to chance. Our home is better than anything we pictured.',
+  name: 'Client Name, Location',
+};
 
 // One statement under the heading.
 const ABOUT_STATEMENT =
-  'We believe in timeless design and prestigious homes built to last. Across architecture and construction, we pursue design excellence and let the projects we deliver show it.';
-
-const cards = [
-  {
-    label: 'Decisions Made On Paper',
-    icon: PencilRuler,
-    desc: 'Each choice is tested in drawings and 3D first, where changing your mind is simple.',
-  },
-  {
-    // U+2011 non-breaking hyphen, so the title never wraps after "Second".
-    label: 'A Home You Will Not Second‑Guess',
-    icon: HeartHandshake,
-    desc: 'By the time work begins, you already know you will love what is being built.',
-  },
-];
+  'We believe in timeless design and prestigious homes that gain character with every year. Across architecture and construction, we pursue design excellence until each home carries the unmistakable signature of its owners.';
 
 const EASE: [number, number, number, number] = [0.2, 0.7, 0.2, 1];
-
-type Card = (typeof cards)[number];
-
-const panelStyle: React.CSSProperties = {
-  position: 'relative',
-  overflow: 'hidden',
-  textAlign: 'left',
-  color: 'var(--sov-white)',
-  padding: '28px 24px 22px',
-  borderRadius: '4px',
-  border: '1px solid rgba(194,178,160,0.35)',
-  background: 'linear-gradient(165deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 60%)',
-};
-
-const titleStyle: React.CSSProperties = {
-  position: 'relative',
-  zIndex: 1,
-  marginTop: '24px',
-  textTransform: 'uppercase',
-  fontSize: '13.5px',
-  fontWeight: 700,
-  letterSpacing: '0.1em',
-  color: 'var(--sov-white)',
-};
-
-const ruleStyle: React.CSSProperties = {
-  position: 'relative',
-  zIndex: 1,
-  width: '28px',
-  height: '2px',
-  backgroundColor: 'var(--sov-greige-light)',
-  margin: '14px 0',
-};
-
-// Large faint copy of the icon in the card corner, plus the ringed icon at the top left.
-// The ghost icon drifts and redraws itself (sov-ghost classes in index.css), staggered per
-// card through --sov-delay.
-function PanelIcons({ icon: Icon, index }: { icon: Card['icon']; index: number }) {
-  return (
-    <>
-      <span
-        className="sov-ghost-wrap"
-        style={
-          {
-            position: 'absolute',
-            top: '-24px',
-            right: '-28px',
-            pointerEvents: 'none',
-            display: 'block',
-            '--sov-delay': `${index * 1.4}s`,
-          } as React.CSSProperties
-        }
-      >
-        <Icon
-          size={150}
-          strokeWidth={0.6}
-          color="rgba(194,178,160,0.16)"
-          aria-hidden="true"
-          className="sov-ghost"
-        />
-      </span>
-      <span
-        style={{
-          position: 'relative',
-          zIndex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '52px',
-          height: '52px',
-          borderRadius: '50%',
-          border: '1px solid rgba(194,178,160,0.5)',
-        }}
-      >
-        <Icon size={24} strokeWidth={1.4} color="#C2B2A0" />
-      </span>
-    </>
-  );
-}
-
-function ReasonCard({ card, index, isMobile }: { card: Card; index: number; isMobile: boolean }) {
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.8, delay: index * 0.15, ease: EASE }}
-      style={panelStyle}
-    >
-      <PanelIcons icon={card.icon} index={index} />
-      <h3 style={{ ...titleStyle, fontSize: isMobile ? '13px' : titleStyle.fontSize }}>{card.label}</h3>
-      <div style={ruleStyle} />
-      <p
-        lang="en-GB"
-        style={{
-          position: 'relative',
-          zIndex: 1,
-          fontSize: isMobile ? 14 : 15,
-          lineHeight: 1.6,
-          color: 'rgba(255,255,255,0.72)',
-          textAlign: 'left',
-        }}
-      >
-        {card.desc}
-      </p>
-    </motion.article>
-  );
-}
 
 export default function AboutSovran() {
   const ref = useRef<HTMLElement>(null);
@@ -215,7 +102,7 @@ export default function AboutSovran() {
             margin: 0,
           }}
         >
-          Why Your Design Pack Comes First.
+          Why Your Design Pack Is Complimentary.
         </h3>
 
         <p
@@ -234,26 +121,94 @@ export default function AboutSovran() {
           your story.
         </p>
 
-        <div
-          style={
-            isMobile
-              ? { display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '32px' }
-              : {
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '24px',
-                  maxWidth: '880px',
-                  marginTop: '40px',
-                  marginLeft: 'auto',
-                  marginRight: 'auto',
-                  alignItems: 'stretch',
-                }
-          }
-        >
-          {cards.map((card, i) => (
-            <ReasonCard key={card.label} card={card} index={i} isMobile={isMobile} />
-          ))}
-        </div>
+        {SHOW_REVIEW && (
+          <motion.figure
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.9, ease: EASE }}
+            style={{
+              margin: isMobile ? '40px 0 0' : '56px auto 0',
+              maxWidth: 1000,
+              position: 'relative',
+              overflow: 'hidden',
+              borderRadius: 6,
+              background: '#141414',
+              aspectRatio: isMobile ? '4 / 5' : '16 / 9',
+            }}
+          >
+            <img
+              src={REVIEW.image}
+              alt={REVIEW.alt}
+              loading="lazy"
+              decoding="async"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                pointerEvents: 'none',
+                background:
+                  'linear-gradient(to top, rgba(10,10,10,0.88) 0%, rgba(10,10,10,0.55) 35%, rgba(10,10,10,0) 65%)',
+              }}
+            />
+            <figcaption
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                padding: isMobile ? '0 22px 24px' : '0 44px 40px',
+                maxWidth: 700,
+                textAlign: 'left',
+              }}
+            >
+              <span
+                aria-hidden="true"
+                style={{
+                  display: 'block',
+                  color: '#C2B2A0',
+                  fontSize: isMobile ? 40 : 52,
+                  lineHeight: 0.8,
+                  fontFamily: 'Georgia, serif',
+                }}
+              >
+                {'“'}
+              </span>
+              <blockquote
+                style={{
+                  margin: 0,
+                  color: '#FFFFFF',
+                  fontSize: isMobile ? 16 : 20,
+                  lineHeight: 1.5,
+                  fontWeight: 400,
+                }}
+              >
+                {REVIEW.quote}
+              </blockquote>
+              <p
+                style={{
+                  margin: '14px 0 0',
+                  color: '#C2B2A0',
+                  fontSize: 12,
+                  letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                  fontWeight: 600,
+                }}
+              >
+                {REVIEW.name}
+              </p>
+            </figcaption>
+          </motion.figure>
+        )}
       </div>
     </section>
   );
