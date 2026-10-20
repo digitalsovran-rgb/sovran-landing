@@ -98,20 +98,28 @@ export default function WhatYouDiscover() {
                   color="#C2B2A0"
                   style={{ display: 'block', margin: '0 auto 16px' }}
                 />
+                {/* Every title reserves two lines, so the descriptions start at the same height. */}
                 <h3
                   style={{
                     color: '#FFFFFF',
                     fontSize: isMobile ? '15px' : '17px',
                     fontWeight: 700,
+                    lineHeight: isMobile ? 1.25 : undefined,
+                    minHeight: '2.5em',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center',
                     margin: '0 0 8px',
                   }}
                 >
                   {item.title}
                 </h3>
                 <p
-                  className="sov-justify sov-justify-l sov-nohyph"
+                  className={isMobile ? 'sov-nohyph' : 'sov-justify sov-justify-l sov-nohyph'}
                   lang="en-GB"
                   style={{
+                    textAlign: isMobile ? 'left' : undefined,
                     fontSize: isMobile ? '13px' : '14px',
                     lineHeight: 1.55,
                     color: 'rgba(255,255,255,0.7)',
