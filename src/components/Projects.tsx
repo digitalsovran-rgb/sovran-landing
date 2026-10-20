@@ -1,25 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 
-// Placeholder projects: three images each, shown in turn on the stage.
+// Featured projects, each with its own number of images, shown in turn on the stage.
 const PROJECTS = [
   {
     title: 'New Build',
     location: 'Cobham, KT11',
-    desc: 'A stone country house with an arched loggia, made for long summer evenings in the garden.',
-    images: ['/media/country1.webp', '/media/country3.webp', '/media/country2.webp'],
+    desc: 'A stone country house with an arched loggia, a spa below ground and living rooms opening onto the garden.',
+    images: ['/media/pr1.webp', '/media/pr1-2.webp', '/media/pr1-3.webp', '/media/pr1-4.webp'],
   },
   {
     title: 'Townhouse Renovation',
-    location: 'Chelsea, SW3',
-    desc: 'A dark joinery kitchen with a marble island, opening onto the dining room and the light from the tall windows.',
-    images: ['/media/centralone.webp', '/media/basement.webp', '/media/country1.webp'],
+    location: 'Kensington, W8',
+    desc: 'A white stucco townhouse reworked inside, with a marble kitchen and a drawing room framed by tall windows.',
+    images: ['/media/pr2.webp', '/media/pr2-1.webp', '/media/pr2-2.webp'],
   },
   {
     title: 'Full Renovation',
-    location: 'Beaconsfield, HP9',
-    desc: 'A red brick Georgian house restored to full proportion, with a still pond along the approach.',
-    images: ['/media/country2.webp', '/media/country3.webp', '/media/centralone.webp'],
+    location: 'Mayfair, W1',
+    desc: 'A classical facade with a reimagined interior, from a curved sitting room to a marble staircase hall.',
+    images: ['/media/pr3.webp', '/media/pr3-1.webp', '/media/pr3-2.webp', '/media/pr3-3.webp'],
   },
 ];
 
@@ -40,7 +40,7 @@ export default function Projects() {
   const downRef = useRef<{ x: number; y: number } | null>(null);
 
   const project = PROJECTS[p];
-  const imageCount = project.images.length;
+  const n = project.images.length;
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768);
@@ -60,7 +60,7 @@ export default function Projects() {
 
   // Steps through the active project's images, then on to the next project.
   const next = () => {
-    if (i < imageCount - 1) {
+    if (i < n - 1) {
       setI(i + 1);
     } else {
       setP((p + 1) % PROJECTS.length);
@@ -112,8 +112,8 @@ export default function Projects() {
     }
   };
 
-  const progressFrom = `${(i / imageCount) * 100}%`;
-  const progressTo = inView && !reduced ? `${((i + 1) / imageCount) * 100}%` : progressFrom;
+  const progressFrom = `${(i / n) * 100}%`;
+  const progressTo = inView && !reduced ? `${((i + 1) / n) * 100}%` : progressFrom;
 
   return (
     <section
