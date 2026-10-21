@@ -34,8 +34,8 @@
     <!-- Preload the first hero video poster so the browser can start fetching it straight from
          the raw HTML. This SPA has no SSR, so without this hint the poster is only requested
          after the JS bundle has downloaded, parsed, executed, and React has mounted Hero. -->
-    <link rel="preload" as="image" href="/media/vidher1mob-poster.webp" media="(max-width: 767px)" fetchpriority="high">
-    <link rel="preload" as="image" href="/media/vidher1-poster.webp" media="(min-width: 768px)" fetchpriority="high">
+    <link rel="preload" as="image" href="/media/hero-mob-poster.webp" media="(max-width: 767px)" fetchpriority="high">
+    <link rel="preload" as="image" href="/media/hero-pc-poster.webp" media="(min-width: 768px)" fetchpriority="high">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

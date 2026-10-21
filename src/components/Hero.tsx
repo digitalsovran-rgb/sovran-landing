@@ -11,17 +11,7 @@ const LOGO_RATIO = 222 / 800;
 // The hero content must start at least this far below the logo's bottom edge.
 const LOGO_CLEARANCE = 48;
 
-const desktopVideos = ['/media/vidher1.mp4', '/media/vidher2.mp4', '/media/vidher3.mp4'];
-const desktopPosters = ['/media/vidher1-poster.webp', '/media/vidher2-poster.webp', '/media/vidher3-poster.webp'];
-const mobileVideos = ['/media/vidher1mob.mp4', '/media/vidher2mob.mp4', '/media/vidher3mob.mp4'];
-const mobilePosters = ['/media/vidher1mob-poster.webp', '/media/vidher2mob-poster.webp', '/media/vidher3mob-poster.webp'];
-
-const CLIP_COUNT = 3;
-const TRIGGER_S = 2.5;
-const FADE_MS = 500;
-const CLEANUP_MS = 600;
-
-// Reduced motion and data saver users get the first poster as a still image, no video at all.
+// Reduced motion and data saver users get the poster as a still image, no video at all.
 function shouldSkipVideo(): boolean {
   if (typeof window === 'undefined') return false;
   const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
@@ -40,7 +30,6 @@ const coverStyle: React.CSSProperties = {
 
 export default function Hero() {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
-  const [failed, setFailed] = useState(false);
   const [ctaHovered, setCtaHovered] = useState(false);
   const [skipVideo] = useState(shouldSkipVideo);
 
@@ -48,20 +37,12 @@ export default function Hero() {
   const logoBottom = LOGO_TOP + logoWidth * LOGO_RATIO;
   const heroPaddingTop = Math.max(Math.ceil(logoBottom + LOGO_CLEARANCE), isMobile ? 96 : 140);
 
-  const videos = isMobile ? mobileVideos : desktopVideos;
-  const posters = isMobile ? mobilePosters : desktopPosters;
-  const showStatic = skipVideo || failed;
+  const videoSrc = isMobile ? '/media/hero-mob.mp4' : '/media/hero-pc.mp4';
+  const posterSrc = isMobile ? '/media/hero-mob-poster.webp' : '/media/hero-pc-poster.webp';
 
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([null, null, null]);
-  const activeRef = useRef(0);
-  const stoppedRef = useRef(false);
-  const warmedRef = useRef(false);
-  // One flag per clip so its crossfade can only start once per play-through.
-  const guardRef = useRef<boolean[]>([false, false, false]);
-  const timersRef = useRef<number[]>([]);
-  const cleanupsRef = useRef<(() => void)[]>([]);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  // Crossing the breakpoint swaps the clip set, so the sequence restarts from clip 1.
+  // Crossing the breakpoint swaps the video, which then loads from the start.
   useEffect(() => {
     let wasMobile = window.innerWidth < 768;
     const handler = () => {
@@ -74,137 +55,12 @@ export default function Hero() {
     return () => window.removeEventListener('resize', handler);
   }, []);
 
-  const later = (fn: () => void, ms: number) => {
-    timersRef.current.push(window.setTimeout(fn, ms));
-  };
-
-  // One-shot listener that is also removed if the component unmounts or restarts first.
-  const listenOnce = (el: HTMLVideoElement, type: string, fn: () => void) => {
-    const handler = () => {
-      el.removeEventListener(type, handler);
-      fn();
-    };
-    el.addEventListener(type, handler);
-    cleanupsRef.current.push(() => el.removeEventListener(type, handler));
-  };
-
-  const clearAll = () => {
-    timersRef.current.forEach((id) => window.clearTimeout(id));
-    timersRef.current = [];
-    cleanupsRef.current.forEach((fn) => fn());
-    cleanupsRef.current = [];
-  };
-
-  // The first clip could not start (autoplay blocked, low power mode): fall back to the poster.
-  const stopRotation = () => {
-    stoppedRef.current = true;
-    clearAll();
-    setFailed(true);
-  };
-
-  // A later clip could not start: freeze the rotation and leave the current clip on screen.
-  const haltRotation = () => {
-    stoppedRef.current = true;
-    clearAll();
-  };
-
-  // Clips 2 and 3 stay at metadata only until clip 1 is actually playing, so they never
-  // compete with the first poster and clip for bandwidth.
-  const warmOtherClips = () => {
-    if (warmedRef.current) return;
-    warmedRef.current = true;
-    for (let i = 1; i < CLIP_COUNT; i++) {
-      const el = videoRefs.current[i];
-      if (!el) continue;
-      el.preload = 'auto';
-      el.load();
-    }
-  };
-
-  const crossfade = (from: number) => {
-    if (stoppedRef.current || activeRef.current !== from || guardRef.current[from]) return;
-    guardRef.current[from] = true;
-
-    const to = (from + 1) % CLIP_COUNT;
-    const current = videoRefs.current[from];
-    const next = videoRefs.current[to];
-    if (!current || !next) return;
-
-    const startFade = () => {
-      if (stoppedRef.current) return;
-      activeRef.current = to;
-      const transition = `opacity ${FADE_MS}ms ease`;
-      current.style.transition = transition;
-      next.style.transition = transition;
-      next.style.zIndex = '2';
-      current.style.zIndex = '1';
-      next.style.opacity = '1';
-      current.style.opacity = '0';
-
-      later(() => {
-        current.pause();
-        current.currentTime = 0;
-        current.style.transition = 'none';
-        current.style.opacity = '0';
-        current.style.zIndex = '0';
-        guardRef.current[from] = false;
-      }, CLEANUP_MS);
-    };
-
-    const begin = () => {
-      if (stoppedRef.current) return;
-      next.currentTime = 0;
-      const started = next.play();
-      if (!started) return;
-      started
-        .then(() => {
-          if (stoppedRef.current) return;
-          if ('requestVideoFrameCallback' in next) {
-            const handle = next.requestVideoFrameCallback(() => startFade());
-            cleanupsRef.current.push(() => next.cancelVideoFrameCallback(handle));
-          } else {
-            listenOnce(next, 'playing', startFade);
-          }
-        })
-        .catch(haltRotation);
-    };
-
-    // The incoming clip must be able to play through before the fade starts. Until then the
-    // current clip stays on screen, holding its last frame if it has already finished.
-    if (next.readyState < 3) {
-      listenOnce(next, 'canplay', begin);
-    } else {
-      begin();
-    }
-  };
-
-  const handleTimeUpdate = (index: number) => {
-    if (index !== activeRef.current) return;
-    const el = videoRefs.current[index];
-    if (el && el.currentTime >= TRIGGER_S) crossfade(index);
-  };
-
-  const handlePlaying = (index: number) => {
-    if (index === 0) warmOtherClips();
-  };
-
-  // (Re)start the sequence from clip 1 on mount and whenever the breakpoint flips.
+  // Backs up autoPlay. If playback is refused (autoplay blocked, low power mode), the
+  // video's poster simply stays on screen.
   useEffect(() => {
-    if (showStatic) return;
-    activeRef.current = 0;
-    stoppedRef.current = false;
-    warmedRef.current = false;
-    guardRef.current = [false, false, false];
-
-    const first = videoRefs.current[0];
-    if (first) {
-      first.muted = true;
-      first.play()?.catch(stopRotation);
-    }
-    return clearAll;
-    // stopRotation and clearAll only touch refs and stable setters
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobile, showStatic]);
+    if (skipVideo) return;
+    videoRef.current?.play()?.catch(() => {});
+  }, [isMobile, skipVideo]);
 
   const scrollToForm = () => {
     document.getElementById('consultation')?.scrollIntoView({ behavior: 'smooth' });
@@ -249,14 +105,12 @@ export default function Hero() {
           backgroundColor: '#0a0a0a',
         }}
       >
-        {/* Background: three short clips stacked, one visible at a time. The next clip fades in
-            over the current one, so there is no dip between clips. */}
-        {/* isolation keeps the clips' own z-index values inside this wrapper, so the overlay and
-            scrim below always paint on top of whichever clip is showing. */}
+        {/* Background: one looping video per breakpoint. The key remounts it when the
+            breakpoint flips, so the matching file loads. */}
         <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'hidden', isolation: 'isolate' }}>
-          {showStatic ? (
+          {skipVideo ? (
             <img
-              src={posters[0]}
+              src={posterSrc}
               alt=""
               aria-hidden="true"
               fetchPriority="high"
@@ -264,34 +118,25 @@ export default function Hero() {
               style={coverStyle}
             />
           ) : (
-            videos.map((src, i) => (
-              <video
-                key={`${isMobile ? 'm' : 'd'}-${i}`}
-                ref={(el) => {
-                  videoRefs.current[i] = el;
-                  if (el) el.muted = true;
-                }}
-                src={src}
-                poster={posters[i]}
-                muted
-                playsInline
-                autoPlay={i === 0}
-                preload={i === 0 ? 'auto' : 'metadata'}
-                aria-hidden="true"
-                tabIndex={-1}
-                disablePictureInPicture
-                onPlaying={() => handlePlaying(i)}
-                onTimeUpdate={() => handleTimeUpdate(i)}
-                onEnded={() => crossfade(i)}
-                style={{
-                  ...coverStyle,
-                  opacity: i === 0 ? 1 : 0,
-                  zIndex: i === 0 ? 1 : 0,
-                  willChange: 'opacity',
-                  transform: 'translateZ(0)',
-                }}
-              />
-            ))
+            <video
+              key={isMobile ? 'mob' : 'pc'}
+              ref={(el) => {
+                videoRef.current = el;
+                // iOS needs the muted property set, not only the attribute, to allow autoplay.
+                if (el) el.muted = true;
+              }}
+              src={videoSrc}
+              poster={posterSrc}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              aria-hidden="true"
+              tabIndex={-1}
+              disablePictureInPicture
+              style={coverStyle}
+            />
           )}
         </div>
 
