@@ -135,47 +135,40 @@ export default function AboutSovran() {
             style={{
               margin: isMobile ? '40px 0 0' : '56px auto 0',
               maxWidth: 1000,
-              position: 'relative',
-              overflow: 'hidden',
-              borderRadius: 6,
-              background: '#141414',
-              aspectRatio: isMobile ? '3 / 4' : '16 / 9',
+              overflow: 'visible',
             }}
           >
-            {/* The review sits over the top of the photo, on a gradient that fades downwards. */}
-            <img
-              src={REVIEW.image}
-              alt={REVIEW.alt}
-              loading="lazy"
-              decoding="async"
-              style={{
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: isMobile ? '30% center' : 'center',
-                display: 'block',
-              }}
-            />
+            {/* The photo stands on its own, with the review below it as normal text. */}
             <div
               style={{
-                position: 'absolute',
-                inset: 0,
-                pointerEvents: 'none',
-                background: isMobile
-                  ? 'linear-gradient(to bottom, rgba(10,10,10,0.88) 0%, rgba(10,10,10,0.6) 38%, rgba(10,10,10,0) 62%)'
-                  : 'linear-gradient(to bottom, rgba(10,10,10,0.82) 0%, rgba(10,10,10,0.45) 32%, rgba(10,10,10,0) 55%)',
+                position: 'relative',
+                overflow: 'hidden',
+                borderRadius: 6,
+                background: '#141414',
+                aspectRatio: isMobile ? '1 / 1' : '16 / 9',
               }}
-            />
+            >
+              <img
+                src={REVIEW.image}
+                alt={REVIEW.alt}
+                loading="lazy"
+                decoding="async"
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: isMobile ? '25% center' : 'center',
+                  display: 'block',
+                }}
+              />
+            </div>
             <figcaption
               style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                padding: isMobile ? '22px 20px 0' : '36px 44px 0',
-                maxWidth: isMobile ? '100%' : 620,
+                position: 'static',
+                padding: isMobile ? '18px 2px 0' : '22px 4px 0',
+                maxWidth: 640,
                 textAlign: 'left',
               }}
             >
@@ -184,7 +177,7 @@ export default function AboutSovran() {
                 style={{
                   display: 'block',
                   color: '#C2B2A0',
-                  fontSize: isMobile ? 40 : 52,
+                  fontSize: isMobile ? 30 : 36,
                   lineHeight: 0.8,
                   fontFamily: 'Georgia, serif',
                 }}
@@ -193,12 +186,13 @@ export default function AboutSovran() {
               </span>
               <blockquote
                 style={{
-                  margin: 0,
-                  color: '#FFFFFF',
-                  fontSize: isMobile ? 15 : 19,
-                  lineHeight: 1.5,
-                  fontWeight: 400,
-                  textShadow: '0 1px 3px rgba(0,0,0,0.45)',
+                  margin: '6px 0 0',
+                  color: 'rgba(255,255,255,0.86)',
+                  fontSize: isMobile ? 14 : 16,
+                  lineHeight: 1.65,
+                  fontWeight: 300,
+                  letterSpacing: '0.01em',
+                  fontStyle: 'normal',
                 }}
               >
                 {REVIEW.quote}
@@ -207,11 +201,10 @@ export default function AboutSovran() {
                 style={{
                   margin: '12px 0 0',
                   color: '#C2B2A0',
-                  fontSize: 12,
+                  fontSize: 11,
                   letterSpacing: '0.18em',
                   textTransform: 'uppercase',
                   fontWeight: 600,
-                  textShadow: '0 1px 3px rgba(0,0,0,0.45)',
                 }}
               >
                 {REVIEW.name}
