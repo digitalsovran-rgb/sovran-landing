@@ -214,3 +214,8 @@ img {
 /* Larger section heading, used for the Our Work title */
 .sov-h2-lg { font-size: clamp(40px, 5.2vw, 68px); font-weight: 900; letter-spacing: -0.02em; line-height: 1.05; }
 @media (max-width: 767px) { .sov-h2-lg { font-size: clamp(36px, 9.8vw, 50px); } }
+
+/* Hide the native iOS play button overlay and controls on background videos */
+video::-webkit-media-controls-start-playback-button { display: none !important; -webkit-appearance: none; }
+video::-webkit-media-controls { display: none !important; }
+video::-webkit-media-controls-panel { display: none !important; }

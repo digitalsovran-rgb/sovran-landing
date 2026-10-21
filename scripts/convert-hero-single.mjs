@@ -9,8 +9,8 @@ const SOURCE_DIR = './source-videos';
 const OUTPUT_DIR = './public/media';
 
 const JOBS = [
-  { source: 'heropc.mp4', output: 'hero-pc', width: 1920, crf: 26, maxBytes: 6 * 1024 * 1024, landscape: true },
-  { source: 'heromob.mp4', output: 'hero-mob', width: 720, crf: 27, maxBytes: 3 * 1024 * 1024, landscape: false },
+  { source: 'heropc.mp4', output: 'hero-pc', width: 1920, profile: 'high', level: '4.0', crf: 26, maxBytes: 6 * 1024 * 1024, landscape: true },
+  { source: 'heromob.mp4', output: 'hero-mob', width: 540, profile: 'main', level: '3.1', crf: 28, maxBytes: 1.5 * 1024 * 1024, landscape: false },
 ];
 
 // `ffmpeg -i <file>` with no output always exits non-zero, but still prints the stream
@@ -51,7 +51,7 @@ function encode(job, crf) {
   run([
     '-y', '-i', join(SOURCE_DIR, job.source), '-an',
     '-vf', `scale=${job.width}:-2:flags=lanczos,fps=30`,
-    '-c:v', 'libx264', '-profile:v', 'high', '-level', '4.0', '-pix_fmt', 'yuv420p',
+    '-c:v', 'libx264', '-profile:v', job.profile, '-level', job.level, '-pix_fmt', 'yuv420p',
     '-preset', 'slow', '-crf', String(crf),
     '-movflags', '+faststart',
     output,

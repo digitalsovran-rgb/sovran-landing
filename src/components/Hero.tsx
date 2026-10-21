@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 
@@ -55,11 +55,61 @@ export default function Hero() {
     return () => window.removeEventListener('resize', handler);
   }, []);
 
-  // Backs up autoPlay. If playback is refused (autoplay blocked, low power mode), the
-  // video's poster simply stays on screen.
+  // iOS only autoplays a video that is muted as both a property and an attribute, and plays
+  // inline. React does not render the muted attribute, so all of this is set here, before
+  // the source is assigned.
+  const setVideoRef = useCallback(
+    (el: HTMLVideoElement | null) => {
+      videoRef.current = el;
+      if (!el) return;
+      el.muted = true;
+      el.defaultMuted = true;
+      el.setAttribute('muted', '');
+      el.setAttribute('playsinline', '');
+      el.setAttribute('webkit-playsinline', '');
+      if (el.getAttribute('src') !== videoSrc) el.src = videoSrc;
+    },
+    [videoSrc]
+  );
+
+  // Backs up autoPlay: tries again once data arrives, when the tab becomes visible, and on the
+  // first touch, pointer or scroll (some iPhones, for example in Low Power Mode, only allow
+  // playback after an interaction). If playback is refused, the poster stays on screen.
+  // The key on the video remounts it at the breakpoint, so this reruns for the new element.
   useEffect(() => {
     if (skipVideo) return;
-    videoRef.current?.play()?.catch(() => {});
+    const el = videoRef.current;
+    if (!el) return;
+
+    const gestureEvents = ['touchstart', 'pointerdown', 'scroll'] as const;
+
+    function removeGestureListeners() {
+      gestureEvents.forEach((type) => window.removeEventListener(type, tryPlay));
+    }
+
+    function tryPlay() {
+      if (!el || !el.paused) return;
+      el.play()?.then(removeGestureListeners).catch(() => {});
+    }
+
+    function handleVisibility() {
+      if (document.visibilityState === 'visible') tryPlay();
+    }
+
+    el.addEventListener('loadeddata', tryPlay);
+    el.addEventListener('canplay', tryPlay);
+    el.addEventListener('playing', removeGestureListeners);
+    document.addEventListener('visibilitychange', handleVisibility);
+    gestureEvents.forEach((type) => window.addEventListener(type, tryPlay, { passive: true }));
+    tryPlay();
+
+    return () => {
+      el.removeEventListener('loadeddata', tryPlay);
+      el.removeEventListener('canplay', tryPlay);
+      el.removeEventListener('playing', removeGestureListeners);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      removeGestureListeners();
+    };
   }, [isMobile, skipVideo]);
 
   const scrollToForm = () => {
@@ -120,12 +170,7 @@ export default function Hero() {
           ) : (
             <video
               key={isMobile ? 'mob' : 'pc'}
-              ref={(el) => {
-                videoRef.current = el;
-                // iOS needs the muted property set, not only the attribute, to allow autoplay.
-                if (el) el.muted = true;
-              }}
-              src={videoSrc}
+              ref={setVideoRef}
               poster={posterSrc}
               autoPlay
               muted
