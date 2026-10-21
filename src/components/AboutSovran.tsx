@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 
-// PLACEHOLDER review. Replace with the real client review and photo, or set SHOW_REVIEW to false, before running ad traffic.
+// Client review. Keep the quote word for word as supplied by the client.
 const SHOW_REVIEW = true;
 const REVIEW = {
-  image: '/media/centralone.webp',
-  alt: 'A Sovran home',
+  image: '/media/newreview.webp',
+  alt: 'A Sovran home designed for the Harrington family',
   quote:
-    'From the first drawing to the day we moved in, nothing was left to chance. Our home is better than anything we pictured.',
-  name: 'Client Name, Location',
+    'Working with Sovran was an exceptional experience. They created a space that feels both elegant and effortless, with every detail carefully considered. It truly feels like a home designed around our lifestyle.',
+  name: 'Olivia Harrington',
 };
 
 // One statement under the heading.
@@ -27,6 +27,23 @@ export default function AboutSovran() {
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
+
+  const reviewImage = (
+    <img
+      src={REVIEW.image}
+      alt={REVIEW.alt}
+      loading="lazy"
+      decoding="async"
+      style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        display: 'block',
+      }}
+    />
+  );
 
   return (
     <section ref={ref} data-bg="dark" style={{ backgroundColor: '#4A443C', padding: '100px 0' }}>
@@ -132,49 +149,62 @@ export default function AboutSovran() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.9, ease: EASE }}
-            style={{
-              margin: isMobile ? '40px 0 0' : '56px auto 0',
-              maxWidth: 1000,
-              position: 'relative',
-              overflow: 'hidden',
-              borderRadius: 6,
-              background: '#141414',
-              aspectRatio: isMobile ? '4 / 5' : '16 / 9',
-            }}
+            style={
+              isMobile
+                ? { margin: '40px 0 0', maxWidth: 1000, position: 'relative', overflow: 'visible' }
+                : {
+                    margin: '56px auto 0',
+                    maxWidth: 1000,
+                    position: 'relative',
+                    overflow: 'hidden',
+                    borderRadius: 6,
+                    background: '#141414',
+                    aspectRatio: '16 / 9',
+                  }
+            }
           >
-            <img
-              src={REVIEW.image}
-              alt={REVIEW.alt}
-              loading="lazy"
-              decoding="async"
-              style={{
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                display: 'block',
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                pointerEvents: 'none',
-                background:
-                  'linear-gradient(to top, rgba(10,10,10,0.88) 0%, rgba(10,10,10,0.55) 35%, rgba(10,10,10,0) 65%)',
-              }}
-            />
+            {/* Mobile: the photo stands on its own and the review sits below it as normal text.
+                Desktop: the review sits over the photo, on a gradient. */}
+            {isMobile ? (
+              <div
+                style={{
+                  position: 'relative',
+                  overflow: 'hidden',
+                  borderRadius: 6,
+                  background: '#141414',
+                  aspectRatio: '4 / 5',
+                }}
+              >
+                {reviewImage}
+              </div>
+            ) : (
+              <>
+                {reviewImage}
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    pointerEvents: 'none',
+                    background:
+                      'linear-gradient(to top, rgba(10,10,10,0.88) 0%, rgba(10,10,10,0.55) 35%, rgba(10,10,10,0) 65%)',
+                  }}
+                />
+              </>
+            )}
             <figcaption
-              style={{
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                bottom: 0,
-                padding: isMobile ? '0 22px 24px' : '0 44px 40px',
-                maxWidth: 700,
-                textAlign: 'left',
-              }}
+              style={
+                isMobile
+                  ? { position: 'static', padding: '22px 4px 0', textAlign: 'left' }
+                  : {
+                      position: 'absolute',
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      padding: '0 44px 40px',
+                      maxWidth: 700,
+                      textAlign: 'left',
+                    }
+              }
             >
               <span
                 aria-hidden="true"
@@ -193,7 +223,7 @@ export default function AboutSovran() {
                   margin: 0,
                   color: '#FFFFFF',
                   fontSize: isMobile ? 16 : 20,
-                  lineHeight: 1.5,
+                  lineHeight: isMobile ? 1.55 : 1.5,
                   fontWeight: 400,
                 }}
               >
