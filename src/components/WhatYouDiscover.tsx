@@ -2,25 +2,26 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Compass, LayoutGrid, Box, Milestone } from 'lucide-react';
 
+// Each title is stored as two parts: joined by a space on desktop, split over two lines on mobile.
 const items = [
   {
     icon: Compass,
-    title: 'Your Planning Potential',
+    title: ['Your Planning', 'Potential'],
     text: 'An early read on what your property can gain approval for.',
   },
   {
     icon: LayoutGrid,
-    title: 'Layout Selection',
+    title: ['Layout', 'Selection'],
     text: 'Options drawn for your space, ready to compare and refine.',
   },
   {
     icon: Box,
-    title: 'Realistic Renders',
+    title: ['Realistic', 'Renders'],
     text: "A true picture of what you're investing in, through 3D illustrations.",
   },
   {
     icon: Milestone,
-    title: 'Your Project Roadmap',
+    title: ['Your Project', 'Roadmap'],
     text: 'Each stage and its investment, with expert guidance.',
   },
 ];
@@ -77,7 +78,7 @@ export default function WhatYouDiscover() {
             const Icon = item.icon;
             return (
               <motion.div
-                key={item.title}
+                key={item.title.join(' ')}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
@@ -98,7 +99,8 @@ export default function WhatYouDiscover() {
                   color="#C2B2A0"
                   style={{ display: 'block', margin: '0 auto 16px' }}
                 />
-                {/* Every title reserves two lines, so the descriptions start at the same height. */}
+                {/* Every title reserves two lines, so the descriptions start at the same height.
+                    The span keeps the title as one flex item, so the line break works inside it. */}
                 <h3
                   style={{
                     color: '#FFFFFF',
@@ -113,13 +115,17 @@ export default function WhatYouDiscover() {
                     margin: '0 0 8px',
                   }}
                 >
-                  {item.title}
+                  <span>
+                    {item.title[0]}
+                    {isMobile ? <br /> : ' '}
+                    {item.title[1]}
+                  </span>
                 </h3>
                 <p
                   className={isMobile ? 'sov-nohyph' : 'sov-justify sov-justify-l sov-nohyph'}
                   lang="en-GB"
                   style={{
-                    textAlign: isMobile ? 'left' : undefined,
+                    textAlign: isMobile ? 'center' : undefined,
                     fontSize: isMobile ? '13px' : '14px',
                     lineHeight: 1.55,
                     color: 'rgba(255,255,255,0.7)',
