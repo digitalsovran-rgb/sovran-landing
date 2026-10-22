@@ -19,7 +19,7 @@ const PROJECTS = [
     title: 'Full Renovation',
     location: 'Mayfair, W1',
     desc: 'A classical facade with a reimagined interior, from a curved sitting room to a marble staircase hall.',
-    images: ['/media/pr3.webp', '/media/pr3-1.webp', '/media/pr3-2.webp', '/media/pr3-3.webp'],
+    images: ['/media/pr3.webp?v=2', '/media/pr3-1.webp?v=2', '/media/pr3-2.webp?v=2', '/media/pr3-3.webp?v=2'],
   },
 ];
 

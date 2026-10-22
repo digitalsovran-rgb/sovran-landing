@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 
-// Client review. Keep the quote word for word as supplied by the client.
+// Client review. Keep the quote word for word as supplied by the client. It is split in two
+// for the Read more control; joined with a single space, the halves are the full quote.
 const SHOW_REVIEW = true;
+const QUOTE_1 =
+  'Ever since I was a child, I dreamed of living in a home filled with natural light, open space, and beautiful views. After years in a typical three-bedroom house, walking into this home felt life-changing.';
+const QUOTE_2 =
+  "The soaring ceilings, floor-to-ceiling windows, and incredible sense of space make every day feel special. More than anything, I'm excited for the memories our family will create here for years to come.";
 const REVIEW = {
   image: '/media/newreview.webp',
   alt: 'A Sovran home designed for the Harrington family',
-  quote:
-    "Ever since I was a child, I dreamed of living in a home filled with natural light, open space, and beautiful views. After years in a typical three-bedroom house, walking into this home felt life-changing. The soaring ceilings, floor-to-ceiling windows, and incredible sense of space make every day feel special. More than anything, I'm excited for the memories our family will create here for years to come.",
   name: 'Olivia Harrington',
 };
 
@@ -23,6 +26,7 @@ export default function AboutSovran() {
   const isInView = useInView(ref, { once: true, margin: '0px 0px -150px 0px', amount: 0.2 });
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768);
@@ -148,8 +152,7 @@ export default function AboutSovran() {
             style={{ ...cardTextStyle, margin: '14px 0 0' }}
           >
             We stand against homeowners spending hundreds of thousands of pounds on a project they regret,
-            misinformed, misadvised or misguided along the way. The design pack exists to test each decision on
-            paper first, long before anything is built.
+            misinformed, misadvised or misguided along the way.
           </p>
           <AnimatePresence initial={false}>
             {moreOpen && (
@@ -163,8 +166,9 @@ export default function AboutSovran() {
                 transition={{ duration: 0.35 }}
                 style={{ ...cardTextStyle, overflow: 'hidden', marginTop: 10 }}
               >
-                In the research, layout, lighting and quality topped the list of regrets, and more than half of
-                those homeowners paid to have the work redone.
+                The design pack exists to test each decision on paper first, long before anything is built. In
+                the research, layout, lighting and quality topped the list of regrets, and more than half of those
+                homeowners paid to have the work redone.
               </motion.p>
             )}
           </AnimatePresence>
@@ -176,7 +180,7 @@ export default function AboutSovran() {
               background: 'none',
               border: 'none',
               padding: 0,
-              marginTop: 12,
+              marginTop: 10,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
@@ -293,8 +297,50 @@ export default function AboutSovran() {
                   fontStyle: 'normal',
                 }}
               >
-                {REVIEW.quote}
+                {QUOTE_1}
+                <AnimatePresence initial={false}>
+                  {reviewOpen && (
+                    <motion.span
+                      key="quote-2"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.35 }}
+                      style={{ display: 'block', marginTop: 8, overflow: 'hidden' }}
+                    >
+                      {QUOTE_2}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </blockquote>
+              <button
+                type="button"
+                aria-expanded={reviewOpen}
+                onClick={() => setReviewOpen((open) => !open)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  margin: '10px 0 0',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  fontSize: 11,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.16em',
+                  fontWeight: 600,
+                  color: '#C2B2A0',
+                }}
+              >
+                {reviewOpen ? 'Less' : 'Read her story'}
+                <ArrowRight
+                  size={14}
+                  color="#C2B2A0"
+                  aria-hidden="true"
+                  style={{ transform: reviewOpen ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}
+                />
+              </button>
               <p
                 style={{
                   margin: '12px 0 0',

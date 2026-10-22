@@ -18,12 +18,12 @@ function seededRandom(seed: number): number {
 }
 
 /**
- * Deterministic slot count between 4 and 8 (inclusive) that only changes at the UK
- * 00:00/12:00 boundary — same UK date + 12-hour period always yields the same number.
+ * Deterministic slot count between 2 and 5 (inclusive) that only changes at the UK
+ * 00:00/12:00 boundary: same UK date + 12-hour period always yields the same number.
  */
 export function getSlotCount(): number {
   const { year, month, day, hour } = getUKDateParts(new Date());
   const period = hour < 12 ? 0 : 1;
   const seed = year * 1000000 + month * 10000 + day * 100 + period;
-  return Math.floor(seededRandom(seed) * 5) + 4;
+  return Math.floor(seededRandom(seed) * 4) + 2;
 }
