@@ -61,7 +61,7 @@ export default function WhatYouDiscover() {
             Your Design Pack
           </p>
           <h2 className="sov-h2" style={{ color: '#FFFFFF', margin: 0 }}>
-            Clarity For Your Biggest Decision.
+            Clarity Before Your Biggest Investment.
           </h2>
         </motion.div>
 

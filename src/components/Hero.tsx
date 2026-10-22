@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 
 // What the design pack contains, shown as a checklist under the headline.
-const HERO_CHECKLIST = ['Floor plans', '3D visuals', 'A mood board', 'A full project proposal'];
+const HERO_CHECKLIST = ['Floor plans', '3D visuals', 'Planning and budgeting insight', 'A 30+ page home blueprint'];
 
 // Fixed logo geometry. The image is 800 by 222, so its rendered height follows from its width.
 const LOGO_TOP = 24;
@@ -286,13 +286,13 @@ export default function Hero() {
               fontFamily: 'Inter, sans-serif',
             }}
           >
-            A Complimentary Design Pack For Your Home.
+            A Complimentary Design Pack For Your Project.
           </motion.h1>
 
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', width: '100%' }}>
           {/* Not Framer Motion-animated (unlike its siblings): this checklist is the likely LCP
               element on mobile, and animating it would delay the final paint LCP measures. */}
-          <div style={{ marginTop: isMobile ? 22 : 28 }}>
+          <div style={{ marginTop: isMobile ? 34 : 28 }}>
             <ul
               style={{
                 listStyle: 'none',
@@ -340,7 +340,7 @@ export default function Hero() {
               textShadow: '0 1px 3px rgba(0,0,0,0.5)',
             }}
           >
-            Included with every construction project over £100K.
+            For homeowners ready to invest £100K in designing and building their home.
           </p>
 
           <motion.div
@@ -348,7 +348,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.35 }}
-            style={{ marginTop: isMobile ? 24 : 28, alignSelf: 'flex-start' }}
+            style={{ marginTop: isMobile ? 34 : 28, alignSelf: 'flex-start' }}
           >
             <button
               type="button"

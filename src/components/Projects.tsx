@@ -139,7 +139,7 @@ export default function Projects() {
               margin: '0 0 14px',
             }}
           >
-            Landmark Homes
+            Showcased Work
           </p>
           <h2
             className="sov-h2-lg"
@@ -150,7 +150,7 @@ export default function Projects() {
               fontFamily: 'Inter, sans-serif',
             }}
           >
-            Spaces That Leave A Mark.
+            Homes That Leave A Mark.
           </h2>
           <p
             className="sov-justify sov-justify-l sov-nohyph"
@@ -163,9 +163,10 @@ export default function Projects() {
               margin: '16px auto 0',
             }}
           >
-            A standard proven across years of delivered projects. Working side by side with each client,
-            Sovran turns what they imagine into remarkable homes. With a commitment to prestigious
-            property, that same design expertise now comes to you.
+            Designed for families who seek a true sense of belonging in the space they envision. A private
+            sanctuary that reflects who they are, where loved ones eagerly gather, guests stay longer and
+            each passing year adds another chapter of memories. That quiet pride is the mark your home can
+            leave.
           </p>
           <div
             style={{

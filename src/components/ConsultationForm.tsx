@@ -38,8 +38,12 @@ const DEFAULT_TYPE = 'Home Extension';
 const DEFAULT_BUDGET = '£100K – £400K';
 const DEFAULT_TIMELINE = 'ASAP';
 
-// Shown under an option's text as a second line. Display only: it is never part of a value.
-const budgetNotes: Record<string, string> = { '£100K – £400K': 'Minimum' };
+// Shown under each option's text as a second line. Display only: it is never part of a value.
+const budgetNotes: Record<string, string> = {
+  '£100K – £400K': 'Most Popular',
+  '£400K – £1M': 'Bespoke Living',
+  '£1M+': 'Landmark Homes',
+};
 
 const progressMap: Partial<Record<Screen, string>> = {
   type: '33%',
@@ -50,10 +54,10 @@ const progressMap: Partial<Record<Screen, string>> = {
 const screenHeadings: Record<Screen, string> = {
   type: "I'm looking for:",
   invest: 'My investment',
-  start: "I'm ready to hire.",
-  loading: 'Checking Our Availability',
-  result: 'Good News: Your Design Pack Is Available.',
-  contact: 'Enter your details and we will call you shortly.',
+  start: "I'm ready to start.",
+  loading: 'Reviewing Your Project',
+  result: 'Good News: Your Project Qualifies For A Design Pack.',
+  contact: 'Almost Done: Your Contact Details.',
 };
 
 // UI labels mapped to the values the Monday board understands.
@@ -892,31 +896,6 @@ export default function ConsultationForm() {
         style={{ backgroundColor: 'var(--sov-white)', padding: '100px 0' }}
       >
       <div className="inner">
-        <p
-          style={{
-            fontSize: '13px',
-            fontWeight: 600,
-            color: 'var(--sov-greige-dark)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.15em',
-            textAlign: 'center',
-            marginBottom: '10px',
-          }}
-        >
-          Limited Availability This Month
-        </p>
-        <p
-          style={{
-            fontSize: '22px',
-            fontWeight: 700,
-            color: '#0a0a0a',
-            textAlign: 'center',
-            letterSpacing: '-0.01em',
-            marginBottom: '32px',
-          }}
-        >
-          Only {getSlotCount()} slots remain.
-        </p>
         <h2
           style={{
             fontSize: 'clamp(34px, 4vw, 52px)',
@@ -927,26 +906,34 @@ export default function ConsultationForm() {
             marginBottom: 0,
           }}
         >
-          Get My Design Pack.
+          Unlock My Design Pack.
         </h2>
         <p
           style={{
             textAlign: 'center',
-            fontSize: '14px',
-            letterSpacing: '0.04em',
-            color: '#6B655C',
-            margin: '14px 0 0',
-            fontWeight: 400,
+            margin: '12px 0 0',
+            fontSize: 14,
+            fontWeight: 500,
+            letterSpacing: '0.02em',
+            color: '#4A443C',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
           }}
         >
-          The first step to your new home.
+          <span
+            aria-hidden="true"
+            style={{ width: 7, height: 7, borderRadius: '50%', background: '#C2B2A0', flex: '0 0 auto' }}
+          />
+          {`Limited availability: ${getSlotCount()} slots left this month.`}
         </p>
 
         <div
           className={after === 'calendly' ? 'form-inner form-inner-tight' : 'form-inner'}
           style={{
             maxWidth: '860px',
-            margin: '60px auto 0',
+            margin: '44px auto 0',
             backgroundColor: 'rgba(0,0,0,0.04)',
             border: '1px solid rgba(0,0,0,0.08)',
             padding: '60px 80px',
@@ -980,12 +967,11 @@ export default function ConsultationForm() {
                       Sent
                     </p>
                     <h3 style={{ ...stepHeadingStyle, textAlign: 'center', marginBottom: 0 }}>
-                      Your Design Pack Request Has Been Received.
+                      Your Request Has Been Submitted.
                     </h3>
                     <p style={afterBodyStyle}>
-                      Our team will call you shortly to talk through your project. Alternatively, if you would
-                      like to discuss your ideas with one of our design and build specialists, you can book a
-                      consultation now.
+                      A consultation with our design and build specialists is also available, often helping
+                      your request progress sooner.
                     </p>
                     <div style={{ marginTop: 28, display: 'flex', justifyContent: 'center' }}>
                       <NavButton
@@ -1162,6 +1148,7 @@ export default function ConsultationForm() {
                   {/* SCREEN 2: investment */}
                   {screen === 'invest' && (
                     <div style={{ marginBottom: '40px' }}>
+                      <p style={columnLabelStyle}>How much I would like to invest</p>
                       {isMobile ? (
                         <WheelPicker
                           options={budgetOptions}
@@ -1196,7 +1183,9 @@ export default function ConsultationForm() {
                   {/* SCREEN 3: start date */}
                   {screen === 'start' && (
                     <div style={{ marginBottom: '40px' }}>
-                      <p style={columnLabelStyle}>My start date</p>
+                      <p style={{ ...columnLabelStyle, textTransform: 'none' }}>
+                        If I am happy with my design, I would move forward:
+                      </p>
                       {isMobile ? (
                         <WheelPicker
                           options={timelineOptions}
@@ -1259,7 +1248,7 @@ export default function ConsultationForm() {
                           letterSpacing: 'normal',
                         }}
                       >
-                        Checking availability for your design pack...
+                        Checking your details against our criteria...
                       </p>
                     </div>
                   )}
@@ -1276,8 +1265,7 @@ export default function ConsultationForm() {
                           letterSpacing: 'normal',
                         }}
                       >
-                        One of our team will be in touch to begin your design pack, with floor plans, 3D
-                        visuals, a mood board and a full proposal built around your home.
+                        Enter your details to complete your request.
                       </p>
                       <TextInput
                         label="Name"
