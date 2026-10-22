@@ -8,7 +8,7 @@ const REVIEW = {
   image: '/media/newreview.webp',
   alt: 'A Sovran home designed for the Harrington family',
   quote:
-    'Working with Sovran was an exceptional experience. They created a space that feels both elegant and effortless, with every detail carefully considered. It truly feels like a home designed around our lifestyle.',
+    "Ever since I was a child, I dreamed of living in a home filled with natural light, open space, and beautiful views. After years in a typical three-bedroom house, walking into this home felt life-changing. The soaring ceilings, floor-to-ceiling windows, and incredible sense of space make every day feel special. More than anything, I'm excited for the memories our family will create here for years to come.",
   name: 'Olivia Harrington',
 };
 
@@ -210,6 +210,32 @@ export default function AboutSovran() {
               overflow: 'visible',
             }}
           >
+            <p
+              style={{
+                margin: '0 0 8px',
+                fontSize: 11,
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                fontWeight: 600,
+                color: '#C2B2A0',
+                textAlign: 'left',
+              }}
+            >
+              In Their Words
+            </p>
+            <h3
+              style={{
+                margin: '0 0 18px',
+                color: '#FFFFFF',
+                fontSize: isMobile ? 20 : 26,
+                fontWeight: 800,
+                lineHeight: 1.25,
+                letterSpacing: '-0.005em',
+                textAlign: 'left',
+              }}
+            >
+              A Dream Finally Realised.
+            </h3>
             {/* The photo stands on its own, with the review below it as normal text. */}
             <div
               style={{

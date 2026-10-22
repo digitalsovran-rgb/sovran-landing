@@ -390,7 +390,7 @@ function BackLink({ onClick, style }: { onClick: () => void; style?: React.CSSPr
 }
 
 // The 64px tick circle shown on the "sent" and "booked" views.
-function TickCircle() {
+function TickCircle({ marginBottom = 14 }: { marginBottom?: number }) {
   return (
     <div
       style={{
@@ -400,7 +400,7 @@ function TickCircle() {
         border: '1px solid #4A443C',
         display: 'grid',
         placeItems: 'center',
-        margin: '0 auto 14px',
+        margin: `0 auto ${marginBottom}px`,
       }}
     >
       <Check size={26} strokeWidth={1.6} color="#4A443C" />
@@ -953,29 +953,16 @@ export default function ConsultationForm() {
               >
                 {after === 'sent' && (
                   <div style={{ textAlign: 'center' }}>
-                    <TickCircle />
-                    <p
-                      style={{
-                        textTransform: 'uppercase',
-                        fontSize: 13,
-                        letterSpacing: '0.18em',
-                        fontWeight: 600,
-                        color: '#0A0A0A',
-                        margin: '0 0 18px',
-                      }}
-                    >
-                      Sent
-                    </p>
+                    <TickCircle marginBottom={18} />
                     <h3 style={{ ...stepHeadingStyle, textAlign: 'center', marginBottom: 0 }}>
-                      Your Request Has Been Submitted.
+                      Request Submitted.
                     </h3>
                     <p style={afterBodyStyle}>
-                      A consultation with our design and build specialists is also available, often helping
-                      your request progress sooner.
+                      Your next step: a consultation with our design and build specialists.
                     </p>
                     <div style={{ marginTop: 28, display: 'flex', justifyContent: 'center' }}>
                       <NavButton
-                        label="Next Step →"
+                        label="Book A Consultation →"
                         onClick={() => goAfter('choose', 1)}
                         disabled={false}
                         block={isMobile}

@@ -13,7 +13,7 @@ const PROJECTS = [
     title: 'Townhouse Renovation',
     location: 'Kensington, W8',
     desc: 'A white stucco townhouse reworked inside, with a marble kitchen and a drawing room framed by tall windows.',
-    images: ['/media/pr2.webp', '/media/pr2-1.webp', '/media/pr2-2.webp'],
+    images: ['/media/pr2.webp?v=2', '/media/pr2-1.webp', '/media/pr2-2.webp'],
   },
   {
     title: 'Full Renovation',
