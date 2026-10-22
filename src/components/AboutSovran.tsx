@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { ArrowRight, ChevronDown } from 'lucide-react';
+import { ArrowUpRight, ChevronDown } from 'lucide-react';
 
 // Client review. Keep the quote word for word as supplied by the client. It is split in two
 // for the Read more control; joined with a single space, the halves are the full quote.
@@ -20,6 +20,34 @@ const ABOUT_STATEMENT =
   'We believe in a tailored design process, with each space built for a family who will spend the years ahead there, growing and dreaming through the moments that define them. Committed to transcending any single style, we make the final handover a unique experience, one most people only imagine.';
 
 const EASE: [number, number, number, number] = [0.2, 0.7, 0.2, 1];
+
+// Shared look for the Read more / Less toggles on the news card and the review.
+const TOGGLE_COLOR = 'rgba(194,178,160,0.85)';
+const toggleStyle: React.CSSProperties = {
+  fontSize: 10,
+  fontWeight: 400,
+  textTransform: 'uppercase',
+  letterSpacing: '0.16em',
+  color: TOGGLE_COLOR,
+  background: 'none',
+  border: 'none',
+  padding: 0,
+  cursor: 'pointer',
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 5,
+};
+
+function ToggleChevron({ open }: { open: boolean }) {
+  return (
+    <ChevronDown
+      size={13}
+      color={TOGGLE_COLOR}
+      aria-hidden="true"
+      style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}
+    />
+  );
+}
 
 export default function AboutSovran() {
   const ref = useRef<HTMLElement>(null);
@@ -143,7 +171,14 @@ export default function AboutSovran() {
               rel="noopener noreferrer"
               style={{ color: '#C2B2A0', textDecoration: 'underline', textUnderlineOffset: '3px' }}
             >
-              Read the article ↗
+              Read the article
+              <ArrowUpRight
+                size={12}
+                strokeWidth={2}
+                color="#C2B2A0"
+                aria-hidden="true"
+                style={{ display: 'inline-block', verticalAlign: '-1px', marginLeft: 3 }}
+              />
             </a>
           </p>
           <p
@@ -176,29 +211,10 @@ export default function AboutSovran() {
             type="button"
             aria-expanded={moreOpen}
             onClick={() => setMoreOpen((open) => !open)}
-            style={{
-              background: 'none',
-              border: 'none',
-              padding: 0,
-              marginTop: 10,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              fontSize: 11,
-              textTransform: 'uppercase',
-              letterSpacing: '0.16em',
-              fontWeight: 600,
-              color: '#C2B2A0',
-            }}
+            style={{ ...toggleStyle, marginTop: 10 }}
           >
             {moreOpen ? 'Less' : 'Read more'}
-            <ChevronDown
-              size={16}
-              color="#C2B2A0"
-              aria-hidden="true"
-              style={{ transform: moreOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}
-            />
+            <ToggleChevron open={moreOpen} />
           </button>
         </motion.div>
 
@@ -287,6 +303,8 @@ export default function AboutSovran() {
                 {'“'}
               </span>
               <blockquote
+                className="sov-justify sov-justify-l sov-nohyph"
+                lang="en-GB"
                 style={{
                   margin: '6px 0 0',
                   color: 'rgba(255,255,255,0.86)',
@@ -317,33 +335,14 @@ export default function AboutSovran() {
                 type="button"
                 aria-expanded={reviewOpen}
                 onClick={() => setReviewOpen((open) => !open)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  margin: '10px 0 0',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  fontSize: 11,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.16em',
-                  fontWeight: 600,
-                  color: '#C2B2A0',
-                }}
+                style={{ ...toggleStyle, margin: '12px 0 0' }}
               >
-                {reviewOpen ? 'Less' : 'Read her story'}
-                <ArrowRight
-                  size={14}
-                  color="#C2B2A0"
-                  aria-hidden="true"
-                  style={{ transform: reviewOpen ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}
-                />
+                {reviewOpen ? 'Less' : 'Read more'}
+                <ToggleChevron open={reviewOpen} />
               </button>
               <p
                 style={{
-                  margin: '12px 0 0',
+                  margin: '16px 0 0',
                   color: '#C2B2A0',
                   fontSize: 11,
                   letterSpacing: '0.18em',

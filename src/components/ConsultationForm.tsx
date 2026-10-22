@@ -906,7 +906,9 @@ export default function ConsultationForm() {
             marginBottom: 0,
           }}
         >
-          Unlock My Design Pack.
+          Unlock My
+          <br />
+          Design Pack.
         </h2>
         <p
           style={{
