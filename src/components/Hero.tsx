@@ -253,8 +253,9 @@ export default function Hero() {
             (room for the logo above, breathing space below), so this block sits in the
             vertical middle of the full-height hero. The .inner wrapper keeps the page's side
             padding (24px on mobile). The block sits in the middle of the page, the headline is
-            centred within it, and the checklist is left-aligned. On desktop the note and the
-            button are centred; on mobile they are left-aligned too. */}
+            centred within it. On desktop the checklist group, the note and the button are
+            centred under it, with the ticks still aligned inside the group; on mobile they are
+            all left-aligned. */}
         <div className="inner" style={{ position: 'relative', zIndex: 2, width: '100%' }}>
         <div
           className="hero-content"
@@ -293,7 +294,13 @@ export default function Hero() {
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', width: '100%' }}>
           {/* Not Framer Motion-animated (unlike its siblings): this checklist is the likely LCP
               element on mobile, and animating it would delay the final paint LCP measures. */}
-          <div style={{ marginTop: isMobile ? 34 : 28 }}>
+          <div
+            style={
+              isMobile
+                ? { marginTop: 34 }
+                : { marginTop: 28, display: 'flex', justifyContent: 'center', alignSelf: 'stretch' }
+            }
+          >
             <ul
               style={{
                 listStyle: 'none',
