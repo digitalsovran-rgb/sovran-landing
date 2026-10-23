@@ -69,6 +69,107 @@ export default function AboutSovran() {
     color: 'rgba(255,255,255,0.72)',
   };
 
+  // Review pieces, arranged differently on mobile and desktop below.
+  const reviewLabel = (
+    <p
+      style={{
+        margin: '0 0 8px',
+        fontSize: 11,
+        letterSpacing: '0.18em',
+        textTransform: 'uppercase',
+        fontWeight: 600,
+        color: '#C2B2A0',
+        textAlign: 'left',
+      }}
+    >
+      In Their Words
+    </p>
+  );
+
+  const reviewTitle = (
+    <h3
+      style={{
+        margin: '0 0 18px',
+        color: '#FFFFFF',
+        fontSize: isMobile ? 20 : 26,
+        fontWeight: 800,
+        lineHeight: 1.25,
+        letterSpacing: '-0.005em',
+        textAlign: 'left',
+      }}
+    >
+      A Dream Finally Realised.
+    </h3>
+  );
+
+  const reviewPhoto = (
+    <div
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: 6,
+        background: '#141414',
+        aspectRatio: isMobile ? '1 / 1' : '4 / 3',
+      }}
+    >
+      <img
+        src={REVIEW.image}
+        alt={REVIEW.alt}
+        loading="lazy"
+        decoding="async"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          objectPosition: '25% center',
+          display: 'block',
+        }}
+      />
+    </div>
+  );
+
+  const quoteMark = (
+    <span
+      aria-hidden="true"
+      style={{
+        display: 'block',
+        color: '#C2B2A0',
+        fontSize: isMobile ? 30 : 36,
+        lineHeight: 0.8,
+        fontFamily: 'Georgia, serif',
+      }}
+    >
+      {'“'}
+    </span>
+  );
+
+  const blockquoteStyle: React.CSSProperties = {
+    margin: '6px 0 0',
+    color: 'rgba(255,255,255,0.86)',
+    fontSize: isMobile ? 13 : 15,
+    lineHeight: 1.65,
+    fontWeight: 300,
+    letterSpacing: '0.01em',
+    fontStyle: 'normal',
+  };
+
+  const reviewName = (
+    <p
+      style={{
+        margin: '16px 0 0',
+        color: '#C2B2A0',
+        fontSize: 11,
+        letterSpacing: '0.18em',
+        textTransform: 'uppercase',
+        fontWeight: 600,
+      }}
+    >
+      {REVIEW.name}
+    </p>
+  );
+
   return (
     <section ref={ref} data-bg="dark" style={{ backgroundColor: '#4A443C', padding: '100px 0' }}>
       <div className="inner" style={{ maxWidth: '900px' }}>
@@ -163,15 +264,14 @@ export default function AboutSovran() {
           >
             Nearly 1 In 3 UK Homeowners Regret Their Renovation Choices.
           </h3>
-          <p style={{ margin: '8px 0 0', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
-            Direct Line research, November 2025 ·{' '}
+          <p style={{ margin: '8px 0 0', fontSize: 12 }}>
             <a
               href="https://www.directlinegroup.co.uk/en/news/brand-news/2025/06112025.html"
               target="_blank"
               rel="noopener noreferrer"
               style={{ color: '#C2B2A0', textDecoration: 'underline', textUnderlineOffset: '3px' }}
             >
-              Read the article
+              Direct Line research
               <ArrowUpRight
                 size={12}
                 strokeWidth={2}
@@ -180,6 +280,7 @@ export default function AboutSovran() {
                 style={{ display: 'inline-block', verticalAlign: '-1px', marginLeft: 3 }}
               />
             </a>
+            <span style={{ color: 'rgba(255,255,255,0.55)' }}>{' · Nov 25'}</span>
           </p>
           <p
             className="sov-justify sov-justify-l sov-nohyph"
@@ -217,145 +318,78 @@ export default function AboutSovran() {
             <ToggleChevron open={moreOpen} />
           </button>
         </motion.div>
+      </div>
 
-        {SHOW_REVIEW && (
+      {/* The review sits in a wider container than the text above, so the desktop two-column
+          layout can reach 1100px. Mobile padding is the same 24px either way. */}
+      {SHOW_REVIEW && (
+        <div className="inner">
           <motion.figure
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.9, ease: EASE }}
-            style={{
-              margin: isMobile ? '40px 0 0' : '56px auto 0',
-              maxWidth: 1000,
-              overflow: 'visible',
-            }}
+            style={
+              isMobile
+                ? { margin: '40px 0 0', maxWidth: 1000, overflow: 'visible' }
+                : { display: 'flex', gap: 48, alignItems: 'center', maxWidth: 1100, margin: '56px auto 0' }
+            }
           >
-            <p
-              style={{
-                margin: '0 0 8px',
-                fontSize: 11,
-                letterSpacing: '0.18em',
-                textTransform: 'uppercase',
-                fontWeight: 600,
-                color: '#C2B2A0',
-                textAlign: 'left',
-              }}
-            >
-              In Their Words
-            </p>
-            <h3
-              style={{
-                margin: '0 0 18px',
-                color: '#FFFFFF',
-                fontSize: isMobile ? 20 : 26,
-                fontWeight: 800,
-                lineHeight: 1.25,
-                letterSpacing: '-0.005em',
-                textAlign: 'left',
-              }}
-            >
-              A Dream Finally Realised.
-            </h3>
-            {/* The photo stands on its own, with the review below it as normal text. */}
-            <div
-              style={{
-                position: 'relative',
-                overflow: 'hidden',
-                borderRadius: 6,
-                background: '#141414',
-                aspectRatio: isMobile ? '1 / 1' : '16 / 9',
-              }}
-            >
-              <img
-                src={REVIEW.image}
-                alt={REVIEW.alt}
-                loading="lazy"
-                decoding="async"
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: isMobile ? '25% center' : 'center',
-                  display: 'block',
-                }}
-              />
-            </div>
-            <figcaption
-              style={{
-                position: 'static',
-                padding: isMobile ? '18px 2px 0' : '22px 4px 0',
-                maxWidth: 640,
-                textAlign: 'left',
-              }}
-            >
-              <span
-                aria-hidden="true"
-                style={{
-                  display: 'block',
-                  color: '#C2B2A0',
-                  fontSize: isMobile ? 30 : 36,
-                  lineHeight: 0.8,
-                  fontFamily: 'Georgia, serif',
-                }}
-              >
-                {'“'}
-              </span>
-              <blockquote
-                className="sov-justify sov-justify-l sov-nohyph"
-                lang="en-GB"
-                style={{
-                  margin: '6px 0 0',
-                  color: 'rgba(255,255,255,0.86)',
-                  fontSize: isMobile ? 13 : 15,
-                  lineHeight: 1.65,
-                  fontWeight: 300,
-                  letterSpacing: '0.01em',
-                  fontStyle: 'normal',
-                }}
-              >
-                {QUOTE_1}
-                <AnimatePresence initial={false}>
-                  {reviewOpen && (
-                    <motion.span
-                      key="quote-2"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.35 }}
-                      style={{ display: 'block', marginTop: 8, overflow: 'hidden' }}
-                    >
-                      {QUOTE_2}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </blockquote>
-              <button
-                type="button"
-                aria-expanded={reviewOpen}
-                onClick={() => setReviewOpen((open) => !open)}
-                style={{ ...toggleStyle, margin: '12px 0 0' }}
-              >
-                {reviewOpen ? 'Less' : 'Read more'}
-                <ToggleChevron open={reviewOpen} />
-              </button>
-              <p
-                style={{
-                  margin: '16px 0 0',
-                  color: '#C2B2A0',
-                  fontSize: 11,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  fontWeight: 600,
-                }}
-              >
-                {REVIEW.name}
-              </p>
-            </figcaption>
+            {/* Mobile: label and title, then the photo, then the review with a Read more toggle.
+                Desktop: the photo on the left, and the label, title and full review on the right. */}
+            {isMobile ? (
+              <>
+                {reviewLabel}
+                {reviewTitle}
+                {reviewPhoto}
+                <figcaption style={{ position: 'static', padding: '18px 2px 0', maxWidth: 640, textAlign: 'left' }}>
+                  {quoteMark}
+                  <blockquote className="sov-justify sov-justify-l sov-nohyph" lang="en-GB" style={blockquoteStyle}>
+                    {QUOTE_1}
+                    <AnimatePresence initial={false}>
+                      {reviewOpen && (
+                        <motion.span
+                          key="quote-2"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.35 }}
+                          style={{ display: 'block', marginTop: 8, overflow: 'hidden' }}
+                        >
+                          {QUOTE_2}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </blockquote>
+                  <button
+                    type="button"
+                    aria-expanded={reviewOpen}
+                    onClick={() => setReviewOpen((open) => !open)}
+                    style={{ ...toggleStyle, margin: '12px 0 0' }}
+                  >
+                    {reviewOpen ? 'Less' : 'Read more'}
+                    <ToggleChevron open={reviewOpen} />
+                  </button>
+                  {reviewName}
+                </figcaption>
+              </>
+            ) : (
+              <>
+                <div style={{ flex: '0 0 55%' }}>{reviewPhoto}</div>
+                <figcaption style={{ flex: 1, textAlign: 'left' }}>
+                  {reviewLabel}
+                  {reviewTitle}
+                  {quoteMark}
+                  <blockquote className="sov-justify sov-justify-l sov-nohyph" lang="en-GB" style={blockquoteStyle}>
+                    {`${QUOTE_1} ${QUOTE_2}`}
+                  </blockquote>
+                  {reviewName}
+                </figcaption>
+              </>
+            )}
           </motion.figure>
-        )}
-      </div>
+        </div>
+      )}
     </section>
   );
 }

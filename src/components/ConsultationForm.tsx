@@ -198,7 +198,8 @@ function SelectCard({
         fontWeight: 500,
         textTransform: 'uppercase',
         letterSpacing: '0.12em',
-        padding: '24px 16px',
+        // Option cards only render on desktop; mobile uses the wheel picker.
+        padding: '16px 18px',
         textAlign: 'center',
         cursor: 'pointer',
         transition: 'all 0.2s ease',
@@ -893,12 +894,12 @@ export default function ConsultationForm() {
       <section
         id="consultation"
         data-bg="light"
-        style={{ backgroundColor: 'var(--sov-white)', padding: '100px 0' }}
+        style={{ backgroundColor: 'var(--sov-white)', padding: isMobile ? '100px 0' : '56px 0' }}
       >
       <div className="inner">
         <h2
           style={{
-            fontSize: 'clamp(34px, 4vw, 52px)',
+            fontSize: isMobile ? 'clamp(34px, 4vw, 52px)' : 'clamp(32px, 3vw, 42px)',
             fontWeight: 900,
             color: '#0a0a0a',
             letterSpacing: '-0.02em',
@@ -913,7 +914,7 @@ export default function ConsultationForm() {
         <p
           style={{
             textAlign: 'center',
-            margin: '12px 0 0',
+            margin: isMobile ? '12px 0 0' : '10px 0 0',
             fontSize: 14,
             fontWeight: 500,
             letterSpacing: '0.02em',
@@ -935,10 +936,10 @@ export default function ConsultationForm() {
           className={after === 'calendly' ? 'form-inner form-inner-tight' : 'form-inner'}
           style={{
             maxWidth: '860px',
-            margin: '44px auto 0',
+            margin: isMobile ? '44px auto 0' : '28px auto 0',
             backgroundColor: 'rgba(0,0,0,0.04)',
             border: '1px solid rgba(0,0,0,0.08)',
-            padding: '60px 80px',
+            padding: isMobile ? '60px 80px' : '32px 48px',
           }}
         >
           {after !== null ? (
@@ -1063,7 +1064,7 @@ export default function ConsultationForm() {
                   style={{
                     height: '2px',
                     backgroundColor: 'rgba(0,0,0,0.08)',
-                    marginBottom: '48px',
+                    marginBottom: isMobile ? '48px' : '22px',
                     position: 'relative',
                   }}
                 >
@@ -1082,7 +1083,9 @@ export default function ConsultationForm() {
               )}
 
               {/* Heading */}
-              <h3 style={stepHeadingStyle}>{screenHeadings[screen]}</h3>
+              <h3 style={isMobile ? stepHeadingStyle : { ...stepHeadingStyle, fontSize: 24, marginBottom: 18 }}>
+                {screenHeadings[screen]}
+              </h3>
 
               {/* Animated screen content */}
               <AnimatePresence mode="wait" custom={direction}>
@@ -1333,7 +1336,7 @@ export default function ConsultationForm() {
                     alignItems: 'center',
                     gap: '24px',
                     justifyContent: nav.back ? 'space-between' : 'flex-end',
-                    marginTop: '8px',
+                    marginTop: isMobile ? '8px' : '24px',
                   }}
                 >
                   {nav.back && <BackLink onClick={nav.back} />}

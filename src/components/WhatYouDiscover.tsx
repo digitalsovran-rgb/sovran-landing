@@ -60,8 +60,13 @@ export default function WhatYouDiscover() {
           >
             Your Design Pack
           </p>
-          <h2 className="sov-h2" style={{ color: '#FFFFFF', margin: 0 }}>
-            Clarity Before Your Biggest Investment.
+          <h2
+            className="sov-h2"
+            style={{ color: '#FFFFFF', margin: 0, fontSize: isMobile ? 'clamp(28px, 7.6vw, 34px)' : undefined }}
+          >
+            Clarity Before Your
+            <br />
+            Biggest Investment.
           </h2>
         </motion.div>
 

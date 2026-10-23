@@ -253,7 +253,8 @@ export default function Hero() {
             (room for the logo above, breathing space below), so this block sits in the
             vertical middle of the full-height hero. The .inner wrapper keeps the page's side
             padding (24px on mobile). The block sits in the middle of the page, the headline is
-            centred within it, and everything below the headline is left-aligned. */}
+            centred within it, and the checklist is left-aligned. On desktop the note and the
+            button are centred; on mobile they are left-aligned too. */}
         <div className="inner" style={{ position: 'relative', zIndex: 2, width: '100%' }}>
         <div
           className="hero-content"
@@ -332,7 +333,8 @@ export default function Hero() {
 
           <p
             style={{
-              textAlign: 'left',
+              textAlign: isMobile ? 'left' : 'center',
+              alignSelf: isMobile ? undefined : 'stretch',
               margin: '20px 0 0',
               fontSize: isMobile ? 12 : 12.5,
               letterSpacing: '0.06em',
@@ -348,7 +350,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.35 }}
-            style={{ marginTop: isMobile ? 34 : 28, alignSelf: 'flex-start' }}
+            style={{ marginTop: isMobile ? 34 : 28, alignSelf: isMobile ? 'flex-start' : 'center' }}
           >
             <button
               type="button"

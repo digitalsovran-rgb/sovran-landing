@@ -12,13 +12,13 @@ const PROJECTS = [
   {
     title: 'Townhouse Renovation',
     location: 'Kensington, W8',
-    desc: 'A white stucco townhouse reworked inside, with a marble kitchen and a drawing room framed by tall windows.',
+    desc: 'A red brick townhouse reworked inside, with a marble kitchen and a drawing room framed by tall windows.',
     images: ['/media/pr2.webp?v=2', '/media/pr2-1.webp', '/media/pr2-2.webp'],
   },
   {
     title: 'Full Renovation',
     location: 'Mayfair, W1',
-    desc: 'A classical facade with a reimagined interior, from a curved sitting room to a marble staircase hall.',
+    desc: 'A contemporary stone townhouse with an interior reimagined room by room.',
     images: ['/media/pr3.webp?v=2', '/media/pr3-1.webp?v=2', '/media/pr3-2.webp?v=2', '/media/pr3-3.webp?v=2'],
   },
 ];
@@ -119,7 +119,7 @@ export default function Projects() {
     <section
       id="projects"
       data-bg="dark"
-      style={{ backgroundColor: '#0A0A0A', overflow: 'hidden', padding: isMobile ? '72px 0' : '100px 0' }}
+      style={{ backgroundColor: '#0A0A0A', overflow: 'hidden', padding: '72px 0' }}
     >
       <div className="inner">
         <motion.div
@@ -148,9 +148,12 @@ export default function Projects() {
               textAlign: 'center',
               margin: 0,
               fontFamily: 'Inter, sans-serif',
+              fontSize: isMobile ? 'clamp(38px, 10.4vw, 53px)' : 'clamp(42px, 5.5vw, 72px)',
             }}
           >
-            Homes That Leave A Mark.
+            Homes That
+            <br />
+            Leave A Mark.
           </h2>
           <p
             className="sov-justify sov-justify-l sov-nohyph"
@@ -173,25 +176,70 @@ export default function Projects() {
               height: '1px',
               backgroundColor: 'rgba(255,255,255,0.15)',
               marginTop: '24px',
-              marginBottom: isMobile ? '32px' : '40px',
+              marginBottom: '32px',
             }}
           />
         </motion.div>
 
-        <div ref={wrapperRef} style={{ maxWidth: 1000, margin: '0 auto' }}>
-          {/* Project selector */}
+        <div ref={wrapperRef} style={{ maxWidth: isMobile ? 1000 : 1100, margin: '0 auto' }}>
+          {/* Project selector. Mobile: stacked cards. Desktop: compact horizontal cards. */}
           <div
             role="tablist"
             aria-label="Featured projects"
             style={{
               display: 'grid',
               gridTemplateColumns: `repeat(${PROJECTS.length}, 1fr)`,
-              gap: isMobile ? 8 : 16,
-              marginBottom: isMobile ? 14 : 20,
+              gap: isMobile ? 8 : 14,
+              marginBottom: isMobile ? 14 : 18,
             }}
           >
             {PROJECTS.map((proj, k) => {
               const active = k === p;
+              const title = (
+                <span
+                  style={{
+                    fontSize: isMobile ? 11 : 12,
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    lineHeight: 1.25,
+                  }}
+                >
+                  {proj.title}
+                </span>
+              );
+              const location = (
+                <span
+                  style={{
+                    fontSize: isMobile ? 10 : 11,
+                    color: 'rgba(255,255,255,0.6)',
+                    letterSpacing: '0.04em',
+                  }}
+                >
+                  {proj.location}
+                </span>
+              );
+              const track = (
+                <span
+                  style={{
+                    display: 'block',
+                    height: 2,
+                    background: 'rgba(255,255,255,0.12)',
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                  }}
+                >
+                  {active && (
+                    <motion.span
+                      key={`${p}-${i}`}
+                      initial={{ width: progressFrom }}
+                      animate={{ width: progressTo }}
+                      transition={{ duration: SLIDE_MS / 1000, ease: 'linear' }}
+                      style={{ display: 'block', height: '100%', background: '#C2B2A0' }}
+                    />
+                  )}
+                </span>
+              );
               return (
                 <button
                   key={proj.title}
@@ -214,14 +262,15 @@ export default function Projects() {
                     color: '#FFFFFF',
                     WebkitTapHighlightColor: 'transparent',
                     display: 'flex',
-                    flexDirection: 'column',
-                    gap: 8,
+                    flexDirection: isMobile ? 'column' : 'row',
+                    alignItems: isMobile ? undefined : 'center',
+                    gap: isMobile ? 8 : 12,
                   }}
                 >
                   <span
                     style={{
                       display: 'block',
-                      aspectRatio: '4 / 3',
+                      ...(isMobile ? { aspectRatio: '4 / 3' } : { width: 96, height: 64, flex: '0 0 auto' }),
                       overflow: 'hidden',
                       borderRadius: 3,
                       background: '#141414',
@@ -235,50 +284,26 @@ export default function Projects() {
                       style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     />
                   </span>
-                  <span
-                    style={{
-                      fontSize: isMobile ? 11 : 13,
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.06em',
-                      lineHeight: 1.25,
-                    }}
-                  >
-                    {proj.title}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: isMobile ? 10 : 11,
-                      color: 'rgba(255,255,255,0.6)',
-                      letterSpacing: '0.04em',
-                    }}
-                  >
-                    {proj.location}
-                  </span>
-                  <span
-                    style={{
-                      display: 'block',
-                      height: 2,
-                      background: 'rgba(255,255,255,0.12)',
-                      borderRadius: 2,
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {active && (
-                      <motion.span
-                        key={`${p}-${i}`}
-                        initial={{ width: progressFrom }}
-                        animate={{ width: progressTo }}
-                        transition={{ duration: SLIDE_MS / 1000, ease: 'linear' }}
-                        style={{ display: 'block', height: '100%', background: '#C2B2A0' }}
-                      />
-                    )}
-                  </span>
+                  {isMobile ? (
+                    <>
+                      {title}
+                      {location}
+                      {track}
+                    </>
+                  ) : (
+                    <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {title}
+                      {location}
+                      {track}
+                    </span>
+                  )}
                 </button>
               );
             })}
           </div>
 
+          {/* Desktop: stage and caption side by side. Mobile: caption under the stage. */}
+          <div style={isMobile ? undefined : { display: 'flex', gap: 40, alignItems: 'center' }}>
           {/* Stage: the active project's current image, with swipe to step through */}
           <div
             id="project-stage"
@@ -291,6 +316,7 @@ export default function Projects() {
               background: '#141414',
               aspectRatio: isMobile ? '4 / 3' : '16 / 9',
               touchAction: 'pan-y',
+              ...(isMobile ? {} : { flex: '0 0 62%', maxHeight: 'calc(100vh - 300px)', minHeight: 320 }),
             }}
           >
             <AnimatePresence initial={false}>
@@ -354,7 +380,7 @@ export default function Projects() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4 }}
-              style={{ textAlign: 'center', marginTop: isMobile ? 20 : 26 }}
+              style={isMobile ? { textAlign: 'center', marginTop: 20 } : { flex: 1, textAlign: 'left' }}
             >
               <p
                 style={{
@@ -368,7 +394,9 @@ export default function Projects() {
               >
                 {project.location}
               </p>
-              <div style={{ width: 32, height: 2, background: '#C2B2A0', margin: '12px auto' }} />
+              <div
+                style={{ width: 32, height: 2, background: '#C2B2A0', margin: isMobile ? '12px auto' : '12px 0' }}
+              />
               <h3 style={{ color: '#FFFFFF', fontSize: isMobile ? 22 : 26, fontWeight: 700, margin: 0 }}>
                 {project.title}
               </h3>
@@ -377,14 +405,15 @@ export default function Projects() {
                   fontSize: isMobile ? 15 : 16,
                   lineHeight: 1.6,
                   color: 'rgba(255,255,255,0.78)',
-                  margin: '8px auto 0',
-                  maxWidth: 560,
+                  margin: isMobile ? '8px auto 0' : '8px 0 0',
+                  maxWidth: isMobile ? 560 : 'none',
                 }}
               >
                 {project.desc}
               </p>
             </motion.div>
           </AnimatePresence>
+          </div>
         </div>
       </div>
     </section>
